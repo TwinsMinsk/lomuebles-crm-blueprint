@@ -194,11 +194,29 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
     try {
       setLoading(true);
       
-      // Prepare data for saving
+      // Ensure full_name is present since it's required
+      if (!values.full_name) {
+        toast.error("ФИО обязательно для заполнения");
+        return;
+      }
+      
+      // Create a typed object that matches the expected Supabase structure
       const contactData = {
-        ...values,
-        // If creating a new contact, set creator_user_id to the current user's ID
-        ...(contactToEdit ? {} : { creator_user_id: user?.id }),
+        full_name: values.full_name,
+        primary_phone: values.primary_phone,
+        secondary_phone: values.secondary_phone,
+        primary_email: values.primary_email,
+        secondary_email: values.secondary_email,
+        delivery_address_street: values.delivery_address_street,
+        delivery_address_number: values.delivery_address_number,
+        delivery_address_apartment: values.delivery_address_apartment,
+        delivery_address_city: values.delivery_address_city,
+        delivery_address_postal_code: values.delivery_address_postal_code,
+        delivery_address_country: values.delivery_address_country,
+        associated_company_id: values.associated_company_id,
+        owner_user_id: values.owner_user_id,
+        notes: values.notes,
+        creator_user_id: contactToEdit ? undefined : user?.id
       };
       
       let result;
