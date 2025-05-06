@@ -106,10 +106,7 @@ const CompanyFormModal: React.FC<CompanyFormModalProps> = ({
         });
       } else {
         // Create new company
-        const { error } = await supabase.from("companies").insert({
-          ...data,
-          creator_user_id: user?.id, // Add creator user ID if we have it in the table
-        });
+        const { error } = await supabase.from("companies").insert(data);
 
         if (error) throw error;
 
