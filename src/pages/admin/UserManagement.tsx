@@ -32,12 +32,16 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { Enums } from "@/integrations/supabase/types";
+
+// Define the user role type from our database schema
+type UserRole = Enums["user_role"];
 
 interface User {
   id: string;
   email: string;
   full_name: string | null;
-  role: string;
+  role: UserRole;
   registration_date: string;
   is_active: boolean;
 }
@@ -84,7 +88,7 @@ const UserManagement = () => {
     fetchUsers();
   }, []);
 
-  const handleRoleChange = async (userId: string, newRole: string) => {
+  const handleRoleChange = async (userId: string, newRole: UserRole) => {
     try {
       const { error } = await supabase
         .from("profiles")
@@ -176,7 +180,7 @@ const UserManagement = () => {
                       <TableCell>
                         <Select
                           defaultValue={user.role}
-                          onValueChange={(value) => handleRoleChange(user.id, value)}
+                          onValueChange={(value) => handleRoleChange(user.id, value as UserRole)}
                         >
                           <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Выберите роль" />
