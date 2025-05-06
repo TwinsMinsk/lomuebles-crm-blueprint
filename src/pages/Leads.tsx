@@ -31,7 +31,7 @@ import { Loader2 } from "lucide-react";
 type LeadWithProfile = Tables<"leads"> & {
   profiles?: {
     full_name: string | null;
-  };
+  } | null;
 };
 
 const Leads = () => {
@@ -71,7 +71,13 @@ const Leads = () => {
           return;
         }
 
-        setLeads(data || []);
+        // Transform the data to match our LeadWithProfile type
+        const transformedData: LeadWithProfile[] = data ? data.map(lead => ({
+          ...(lead as Tables<"leads">),
+          profiles: lead.profiles as { full_name: string | null } | null
+        })) : [];
+
+        setLeads(transformedData);
       } catch (error) {
         console.error("Failed to fetch leads:", error);
       } finally {

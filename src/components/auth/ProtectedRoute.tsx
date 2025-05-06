@@ -1,15 +1,17 @@
 
 import React from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
 interface ProtectedRouteProps {
-  requiredRole?: string | string[];
+  children: React.ReactNode;
+  allowedRoles?: string | string[];
   redirectTo?: string;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  requiredRole,
+  children,
+  allowedRoles,
   redirectTo = "/auth/login"
 }) => {
   const { user, isLoading, userRole } = useAuth();
@@ -24,8 +26,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Если требуется определенная роль
-  if (requiredRole) {
-    const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+  if (allowedRoles) {
+    const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
     
     // Проверяем, имеет ли пользователь требуемую роль
     if (userRole && !roles.includes(userRole)) {
@@ -33,7 +35,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   }
 
-  return <Outlet />;
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
