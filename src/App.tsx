@@ -21,6 +21,7 @@ import AccessDenied from "./pages/AccessDenied";
 // Страницы приложения
 import Dashboard from "./pages/Dashboard";
 import UserManagement from "./pages/admin/UserManagement";
+import ProfileSettings from "./pages/user/ProfileSettings";
 
 const queryClient = new QueryClient();
 
@@ -62,7 +63,7 @@ const App = () => (
                 <Route path="products" element={<PagePlaceholder title="Товары CRM" />} />
                 <Route path="suppliers" element={<PagePlaceholder title="Поставщики" />} />
                 <Route path="partners" element={<PagePlaceholder title="Партнеры-Изготовители" />} />
-                <Route path="settings" element={<PagePlaceholder title="Настройки" />} />
+                <Route path="settings" element={<ProfileSettings />} />
                 
                 {/* Маршрут, требующий роли Главного Администратора */}
                 <Route 

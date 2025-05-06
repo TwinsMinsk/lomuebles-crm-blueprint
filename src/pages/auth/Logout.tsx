@@ -1,17 +1,27 @@
 
 import { useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
 const Logout = () => {
   const { signOut } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    signOut();
-  }, [signOut]);
+    const performLogout = async () => {
+      await signOut();
+      navigate("/auth/login", { replace: true });
+    };
+    
+    performLogout();
+  }, [signOut, navigate]);
 
-  // Перенаправляем на страницу логина
-  return <Navigate to="/auth/login" replace />;
+  // Показываем заглушку пока происходит выход из системы
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <p>Выполняется выход из системы...</p>
+    </div>
+  );
 };
 
 export default Logout;
