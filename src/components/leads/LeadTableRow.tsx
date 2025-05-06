@@ -15,9 +15,10 @@ export type LeadWithProfile = Tables<"leads"> & {
 
 interface LeadTableRowProps {
   lead: LeadWithProfile;
+  onClick: (lead: LeadWithProfile) => void;
 }
 
-const LeadTableRow: React.FC<LeadTableRowProps> = ({ lead }) => {
+const LeadTableRow: React.FC<LeadTableRowProps> = ({ lead, onClick }) => {
   // Format date for display
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "";
@@ -25,7 +26,11 @@ const LeadTableRow: React.FC<LeadTableRowProps> = ({ lead }) => {
   };
 
   return (
-    <TableRow key={lead.lead_id}>
+    <TableRow 
+      key={lead.lead_id}
+      className="cursor-pointer hover:bg-muted/50"
+      onClick={() => onClick(lead)}
+    >
       <TableCell>{lead.lead_id}</TableCell>
       <TableCell>{lead.name || "-"}</TableCell>
       <TableCell>{lead.phone || "-"}</TableCell>

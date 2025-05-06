@@ -13,9 +13,10 @@ import LeadTableRow, { LeadWithProfile } from "./LeadTableRow";
 interface LeadsTableProps {
   leads: LeadWithProfile[];
   loading: boolean;
+  onLeadClick: (lead: LeadWithProfile) => void;
 }
 
-const LeadsTable: React.FC<LeadsTableProps> = ({ leads, loading }) => {
+const LeadsTable: React.FC<LeadsTableProps> = ({ leads, loading, onLeadClick }) => {
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -34,7 +35,13 @@ const LeadsTable: React.FC<LeadsTableProps> = ({ leads, loading }) => {
         </TableHeader>
         <TableBody>
           {leads.length > 0 ? (
-            leads.map((lead) => <LeadTableRow key={lead.lead_id} lead={lead} />)
+            leads.map((lead) => (
+              <LeadTableRow 
+                key={lead.lead_id} 
+                lead={lead} 
+                onClick={onLeadClick} 
+              />
+            ))
           ) : (
             <TableRow>
               <TableCell colSpan={9} className="text-center py-4">
