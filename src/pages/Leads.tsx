@@ -80,9 +80,10 @@ const Leads = () => {
             // Add proper null check before accessing item.profiles
             if (item.profiles && typeof item.profiles === 'object') {
               // Check if full_name property exists in the profiles object
-              if ('full_name' in item.profiles) {
+              const profilesObj = item.profiles as Record<string, unknown>;
+              if ('full_name' in profilesObj) {
                 profileData = {
-                  full_name: item.profiles.full_name
+                  full_name: profilesObj.full_name as string | null
                 };
               }
             }
