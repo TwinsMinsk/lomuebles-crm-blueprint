@@ -188,6 +188,59 @@ export type Database = {
           },
         ]
       }
+      partners_manufacturers: {
+        Row: {
+          attached_files_partner_docs: Json | null
+          company_name: string
+          contact_person: string | null
+          creation_date: string
+          creator_user_id: string | null
+          email: string | null
+          notes: string | null
+          partner_manufacturer_id: number
+          phone: string | null
+          requisites: string | null
+          specialization: string | null
+          terms: string | null
+        }
+        Insert: {
+          attached_files_partner_docs?: Json | null
+          company_name: string
+          contact_person?: string | null
+          creation_date?: string
+          creator_user_id?: string | null
+          email?: string | null
+          notes?: string | null
+          partner_manufacturer_id?: number
+          phone?: string | null
+          requisites?: string | null
+          specialization?: string | null
+          terms?: string | null
+        }
+        Update: {
+          attached_files_partner_docs?: Json | null
+          company_name?: string
+          contact_person?: string | null
+          creation_date?: string
+          creator_user_id?: string | null
+          email?: string | null
+          notes?: string | null
+          partner_manufacturer_id?: number
+          phone?: string | null
+          requisites?: string | null
+          specialization?: string | null
+          terms?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partners_manufacturers_creator_user_id_fkey"
+            columns: ["creator_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           email: string
