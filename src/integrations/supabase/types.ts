@@ -131,6 +131,118 @@ export type Database = {
           },
         ]
       }
+      deals_orders: {
+        Row: {
+          assigned_user_id: string | null
+          associated_company_id: number | null
+          associated_contact_id: number
+          associated_partner_manufacturer_id: number | null
+          attached_files_order_docs: Json | null
+          client_language: string
+          closing_date: string | null
+          creation_date: string
+          creator_user_id: string | null
+          deal_order_id: number
+          delivery_address_full: string | null
+          final_amount: number | null
+          notes_history: string | null
+          order_name: string | null
+          order_number: string
+          order_type: string
+          payment_status: string | null
+          source_lead_id: number | null
+          status_custom_made: string | null
+          status_ready_made: string | null
+        }
+        Insert: {
+          assigned_user_id?: string | null
+          associated_company_id?: number | null
+          associated_contact_id: number
+          associated_partner_manufacturer_id?: number | null
+          attached_files_order_docs?: Json | null
+          client_language: string
+          closing_date?: string | null
+          creation_date?: string
+          creator_user_id?: string | null
+          deal_order_id?: number
+          delivery_address_full?: string | null
+          final_amount?: number | null
+          notes_history?: string | null
+          order_name?: string | null
+          order_number: string
+          order_type: string
+          payment_status?: string | null
+          source_lead_id?: number | null
+          status_custom_made?: string | null
+          status_ready_made?: string | null
+        }
+        Update: {
+          assigned_user_id?: string | null
+          associated_company_id?: number | null
+          associated_contact_id?: number
+          associated_partner_manufacturer_id?: number | null
+          attached_files_order_docs?: Json | null
+          client_language?: string
+          closing_date?: string | null
+          creation_date?: string
+          creator_user_id?: string | null
+          deal_order_id?: number
+          delivery_address_full?: string | null
+          final_amount?: number | null
+          notes_history?: string | null
+          order_name?: string | null
+          order_number?: string
+          order_type?: string
+          payment_status?: string | null
+          source_lead_id?: number | null
+          status_custom_made?: string | null
+          status_ready_made?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_orders_assigned_user_id_fkey"
+            columns: ["assigned_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_orders_associated_company_id_fkey"
+            columns: ["associated_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "deals_orders_associated_contact_id_fkey"
+            columns: ["associated_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "deals_orders_associated_partner_manufacturer_id_fkey"
+            columns: ["associated_partner_manufacturer_id"]
+            isOneToOne: false
+            referencedRelation: "partners_manufacturers"
+            referencedColumns: ["partner_manufacturer_id"]
+          },
+          {
+            foreignKeyName: "deals_orders_creator_user_id_fkey"
+            columns: ["creator_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_orders_source_lead_id_fkey"
+            columns: ["source_lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["lead_id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           assigned_user_id: string | null
@@ -273,6 +385,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_order_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: string

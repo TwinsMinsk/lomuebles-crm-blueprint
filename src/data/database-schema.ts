@@ -1,4 +1,3 @@
-
 export interface FieldDefinition {
   name: string;
   type: string;
@@ -343,6 +342,160 @@ export const databaseSchema: TableDefinition[] = [
         type: "Timestamp with time zone",
         required: true,
         defaultValue: "NOW()"
+      },
+      {
+        name: "creator_user_id",
+        type: "UUID",
+        reference: {
+          table: "profiles",
+          field: "id"
+        }
+      }
+    ]
+  },
+  {
+    name: "deals_orders",
+    description: "Заказы и сделки",
+    fields: [
+      {
+        name: "deal_order_id",
+        type: "Serial",
+        required: true
+      },
+      {
+        name: "order_number",
+        type: "Text",
+        required: true
+      },
+      {
+        name: "order_name",
+        type: "Text"
+      },
+      {
+        name: "order_type",
+        type: "Text",
+        required: true,
+        options: [
+          "Готовая мебель (Tilda)",
+          "Мебель на заказ"
+        ]
+      },
+      {
+        name: "status_ready_made",
+        type: "Text",
+        options: [
+          "Новый",
+          "Ожидает подтверждения",
+          "Ожидает оплаты",
+          "Оплачен",
+          "Передан на сборку",
+          "Готов к отгрузке",
+          "В доставке",
+          "Выполнен",
+          "Отменен"
+        ]
+      },
+      {
+        name: "status_custom_made",
+        type: "Text",
+        options: [
+          "Новый запрос",
+          "Предварительная оценка",
+          "Согласование ТЗ/Дизайна",
+          "Ожидает замера",
+          "Замер выполнен",
+          "Проектирование",
+          "Согласование проекта",
+          "Ожидает предоплаты",
+          "В производстве",
+          "Готов к монтажу",
+          "Монтаж",
+          "Завершен",
+          "Отменен"
+        ]
+      },
+      {
+        name: "final_amount",
+        type: "Numeric(10, 2)"
+      },
+      {
+        name: "associated_contact_id",
+        type: "Integer",
+        required: true,
+        reference: {
+          table: "contacts",
+          field: "contact_id"
+        }
+      },
+      {
+        name: "associated_company_id",
+        type: "Integer",
+        reference: {
+          table: "companies",
+          field: "company_id"
+        }
+      },
+      {
+        name: "source_lead_id",
+        type: "Integer",
+        reference: {
+          table: "leads",
+          field: "lead_id"
+        }
+      },
+      {
+        name: "client_language",
+        type: "Text",
+        required: true,
+        options: ["ES", "EN", "RU"]
+      },
+      {
+        name: "creation_date",
+        type: "Timestamp with time zone",
+        required: true,
+        defaultValue: "NOW()"
+      },
+      {
+        name: "closing_date",
+        type: "Timestamp with time zone"
+      },
+      {
+        name: "assigned_user_id",
+        type: "UUID",
+        reference: {
+          table: "profiles",
+          field: "id"
+        }
+      },
+      {
+        name: "delivery_address_full",
+        type: "Text"
+      },
+      {
+        name: "payment_status",
+        type: "Text",
+        options: [
+          "Не оплачен",
+          "Частично оплачен",
+          "Оплачен полностью",
+          "Возврат"
+        ]
+      },
+      {
+        name: "notes_history",
+        type: "Text"
+      },
+      {
+        name: "attached_files_order_docs",
+        type: "Json"
+      },
+      {
+        name: "associated_partner_manufacturer_id",
+        type: "Integer",
+        reference: {
+          table: "partners_manufacturers",
+          field: "partner_manufacturer_id"
+        }
       },
       {
         name: "creator_user_id",
