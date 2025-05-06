@@ -54,8 +54,7 @@ const Leads = () => {
         const total = count || 0;
         setTotalPages(Math.ceil(total / itemsPerPage));
 
-        // Fetch the leads with pagination
-        // We specifically target the assigned_user_id column for the join
+        // Fetch the leads with pagination and explicitly specify the column for the join
         const { data, error } = await supabase
           .from("leads")
           .select(`
@@ -72,12 +71,10 @@ const Leads = () => {
 
         if (data) {
           // Transform the data to match our LeadWithProfile type
-          const transformedData = data.map(lead => {
-            return {
-              ...lead,
-              profiles: lead.profiles as { full_name: string | null } | null
-            };
-          });
+          const transformedData = data.map(item => ({
+            ...item,
+            profiles: item.profiles as { full_name: string | null } | null
+          }));
           
           setLeads(transformedData);
         }
