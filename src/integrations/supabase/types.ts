@@ -9,6 +9,53 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      companies: {
+        Row: {
+          address: string | null
+          company_id: number
+          company_name: string
+          creation_date: string
+          email: string | null
+          industry: string | null
+          nif_cif: string | null
+          notes: string | null
+          owner_user_id: string | null
+          phone: string | null
+        }
+        Insert: {
+          address?: string | null
+          company_id?: number
+          company_name: string
+          creation_date?: string
+          email?: string | null
+          industry?: string | null
+          nif_cif?: string | null
+          notes?: string | null
+          owner_user_id?: string | null
+          phone?: string | null
+        }
+        Update: {
+          address?: string | null
+          company_id?: number
+          company_name?: string
+          creation_date?: string
+          email?: string | null
+          industry?: string | null
+          nif_cif?: string | null
+          notes?: string | null
+          owner_user_id?: string | null
+          phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companies_owner_user_id_fkey"
+            columns: ["owner_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           assigned_user_id: string | null

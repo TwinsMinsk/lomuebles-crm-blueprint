@@ -21,6 +21,13 @@ const DbHeader = () => {
           <span>auth.users</span>
           <p className="ml-4 text-slate-400">(связь через поле id)</p>
         </div>
+
+        <div className="flex items-center text-slate-300">
+          <span>companies</span>
+          <ArrowRight className="h-4 w-4 mx-2" />
+          <span>profiles</span>
+          <p className="ml-4 text-slate-400">(связь через поле owner_user_id)</p>
+        </div>
       </div>
     </div>
   );

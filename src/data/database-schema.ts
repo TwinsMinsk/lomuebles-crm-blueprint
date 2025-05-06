@@ -1,4 +1,3 @@
-
 export interface FieldDefinition {
   name: string;
   type: string;
@@ -137,6 +136,66 @@ export const databaseSchema: TableDefinition[] = [
       },
       {
         name: "creator_user_id",
+        type: "UUID",
+        reference: {
+          table: "profiles",
+          field: "id"
+        }
+      }
+    ]
+  },
+  {
+    name: "companies",
+    description: "Компании-клиенты системы",
+    fields: [
+      {
+        name: "company_id",
+        type: "Serial",
+        required: true
+      },
+      {
+        name: "company_name",
+        type: "Text",
+        required: true
+      },
+      {
+        name: "nif_cif",
+        type: "Text"
+      },
+      {
+        name: "phone",
+        type: "Text"
+      },
+      {
+        name: "email",
+        type: "Text"
+      },
+      {
+        name: "address",
+        type: "Text"
+      },
+      {
+        name: "industry",
+        type: "Text",
+        options: [
+          "Розничная торговля",
+          "Дизайн интерьера",
+          "Строительство",
+          "Другое"
+        ]
+      },
+      {
+        name: "notes",
+        type: "Text"
+      },
+      {
+        name: "creation_date",
+        type: "Timestamp with time zone",
+        required: true,
+        defaultValue: "NOW()"
+      },
+      {
+        name: "owner_user_id",
         type: "UUID",
         reference: {
           table: "profiles",
