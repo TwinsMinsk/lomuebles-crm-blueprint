@@ -4,6 +4,7 @@ import { useContacts } from "@/hooks/useContacts";
 import PageHeader from "@/components/common/PageHeader";
 import ContactsTable from "@/components/contacts/ContactsTable";
 import ContactFormModal from "@/components/contacts/ContactFormModal";
+import DeleteContactDialog from "@/components/contacts/DeleteContactDialog";
 import ContactsPagination from "@/components/contacts/ContactsPagination";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Filter, Plus } from "lucide-react";
@@ -50,6 +51,11 @@ const Contacts = () => {
   // Modal state
   const [isFormModalOpen, setIsFormModalOpen] = useState<boolean>(false);
   const [contactToEdit, setContactToEdit] = useState<ContactWithRelations | undefined>(undefined);
+  
+  // Delete dialog state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
+  const [contactToDelete, setContactToDelete] = useState<ContactWithRelations | null>(null);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   // Options for dropdowns
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -92,7 +98,7 @@ const Contacts = () => {
   }, []);
   
   // Get contacts with filters and sorting
-  const { contacts, loading, totalPages, error } = useContacts({ 
+  const { contacts, loading, totalPages, error, refetch } = useContacts({ 
     page: currentPage, 
     pageSize,
     sortColumn,
@@ -146,16 +152,54 @@ const Contacts = () => {
     setIsFormModalOpen(true);
   };
   
+  // Handle delete contact (open dialog)
+  const handleDeleteContact = (contact: ContactWithRelations) => {
+    setContactToDelete(contact);
+    setIsDeleteDialogOpen(true);
+  };
+  
+  // Handle confirm delete
+  const handleConfirmDelete = async (contactId: number) => {
+    try {
+      setIsDeleting(true);
+      
+      const { error } = await supabase
+        .from('contacts')
+        .delete()
+        .eq('contact_id', contactId);
+      
+      if (error) throw error;
+      
+      toast.success("Контакт успешно удален");
+      refetch(); // Refresh contacts list
+      setIsDeleteDialogOpen(false);
+      
+    } catch (err) {
+      console.error("Error deleting contact:", err);
+      toast.error("Ошибка при удалении контакта", {
+        description: err instanceof Error ? err.message : "Неизвестная ошибка"
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+  
   // Handle close modal
   const handleModalClose = () => {
     setIsFormModalOpen(false);
     setContactToEdit(undefined);
   };
   
+  // Handle close delete dialog
+  const handleCloseDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+    setContactToDelete(null);
+  };
+  
   // Handle contact saved
   const handleContactSaved = () => {
     // Refresh the contacts list
-    setCurrentPage(1); // Reset to first page to show new contact
+    refetch();
   };
 
   // Show error toast if data fetching fails
@@ -280,6 +324,7 @@ const Contacts = () => {
                 sortColumn={sortColumn}
                 sortDirection={sortDirection}
                 onEditContact={handleEditContact}
+                onDeleteContact={handleDeleteContact}
               />
               {totalPages > 1 && (
                 <div className="mt-4">
@@ -301,6 +346,15 @@ const Contacts = () => {
         onClose={handleModalClose}
         contactToEdit={contactToEdit}
         onContactSaved={handleContactSaved}
+      />
+      
+      {/* Delete confirmation dialog */}
+      <DeleteContactDialog
+        isOpen={isDeleteDialogOpen}
+        contact={contactToDelete}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
       />
     </div>
   );

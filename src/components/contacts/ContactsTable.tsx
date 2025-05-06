@@ -18,6 +18,7 @@ interface ContactsTableProps {
   sortColumn?: string;
   sortDirection?: 'asc' | 'desc';
   onEditContact: (contact: ContactWithRelations) => void;
+  onDeleteContact: (contact: ContactWithRelations) => void;
 }
 
 const ContactsTable: React.FC<ContactsTableProps> = ({
@@ -27,6 +28,7 @@ const ContactsTable: React.FC<ContactsTableProps> = ({
   sortColumn,
   sortDirection,
   onEditContact,
+  onDeleteContact,
 }) => {
   // Function to render sort indicator
   const renderSortIndicator = (column: string) => {
@@ -67,6 +69,7 @@ const ContactsTable: React.FC<ContactsTableProps> = ({
             {createSortableHeader("companyName", "Компания")}
             <TableHead>Ответственный менеджер</TableHead>
             {createSortableHeader("creation_date", "Дата создания")}
+            <TableHead className="w-[80px]">Действия</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -76,11 +79,12 @@ const ContactsTable: React.FC<ContactsTableProps> = ({
                 key={contact.contact_id} 
                 contact={contact} 
                 onEditClick={onEditContact}
+                onDeleteClick={onDeleteContact}
               />
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={7} className="text-center py-4">
+              <TableCell colSpan={8} className="text-center py-4">
                 Контакты не найдены
               </TableCell>
             </TableRow>
