@@ -1,213 +1,49 @@
 
-import React, { useState, useEffect } from "react";
-import { useContacts } from "@/hooks/useContacts";
+import React from "react";
 import PageHeader from "@/components/common/PageHeader";
-import ContactsTable from "@/components/contacts/ContactsTable";
 import ContactFormModal from "@/components/contacts/ContactFormModal";
 import DeleteContactDialog from "@/components/contacts/DeleteContactDialog";
-import ContactsPagination from "@/components/contacts/ContactsPagination";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Filter, Plus } from "lucide-react";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ContactWithRelations } from "@/components/contacts/ContactTableRow";
-
-// Types for companies and users dropdown
-type Company = {
-  company_id: number;
-  company_name: string;
-};
-
-type User = {
-  id: string;
-  full_name: string;
-};
+import { useContactsState } from "@/hooks/useContactsState";
+import ContactFilters from "@/components/contacts/ContactFilters";
+import ContactsContent from "@/components/contacts/ContactsContent";
 
 const Contacts = () => {
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const pageSize = 10;
-
-  // Sorting state
-  const [sortColumn, setSortColumn] = useState<string | undefined>(undefined);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-
-  // Filter state
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [companyFilter, setCompanyFilter] = useState<string>('all');
-  const [ownerFilter, setOwnerFilter] = useState<string>('all');
-  const [showFilters, setShowFilters] = useState<boolean>(false);
-  
-  // Modal state
-  const [isFormModalOpen, setIsFormModalOpen] = useState<boolean>(false);
-  const [contactToEdit, setContactToEdit] = useState<ContactWithRelations | undefined>(undefined);
-  
-  // Delete dialog state
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
-  const [contactToDelete, setContactToDelete] = useState<ContactWithRelations | null>(null);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
-
-  // Options for dropdowns
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  
-  // Fetch filter options
-  useEffect(() => {
-    // Fetch companies for filter
-    const fetchCompanies = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('companies')
-          .select('company_id, company_name')
-          .order('company_name');
-        
-        if (error) throw error;
-        setCompanies(data || []);
-      } catch (err) {
-        console.error("Error fetching companies:", err);
-      }
-    };
-    
-    // Fetch users for filter
-    const fetchUsers = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, full_name')
-          .order('full_name');
-        
-        if (error) throw error;
-        setUsers(data || []);
-      } catch (err) {
-        console.error("Error fetching users:", err);
-      }
-    };
-    
-    fetchCompanies();
-    fetchUsers();
-  }, []);
-  
-  // Get contacts with filters and sorting
-  const { contacts, loading, totalPages, error, refetch } = useContacts({ 
-    page: currentPage, 
-    pageSize,
+  const {
+    contacts,
+    loading,
+    totalPages,
+    currentPage,
+    handlePageChange,
     sortColumn,
     sortDirection,
-    search: searchTerm,
+    handleSort,
+    searchTerm,
+    setSearchTerm,
     companyFilter,
-    ownerFilter
-  });
-
-  // Handle pagination change
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  // Handle sorting
-  const handleSort = (column: string) => {
-    if (sortColumn === column) {
-      // Toggle direction if clicking the same column
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
-    } else {
-      // Set new column and default to ascending
-      setSortColumn(column);
-      setSortDirection('asc');
-    }
-  };
-
-  // Reset filters
-  const handleResetFilters = () => {
-    setSearchTerm('');
-    setCompanyFilter('all');
-    setOwnerFilter('all');
-    setSortColumn(undefined);
-    setSortDirection('asc');
-    setCurrentPage(1);
-  };
-
-  // Toggle filters visibility
-  const toggleFilters = () => {
-    setShowFilters(!showFilters);
-  };
-  
-  // Open add contact modal
-  const handleAddContact = () => {
-    setContactToEdit(undefined);
-    setIsFormModalOpen(true);
-  };
-  
-  // Handle edit contact
-  const handleEditContact = (contact: ContactWithRelations) => {
-    setContactToEdit(contact);
-    setIsFormModalOpen(true);
-  };
-  
-  // Handle delete contact (open dialog)
-  const handleDeleteContact = (contact: ContactWithRelations) => {
-    setContactToDelete(contact);
-    setIsDeleteDialogOpen(true);
-  };
-  
-  // Handle confirm delete
-  const handleConfirmDelete = async (contactId: number) => {
-    try {
-      setIsDeleting(true);
-      
-      const { error } = await supabase
-        .from('contacts')
-        .delete()
-        .eq('contact_id', contactId);
-      
-      if (error) throw error;
-      
-      toast.success("Контакт успешно удален");
-      refetch(); // Refresh contacts list
-      setIsDeleteDialogOpen(false);
-      
-    } catch (err) {
-      console.error("Error deleting contact:", err);
-      toast.error("Ошибка при удалении контакта", {
-        description: err instanceof Error ? err.message : "Неизвестная ошибка"
-      });
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-  
-  // Handle close modal
-  const handleModalClose = () => {
-    setIsFormModalOpen(false);
-    setContactToEdit(undefined);
-  };
-  
-  // Handle close delete dialog
-  const handleCloseDeleteDialog = () => {
-    setIsDeleteDialogOpen(false);
-    setContactToDelete(null);
-  };
-  
-  // Handle contact saved
-  const handleContactSaved = () => {
-    // Refresh the contacts list
-    refetch();
-  };
-
-  // Show error toast if data fetching fails
-  if (error) {
-    toast.error("Ошибка при загрузке контактов", {
-      description: error.message
-    });
-  }
+    setCompanyFilter,
+    ownerFilter,
+    setOwnerFilter,
+    showFilters,
+    toggleFilters,
+    handleResetFilters,
+    companies,
+    users,
+    isFormModalOpen,
+    contactToEdit,
+    handleAddContact,
+    handleEditContact,
+    handleDeleteContact,
+    handleModalClose,
+    handleContactSaved,
+    isDeleteDialogOpen,
+    contactToDelete,
+    isDeleting,
+    handleConfirmDelete,
+    handleCloseDeleteDialog
+  } = useContactsState();
 
   return (
     <div className="space-y-4">
@@ -229,114 +65,33 @@ const Contacts = () => {
               Управление информацией о клиентах и их контактных данных
             </CardDescription>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={toggleFilters}
-            className="flex items-center gap-2"
-          >
-            <Filter className="h-4 w-4" />
-            Фильтры
-          </Button>
+          <ContactFilters
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            companyFilter={companyFilter}
+            setCompanyFilter={setCompanyFilter}
+            ownerFilter={ownerFilter}
+            setOwnerFilter={setOwnerFilter}
+            showFilters={showFilters}
+            toggleFilters={toggleFilters}
+            handleResetFilters={handleResetFilters}
+            companies={companies}
+            users={users}
+          />
         </CardHeader>
         <CardContent>
-          {showFilters && (
-            <div className="mb-6 p-4 border rounded-md bg-muted/20">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Поиск</label>
-                  <Input
-                    placeholder="Имя, телефон или email"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full"
-                  />
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Компания</label>
-                  <Select
-                    value={companyFilter}
-                    onValueChange={setCompanyFilter}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Выберите компанию" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="all">Все компании</SelectItem>
-                        <SelectItem value="null">Частные лица</SelectItem>
-                        {companies.map((company) => (
-                          <SelectItem key={company.company_id} value={String(company.company_id)}>
-                            {company.company_name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Ответственный менеджер</label>
-                  <Select
-                    value={ownerFilter}
-                    onValueChange={setOwnerFilter}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Выберите менеджера" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="all">Все менеджеры</SelectItem>
-                        <SelectItem value="null">Не назначен</SelectItem>
-                        {users.map((user) => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.full_name || user.id}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="flex justify-end gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={handleResetFilters}
-                >
-                  Сбросить фильтры
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : (
-            <>
-              <ContactsTable 
-                contacts={contacts} 
-                loading={loading} 
-                onSort={handleSort}
-                sortColumn={sortColumn}
-                sortDirection={sortDirection}
-                onEditContact={handleEditContact}
-                onDeleteContact={handleDeleteContact}
-              />
-              {totalPages > 1 && (
-                <div className="mt-4">
-                  <ContactsPagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
-                  />
-                </div>
-              )}
-            </>
-          )}
+          <ContactsContent
+            contacts={contacts}
+            loading={loading}
+            totalPages={totalPages}
+            currentPage={currentPage}
+            handlePageChange={handlePageChange}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            handleSort={handleSort}
+            onEditContact={handleEditContact}
+            onDeleteContact={handleDeleteContact}
+          />
         </CardContent>
       </Card>
       
