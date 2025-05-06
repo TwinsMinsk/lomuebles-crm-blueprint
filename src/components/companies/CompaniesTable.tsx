@@ -10,6 +10,7 @@ interface CompaniesTableProps {
   sortColumn?: string;
   sortDirection?: "asc" | "desc";
   onSort: (column: string) => void;
+  onEditCompany: (company: Company) => void;
 }
 
 const CompaniesTable: React.FC<CompaniesTableProps> = ({
@@ -17,6 +18,7 @@ const CompaniesTable: React.FC<CompaniesTableProps> = ({
   sortColumn,
   sortDirection,
   onSort,
+  onEditCompany,
 }) => {
   const renderSortIcon = (column: string) => {
     if (sortColumn !== column) return null;
@@ -102,7 +104,11 @@ const CompaniesTable: React.FC<CompaniesTableProps> = ({
         <TableBody>
           {companies.length > 0 ? (
             companies.map((company) => (
-              <CompanyTableRow key={company.company_id} company={company} />
+              <CompanyTableRow 
+                key={company.company_id} 
+                company={company} 
+                onEdit={onEditCompany}
+              />
             ))
           ) : (
             <TableRow>

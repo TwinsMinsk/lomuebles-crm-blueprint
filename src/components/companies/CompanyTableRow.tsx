@@ -6,11 +6,15 @@ import { formatDate } from "@/lib/utils";
 
 interface CompanyTableRowProps {
   company: Company;
+  onEdit: (company: Company) => void;
 }
 
-const CompanyTableRow: React.FC<CompanyTableRowProps> = ({ company }) => {
+const CompanyTableRow: React.FC<CompanyTableRowProps> = ({ company, onEdit }) => {
   return (
-    <TableRow className="cursor-pointer hover:bg-muted/50">
+    <TableRow 
+      className="cursor-pointer hover:bg-muted/50"
+      onClick={() => onEdit(company)}
+    >
       <TableCell>{company.company_id}</TableCell>
       <TableCell>{company.company_name}</TableCell>
       <TableCell>{company.nif_cif || "-"}</TableCell>

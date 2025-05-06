@@ -1,9 +1,7 @@
 
 import React from "react";
 import PageHeader from "@/components/common/PageHeader";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { useCompaniesState } from "@/hooks/useCompaniesState";
 import CompaniesContent from "@/components/companies/CompaniesContent";
 
@@ -26,6 +24,7 @@ const Companies = () => {
     showFilters,
     toggleFilters,
     handleResetFilters,
+    refetch,
     users,
     industries
   } = useCompaniesState();
@@ -35,23 +34,10 @@ const Companies = () => {
       <PageHeader
         title="Компании"
         description="Управление информацией о компаниях"
-        action={
-          <Button className="flex items-center gap-2">
-            <Plus className="h-4 w-4" /> Добавить компанию
-          </Button>
-        }
       />
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Список компаний</CardTitle>
-            <CardDescription>
-              Информация о компаниях клиентов
-            </CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <CompaniesContent
             companies={companies}
             loading={loading}
@@ -70,6 +56,7 @@ const Companies = () => {
             showFilters={showFilters}
             toggleFilters={toggleFilters}
             handleResetFilters={handleResetFilters}
+            refetch={refetch}
             users={users}
             industries={industries}
           />
