@@ -10,7 +10,7 @@ interface CompanyTableRowProps {
 
 const CompanyTableRow: React.FC<CompanyTableRowProps> = ({ company }) => {
   return (
-    <TableRow>
+    <TableRow className="cursor-pointer hover:bg-muted/50">
       <TableCell>{company.company_id}</TableCell>
       <TableCell>{company.company_name}</TableCell>
       <TableCell>{company.nif_cif || "-"}</TableCell>

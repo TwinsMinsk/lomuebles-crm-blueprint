@@ -12,7 +12,10 @@ export const useCompanies = (
   page: number = 1,
   pageSize: number = 10,
   sortBy: string = "company_id",
-  sortOrder: "asc" | "desc" = "asc"
+  sortOrder: "asc" | "desc" = "asc",
+  searchTerm: string = "",
+  industryFilter: string = "all",
+  ownerFilter: string = "all"
 ) => {
   const fetchCompanies = async (): Promise<{
     companies: Company[];
@@ -22,8 +25,8 @@ export const useCompanies = (
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    // Fetch companies with owner name from profiles
-    const { data: companies, error, count } = await supabase
+    // Start building the query
+    let query = supabase
       .from("companies")
       .select(
         `
@@ -33,7 +36,29 @@ export const useCompanies = (
         )
         `,
         { count: "exact" }
-      )
+      );
+
+    // Apply search filter if provided
+    if (searchTerm) {
+      query = query.or(
+        `company_name.ilike.%${searchTerm}%,nif_cif.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`
+      );
+    }
+
+    // Apply industry filter if provided and not "all"
+    if (industryFilter && industryFilter !== "all") {
+      query = query.eq("industry", industryFilter);
+    }
+
+    // Apply owner filter
+    if (ownerFilter === "null") {
+      query = query.is("owner_user_id", null);
+    } else if (ownerFilter !== "all") {
+      query = query.eq("owner_user_id", ownerFilter);
+    }
+
+    // Apply sorting and pagination
+    const { data: companies, error, count } = await query
       .order(sortBy, { ascending: sortOrder === "asc" })
       .range(from, to);
 
@@ -67,7 +92,7 @@ export const useCompanies = (
     error,
     refetch,
   } = useQuery({
-    queryKey: ["companies", page, pageSize, sortBy, sortOrder],
+    queryKey: ["companies", page, pageSize, sortBy, sortOrder, searchTerm, industryFilter, ownerFilter],
     queryFn: fetchCompanies,
   });
 
@@ -77,5 +102,60 @@ export const useCompanies = (
     loading: isLoading,
     error: isError ? (error as Error).message : null,
     refetch,
+  };
+};
+
+// Function to fetch users for the owner filter
+export const useUsers = () => {
+  const fetchUsers = async () => {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, full_name")
+      .in("role", ["Менеджер", "Администратор", "Главный Администратор"]);
+
+    if (error) {
+      console.error("Error fetching users:", error);
+      throw new Error(error.message);
+    }
+
+    return data || [];
+  };
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchUsers,
+  });
+
+  return {
+    users: data || [],
+    loading: isLoading,
+  };
+};
+
+// Function to fetch unique industry values
+export const useIndustries = () => {
+  const fetchIndustries = async () => {
+    // Predefined industry options
+    const predefinedIndustries = [
+      { value: "Розничная торговля", label: "Розничная торговля" },
+      { value: "Дизайн интерьера", label: "Дизайн интерьера" },
+      { value: "Строительство", label: "Строительство" },
+      { value: "Другое", label: "Другое" },
+    ];
+    
+    // You could also fetch unique industry values from the database
+    // but we'll use predefined values for now
+    
+    return predefinedIndustries;
+  };
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["industries"],
+    queryFn: fetchIndustries,
+  });
+
+  return {
+    industries: data || [],
+    loading: isLoading,
   };
 };

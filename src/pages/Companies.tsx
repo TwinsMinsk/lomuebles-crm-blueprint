@@ -16,7 +16,18 @@ const Companies = () => {
     handlePageChange,
     sortColumn,
     sortDirection,
-    handleSort
+    handleSort,
+    searchTerm,
+    setSearchTerm,
+    industryFilter,
+    setIndustryFilter,
+    ownerFilter,
+    setOwnerFilter,
+    showFilters,
+    toggleFilters,
+    handleResetFilters,
+    users,
+    industries
   } = useCompaniesState();
 
   return (
@@ -50,6 +61,17 @@ const Companies = () => {
             sortColumn={sortColumn}
             sortDirection={sortDirection}
             handleSort={handleSort}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            industryFilter={industryFilter}
+            setIndustryFilter={setIndustryFilter}
+            ownerFilter={ownerFilter}
+            setOwnerFilter={setOwnerFilter}
+            showFilters={showFilters}
+            toggleFilters={toggleFilters}
+            handleResetFilters={handleResetFilters}
+            users={users}
+            industries={industries}
           />
         </CardContent>
       </Card>

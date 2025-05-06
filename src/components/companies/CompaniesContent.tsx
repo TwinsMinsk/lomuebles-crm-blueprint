@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { Company } from "@/hooks/useCompanies";
 import CompaniesTable from "./CompaniesTable";
 import CompaniesPagination from "./CompaniesPagination";
+import CompanyFilters from "./CompanyFilters";
 
 interface CompaniesContentProps {
   companies: Company[];
@@ -14,6 +15,17 @@ interface CompaniesContentProps {
   sortColumn?: string;
   sortDirection?: 'asc' | 'desc';
   handleSort: (column: string) => void;
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+  industryFilter: string;
+  setIndustryFilter: (value: string) => void;
+  ownerFilter: string;
+  setOwnerFilter: (value: string) => void;
+  showFilters: boolean;
+  toggleFilters: () => void;
+  handleResetFilters: () => void;
+  users: Array<{ id: string; full_name: string }>;
+  industries: Array<{ value: string; label: string }>;
 }
 
 const CompaniesContent: React.FC<CompaniesContentProps> = ({
@@ -25,6 +37,17 @@ const CompaniesContent: React.FC<CompaniesContentProps> = ({
   sortColumn,
   sortDirection,
   handleSort,
+  searchTerm,
+  setSearchTerm,
+  industryFilter,
+  setIndustryFilter,
+  ownerFilter,
+  setOwnerFilter,
+  showFilters,
+  toggleFilters,
+  handleResetFilters,
+  users,
+  industries
 }) => {
   if (loading) {
     return (
@@ -36,6 +59,22 @@ const CompaniesContent: React.FC<CompaniesContentProps> = ({
 
   return (
     <>
+      <div className="mb-4">
+        <CompanyFilters
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          industryFilter={industryFilter}
+          setIndustryFilter={setIndustryFilter}
+          ownerFilter={ownerFilter}
+          setOwnerFilter={setOwnerFilter}
+          showFilters={showFilters}
+          toggleFilters={toggleFilters}
+          handleResetFilters={handleResetFilters}
+          industryOptions={industries}
+          users={users}
+        />
+      </div>
+    
       <CompaniesTable 
         companies={companies}
         sortColumn={sortColumn}
