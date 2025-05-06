@@ -1,37 +1,38 @@
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useContacts } from "@/hooks/useContacts";
 import { toast } from "sonner";
-import { ContactWithRelations } from "@/components/contacts/ContactTableRow";
+import { useContacts } from "@/hooks/useContacts";
+import { usePaginationAndSort } from "./contacts/usePaginationAndSort";
+import { useContactsFilter } from "./contacts/useContactsFilter";
+import { useContactFormModal } from "./contacts/useContactFormModal";
+import { useContactDelete } from "./contacts/useContactDelete";
+import { useFilterOptions } from "./contacts/useFilterOptions";
 
 export function useContactsState() {
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState<number>(1);
+  // Get pagination and sorting hooks
+  const {
+    currentPage,
+    setCurrentPage,
+    sortColumn,
+    sortDirection,
+    handlePageChange,
+    handleSort
+  } = usePaginationAndSort();
+
+  // Get filtering hooks
+  const {
+    searchTerm,
+    setSearchTerm,
+    companyFilter,
+    setCompanyFilter,
+    ownerFilter,
+    setOwnerFilter,
+    showFilters,
+    toggleFilters,
+    handleResetFilters: resetFilters
+  } = useContactsFilter();
+
+  // Page size is constant for now
   const pageSize = 10;
-
-  // Sorting state
-  const [sortColumn, setSortColumn] = useState<string | undefined>(undefined);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-
-  // Filter state
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [companyFilter, setCompanyFilter] = useState<string>('all');
-  const [ownerFilter, setOwnerFilter] = useState<string>('all');
-  const [showFilters, setShowFilters] = useState<boolean>(false);
-  
-  // Modal state
-  const [isFormModalOpen, setIsFormModalOpen] = useState<boolean>(false);
-  const [contactToEdit, setContactToEdit] = useState<ContactWithRelations | undefined>(undefined);
-  
-  // Delete dialog state
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
-  const [contactToDelete, setContactToDelete] = useState<ContactWithRelations | null>(null);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
-
-  // Options for dropdowns
-  const [companies, setCompanies] = useState<{company_id: number; company_name: string}[]>([]);
-  const [users, setUsers] = useState<{id: string; full_name: string}[]>([]);
 
   // Get contacts with filters and sorting
   const { contacts, loading, totalPages, error, refetch } = useContacts({ 
@@ -44,92 +45,34 @@ export function useContactsState() {
     ownerFilter
   });
 
-  // Handle pagination change
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+  // Get contact form modal hooks
+  const {
+    isFormModalOpen,
+    contactToEdit,
+    handleAddContact,
+    handleEditContact,
+    handleModalClose
+  } = useContactFormModal();
 
-  // Handle sorting
-  const handleSort = (column: string) => {
-    if (sortColumn === column) {
-      // Toggle direction if clicking the same column
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
-    } else {
-      // Set new column and default to ascending
-      setSortColumn(column);
-      setSortDirection('asc');
-    }
-  };
+  // Get contact delete hooks
+  const {
+    isDeleteDialogOpen,
+    contactToDelete,
+    isDeleting,
+    handleDeleteContact,
+    handleConfirmDelete,
+    handleCloseDeleteDialog
+  } = useContactDelete({
+    onDeleteSuccess: refetch
+  });
 
-  // Reset filters
+  // Get filter options
+  const { companies, users } = useFilterOptions();
+
+  // Reset filters and sorting
   const handleResetFilters = () => {
-    setSearchTerm('');
-    setCompanyFilter('all');
-    setOwnerFilter('all');
-    setSortColumn(undefined);
-    setSortDirection('asc');
+    resetFilters();
     setCurrentPage(1);
-  };
-
-  // Toggle filters visibility
-  const toggleFilters = () => {
-    setShowFilters(!showFilters);
-  };
-  
-  // Open add contact modal
-  const handleAddContact = () => {
-    setContactToEdit(undefined);
-    setIsFormModalOpen(true);
-  };
-  
-  // Handle edit contact
-  const handleEditContact = (contact: ContactWithRelations) => {
-    setContactToEdit(contact);
-    setIsFormModalOpen(true);
-  };
-  
-  // Handle delete contact (open dialog)
-  const handleDeleteContact = (contact: ContactWithRelations) => {
-    setContactToDelete(contact);
-    setIsDeleteDialogOpen(true);
-  };
-  
-  // Handle confirm delete
-  const handleConfirmDelete = async (contactId: number) => {
-    try {
-      setIsDeleting(true);
-      
-      const { error } = await supabase
-        .from('contacts')
-        .delete()
-        .eq('contact_id', contactId);
-      
-      if (error) throw error;
-      
-      toast.success("Контакт успешно удален");
-      refetch(); // Refresh contacts list
-      setIsDeleteDialogOpen(false);
-      
-    } catch (err) {
-      console.error("Error deleting contact:", err);
-      toast.error("Ошибка при удалении контакта", {
-        description: err instanceof Error ? err.message : "Неизвестная ошибка"
-      });
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-  
-  // Handle close modal
-  const handleModalClose = () => {
-    setIsFormModalOpen(false);
-    setContactToEdit(undefined);
-  };
-  
-  // Handle close delete dialog
-  const handleCloseDeleteDialog = () => {
-    setIsDeleteDialogOpen(false);
-    setContactToDelete(null);
   };
   
   // Handle contact saved
@@ -137,42 +80,6 @@ export function useContactsState() {
     // Refresh the contacts list
     refetch();
   };
-
-  // Fetch filter options
-  useEffect(() => {
-    // Fetch companies for filter
-    const fetchCompanies = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('companies')
-          .select('company_id, company_name')
-          .order('company_name');
-        
-        if (error) throw error;
-        setCompanies(data || []);
-      } catch (err) {
-        console.error("Error fetching companies:", err);
-      }
-    };
-    
-    // Fetch users for filter
-    const fetchUsers = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, full_name')
-          .order('full_name');
-        
-        if (error) throw error;
-        setUsers(data || []);
-      } catch (err) {
-        console.error("Error fetching users:", err);
-      }
-    };
-    
-    fetchCompanies();
-    fetchUsers();
-  }, []);
 
   // Show error toast if data fetching fails
   if (error) {
