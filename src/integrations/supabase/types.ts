@@ -56,6 +56,81 @@ export type Database = {
           },
         ]
       }
+      contacts: {
+        Row: {
+          associated_company_id: number | null
+          attached_files_general: Json | null
+          contact_id: number
+          creation_date: string
+          delivery_address_apartment: string | null
+          delivery_address_city: string | null
+          delivery_address_country: string | null
+          delivery_address_number: string | null
+          delivery_address_postal_code: string | null
+          delivery_address_street: string | null
+          full_name: string
+          notes: string | null
+          owner_user_id: string | null
+          primary_email: string | null
+          primary_phone: string | null
+          secondary_email: string | null
+          secondary_phone: string | null
+        }
+        Insert: {
+          associated_company_id?: number | null
+          attached_files_general?: Json | null
+          contact_id?: number
+          creation_date?: string
+          delivery_address_apartment?: string | null
+          delivery_address_city?: string | null
+          delivery_address_country?: string | null
+          delivery_address_number?: string | null
+          delivery_address_postal_code?: string | null
+          delivery_address_street?: string | null
+          full_name: string
+          notes?: string | null
+          owner_user_id?: string | null
+          primary_email?: string | null
+          primary_phone?: string | null
+          secondary_email?: string | null
+          secondary_phone?: string | null
+        }
+        Update: {
+          associated_company_id?: number | null
+          attached_files_general?: Json | null
+          contact_id?: number
+          creation_date?: string
+          delivery_address_apartment?: string | null
+          delivery_address_city?: string | null
+          delivery_address_country?: string | null
+          delivery_address_number?: string | null
+          delivery_address_postal_code?: string | null
+          delivery_address_street?: string | null
+          full_name?: string
+          notes?: string | null
+          owner_user_id?: string | null
+          primary_email?: string | null
+          primary_phone?: string | null
+          secondary_email?: string | null
+          secondary_phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_associated_company_id_fkey"
+            columns: ["associated_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "contacts_owner_user_id_fkey"
+            columns: ["owner_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           assigned_user_id: string | null

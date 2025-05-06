@@ -203,5 +203,92 @@ export const databaseSchema: TableDefinition[] = [
         }
       }
     ]
+  },
+  {
+    name: "contacts",
+    description: "Контакты клиентов",
+    fields: [
+      {
+        name: "contact_id",
+        type: "Serial",
+        required: true
+      },
+      {
+        name: "full_name",
+        type: "Text",
+        required: true
+      },
+      {
+        name: "primary_phone",
+        type: "Text"
+      },
+      {
+        name: "secondary_phone",
+        type: "Text"
+      },
+      {
+        name: "primary_email",
+        type: "Text"
+      },
+      {
+        name: "secondary_email",
+        type: "Text"
+      },
+      {
+        name: "delivery_address_street",
+        type: "Text"
+      },
+      {
+        name: "delivery_address_number",
+        type: "Text"
+      },
+      {
+        name: "delivery_address_apartment",
+        type: "Text"
+      },
+      {
+        name: "delivery_address_city",
+        type: "Text"
+      },
+      {
+        name: "delivery_address_postal_code",
+        type: "Text"
+      },
+      {
+        name: "delivery_address_country",
+        type: "Text",
+        defaultValue: "'Spain'"
+      },
+      {
+        name: "notes",
+        type: "Text"
+      },
+      {
+        name: "attached_files_general",
+        type: "Json"
+      },
+      {
+        name: "creation_date",
+        type: "Timestamp with time zone",
+        required: true,
+        defaultValue: "NOW()"
+      },
+      {
+        name: "owner_user_id",
+        type: "UUID",
+        reference: {
+          table: "profiles",
+          field: "id"
+        }
+      },
+      {
+        name: "associated_company_id",
+        type: "Integer",
+        reference: {
+          table: "companies",
+          field: "company_id"
+        }
+      }
+    ]
   }
 ];
