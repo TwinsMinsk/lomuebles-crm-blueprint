@@ -11,6 +11,7 @@ interface CompaniesTableProps {
   sortDirection?: "asc" | "desc";
   onSort: (column: string) => void;
   onEditCompany: (company: Company) => void;
+  onDeleteCompany: (company: Company) => void;
 }
 
 const CompaniesTable: React.FC<CompaniesTableProps> = ({
@@ -19,6 +20,7 @@ const CompaniesTable: React.FC<CompaniesTableProps> = ({
   sortDirection,
   onSort,
   onEditCompany,
+  onDeleteCompany,
 }) => {
   const renderSortIcon = (column: string) => {
     if (sortColumn !== column) return null;
@@ -99,6 +101,9 @@ const CompaniesTable: React.FC<CompaniesTableProps> = ({
                 Дата создания {renderSortIcon("creation_date")}
               </div>
             </TableHead>
+            <TableHead className="w-10">
+              <span className="sr-only">Действия</span>
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -108,11 +113,12 @@ const CompaniesTable: React.FC<CompaniesTableProps> = ({
                 key={company.company_id} 
                 company={company} 
                 onEdit={onEditCompany}
+                onDelete={onDeleteCompany}
               />
             ))
           ) : (
             <TableRow>
-              <TableHead colSpan={8} className="text-center py-4">
+              <TableHead colSpan={9} className="text-center py-4">
                 Компании не найдены
               </TableHead>
             </TableRow>

@@ -6,7 +6,10 @@ import CompaniesTable from "./CompaniesTable";
 import CompaniesPagination from "./CompaniesPagination";
 import CompanyFilters from "./CompanyFilters";
 import CompanyFormModal from "./CompanyFormModal";
+import DeleteCompanyDialog from "./DeleteCompanyDialog";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CompaniesContentProps {
   companies: Company[];
@@ -55,6 +58,8 @@ const CompaniesContent: React.FC<CompaniesContentProps> = ({
 }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [companyToDelete, setCompanyToDelete] = useState<Company | null>(null);
 
   const handleAddCompany = () => {
     setSelectedCompany(null);
@@ -69,6 +74,43 @@ const CompaniesContent: React.FC<CompaniesContentProps> = ({
   const handleCloseForm = () => {
     setIsFormOpen(false);
     setSelectedCompany(null);
+  };
+
+  const handleDeleteCompany = (company: Company) => {
+    setCompanyToDelete(company);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!companyToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('companies')
+        .delete()
+        .eq('company_id', companyToDelete.company_id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Компания удалена",
+        description: `Компания "${companyToDelete.company_name}" успешно удалена.`,
+      });
+      
+      // Close the dialog and refresh the data
+      setIsDeleteDialogOpen(false);
+      setCompanyToDelete(null);
+      refetch();
+    } catch (error) {
+      console.error("Error deleting company:", error);
+      toast({
+        title: "Ошибка при удалении",
+        description: "Не удалось удалить компанию. Пожалуйста, попробуйте еще раз.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleFormSuccess = () => {
@@ -117,6 +159,7 @@ const CompaniesContent: React.FC<CompaniesContentProps> = ({
         sortDirection={sortDirection}
         onSort={handleSort}
         onEditCompany={handleEditCompany}
+        onDeleteCompany={handleDeleteCompany}
       />
       
       {totalPages > 1 && (
@@ -136,6 +179,17 @@ const CompaniesContent: React.FC<CompaniesContentProps> = ({
         onClose={handleCloseForm}
         onSuccess={handleFormSuccess}
         users={users}
+      />
+
+      {/* Delete Company Dialog */}
+      <DeleteCompanyDialog
+        company={companyToDelete}
+        isOpen={isDeleteDialogOpen}
+        onClose={() => {
+          setIsDeleteDialogOpen(false);
+          setCompanyToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
       />
     </>
   );
