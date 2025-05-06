@@ -14,9 +14,15 @@ interface LeadsTableProps {
   leads: LeadWithProfile[];
   loading: boolean;
   onLeadClick: (lead: LeadWithProfile) => void;
+  onLeadDelete: (lead: LeadWithProfile) => void;
 }
 
-const LeadsTable: React.FC<LeadsTableProps> = ({ leads, loading, onLeadClick }) => {
+const LeadsTable: React.FC<LeadsTableProps> = ({ 
+  leads, 
+  loading, 
+  onLeadClick, 
+  onLeadDelete 
+}) => {
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -31,6 +37,7 @@ const LeadsTable: React.FC<LeadsTableProps> = ({ leads, loading, onLeadClick }) 
             <TableHead>Статус лида</TableHead>
             <TableHead>Ответственный менеджер</TableHead>
             <TableHead>Дата создания</TableHead>
+            <TableHead className="w-[50px]"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -39,12 +46,13 @@ const LeadsTable: React.FC<LeadsTableProps> = ({ leads, loading, onLeadClick }) 
               <LeadTableRow 
                 key={lead.lead_id} 
                 lead={lead} 
-                onClick={onLeadClick} 
+                onClick={onLeadClick}
+                onDelete={onLeadDelete}
               />
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={9} className="text-center py-4">
+              <TableCell colSpan={10} className="text-center py-4">
                 Лиды не найдены
               </TableCell>
             </TableRow>

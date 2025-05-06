@@ -8,11 +8,17 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import LeadFormModal from "@/components/leads/LeadFormModal";
 import { LeadWithProfile } from "@/components/leads/LeadTableRow";
+import DeleteLeadDialog from "@/components/leads/DeleteLeadDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Leads = () => {
   const { leads, loading, page, totalPages, setPage, refreshLeads } = useLeads();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<LeadWithProfile | undefined>(undefined);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [leadToDelete, setLeadToDelete] = useState<LeadWithProfile | null>(null);
+  const { toast } = useToast();
 
   const handleAddLead = () => {
     setSelectedLead(undefined);
@@ -31,6 +37,47 @@ const Leads = () => {
 
   const handleSuccess = () => {
     refreshLeads();
+  };
+
+  const handleDeleteLead = (lead: LeadWithProfile) => {
+    setLeadToDelete(lead);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+    setLeadToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!leadToDelete) return;
+    
+    try {
+      const { error } = await supabase
+        .from("leads")
+        .delete()
+        .eq("lead_id", leadToDelete.lead_id);
+        
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: "Лид удален",
+        description: "Лид был успешно удален из системы.",
+      });
+      
+      refreshLeads();
+    } catch (error) {
+      console.error("Error deleting lead:", error);
+      toast({
+        title: "Ошибка при удалении",
+        description: "Не удалось удалить лид. Пожалуйста, попробуйте снова.",
+        variant: "destructive",
+      });
+    } finally {
+      handleCloseDeleteDialog();
+    }
   };
 
   return (
@@ -54,6 +101,7 @@ const Leads = () => {
                 leads={leads} 
                 loading={loading} 
                 onLeadClick={handleEditLead}
+                onLeadDelete={handleDeleteLead}
               />
               
               {/* Pagination */}
@@ -74,6 +122,13 @@ const Leads = () => {
         onClose={handleCloseModal}
         lead={selectedLead}
         onSuccess={handleSuccess}
+      />
+
+      <DeleteLeadDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleConfirmDelete}
+        lead={leadToDelete}
       />
     </div>
   );
