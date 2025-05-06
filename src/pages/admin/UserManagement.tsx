@@ -32,10 +32,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { Enums } from "@/integrations/supabase/types";
+import { Database } from "@/integrations/supabase/types";
 
 // Define the user role type from our database schema
-type UserRole = Enums["user_role"];
+type UserRole = Database["public"]["Enums"]["user_role"];
 
 interface User {
   id: string;
