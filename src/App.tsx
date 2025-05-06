@@ -7,9 +7,20 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/layout/Layout";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
-// Импортируем заглушки для страниц (будут созданы позже)
+// Аутентификация
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
+import Logout from "./pages/auth/Logout";
+import AccessDenied from "./pages/AccessDenied";
+
+// Страницы приложения
 import Dashboard from "./pages/Dashboard";
+import UserManagement from "./pages/admin/UserManagement";
 
 const queryClient = new QueryClient();
 
@@ -23,31 +34,55 @@ const PagePlaceholder = ({ title }: { title: string }) => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Index />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="leads" element={<PagePlaceholder title="Лиды" />} />
-            <Route path="contacts" element={<PagePlaceholder title="Контакты" />} />
-            <Route path="companies" element={<PagePlaceholder title="Компании" />} />
-            <Route path="orders" element={<PagePlaceholder title="Заказы" />} />
-            <Route path="tasks" element={<PagePlaceholder title="Задачи" />} />
-            <Route path="calendar" element={<PagePlaceholder title="Календарь" />} />
-            <Route path="products" element={<PagePlaceholder title="Товары CRM" />} />
-            <Route path="suppliers" element={<PagePlaceholder title="Поставщики" />} />
-            <Route path="partners" element={<PagePlaceholder title="Партнеры-Изготовители" />} />
-            <Route path="settings" element={<PagePlaceholder title="Настройки" />} />
-            <Route path="admin/users" element={<PagePlaceholder title="Управление Пользователями" />} />
-            <Route path="logout" element={<PagePlaceholder title="Выход" />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Публичные маршруты */}
+            <Route path="/auth/login" element={<Login />} />
+            <Route path="/auth/register" element={<Register />} />
+            <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/logout" element={<Logout />} />
+            <Route path="/access-denied" element={<AccessDenied />} />
+            
+            {/* Маршруты, требующие аутентификации */}
+            <Route element={<ProtectedRoute />}>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Index />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="leads" element={<PagePlaceholder title="Лиды" />} />
+                <Route path="contacts" element={<PagePlaceholder title="Контакты" />} />
+                <Route path="companies" element={<PagePlaceholder title="Компании" />} />
+                <Route path="orders" element={<PagePlaceholder title="Заказы" />} />
+                <Route path="tasks" element={<PagePlaceholder title="Задачи" />} />
+                <Route path="calendar" element={<PagePlaceholder title="Календарь" />} />
+                <Route path="products" element={<PagePlaceholder title="Товары CRM" />} />
+                <Route path="suppliers" element={<PagePlaceholder title="Поставщики" />} />
+                <Route path="partners" element={<PagePlaceholder title="Партнеры-Изготовители" />} />
+                <Route path="settings" element={<PagePlaceholder title="Настройки" />} />
+                
+                {/* Маршрут, требующий роли Главного Администратора */}
+                <Route 
+                  element={
+                    <ProtectedRoute 
+                      requiredRole="Главный Администратор" 
+                      redirectTo="/access-denied" 
+                    />
+                  }
+                >
+                  <Route path="admin/users" element={<UserManagement />} />
+                </Route>
+              </Route>
+            </Route>
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

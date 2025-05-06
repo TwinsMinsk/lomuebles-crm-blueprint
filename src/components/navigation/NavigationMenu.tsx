@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -16,16 +16,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-// Временная заглушка для проверки роли пользователя
-// В будущем это будет заменено на реальную проверку из контекста авторизации
-const isAdmin = true; // для демонстрации
+import { useAuth } from "@/context/AuthContext";
 
 type MenuItem = {
   label: string;
   path: string;
   icon: React.ElementType;
-  adminOnly?: boolean;
+  requiredRole?: string | string[];
 };
 
 const menuItems: MenuItem[] = [
@@ -40,8 +37,12 @@ const menuItems: MenuItem[] = [
   { label: "Поставщики", path: "/suppliers", icon: Truck },
   { label: "Партнеры-Изготовители", path: "/partners", icon: Users },
   { label: "Настройки", path: "/settings", icon: Settings },
-  { label: "Управление Пользователями", path: "/admin/users", icon: UserCog, adminOnly: true },
-  { label: "Выход", path: "/logout", icon: LogOut },
+  { 
+    label: "Управление Пользователями", 
+    path: "/admin/users", 
+    icon: UserCog, 
+    requiredRole: "Главный Администратор"
+  }
 ];
 
 interface NavigationMenuProps {
@@ -50,6 +51,20 @@ interface NavigationMenuProps {
 
 const NavigationMenu: React.FC<NavigationMenuProps> = ({ onItemClick }) => {
   const isMobile = useIsMobile();
+  const { userRole } = useAuth();
+  const location = useLocation();
+  
+  // Проверка доступа к пункту меню на основе роли пользователя
+  const hasAccess = (item: MenuItem) => {
+    if (!item.requiredRole) return true;
+    if (!userRole) return false;
+    
+    const requiredRoles = Array.isArray(item.requiredRole) 
+      ? item.requiredRole 
+      : [item.requiredRole];
+      
+    return requiredRoles.includes(userRole);
+  };
   
   return (
     <nav className={cn(
@@ -61,17 +76,22 @@ const NavigationMenu: React.FC<NavigationMenuProps> = ({ onItemClick }) => {
         isMobile ? "space-y-2 md:space-y-0" : ""
       )}>
         {menuItems.map((item) => {
-          // Пропускаем пункт меню, если он только для админа и у пользователя нет прав админа
-          if (item.adminOnly && !isAdmin) {
+          // Пропускаем пункты меню, к которым у пользователя нет доступа
+          if (!hasAccess(item)) {
             return null;
           }
+          
+          const isActive = location.pathname === item.path;
           
           return (
             <li key={item.path}>
               <Link 
                 to={item.path} 
                 className={cn(
-                  "flex items-center text-gray-700 hover:text-blue-600 transition-colors",
+                  "flex items-center transition-colors",
+                  isActive 
+                    ? "text-blue-600 font-medium" 
+                    : "text-gray-700 hover:text-blue-600",
                   isMobile ? "py-2" : ""
                 )}
                 onClick={onItemClick}
