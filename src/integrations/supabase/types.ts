@@ -561,6 +561,163 @@ export type Database = {
         }
         Relationships: []
       }
+      suppliers: {
+        Row: {
+          contact_person: string | null
+          creation_date: string
+          creator_user_id: string | null
+          email: string | null
+          phone: string | null
+          product_categories: string | null
+          supplier_id: number
+          supplier_name: string
+          terms: string | null
+          website: string | null
+        }
+        Insert: {
+          contact_person?: string | null
+          creation_date?: string
+          creator_user_id?: string | null
+          email?: string | null
+          phone?: string | null
+          product_categories?: string | null
+          supplier_id?: number
+          supplier_name: string
+          terms?: string | null
+          website?: string | null
+        }
+        Update: {
+          contact_person?: string | null
+          creation_date?: string
+          creator_user_id?: string | null
+          email?: string | null
+          phone?: string | null
+          product_categories?: string | null
+          supplier_id?: number
+          supplier_name?: string
+          terms?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suppliers_creator_user_id_fkey"
+            columns: ["creator_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          assigned_task_user_id: string
+          completion_date: string | null
+          creation_date: string
+          creator_user_id: string | null
+          description: string | null
+          due_date: string | null
+          google_calendar_event_id: string | null
+          priority: string | null
+          related_contact_id: number | null
+          related_custom_request_id: number | null
+          related_deal_order_id: number | null
+          related_lead_id: number | null
+          related_partner_manufacturer_id: number | null
+          task_id: number
+          task_name: string
+          task_status: string
+          task_type: string | null
+        }
+        Insert: {
+          assigned_task_user_id: string
+          completion_date?: string | null
+          creation_date?: string
+          creator_user_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          google_calendar_event_id?: string | null
+          priority?: string | null
+          related_contact_id?: number | null
+          related_custom_request_id?: number | null
+          related_deal_order_id?: number | null
+          related_lead_id?: number | null
+          related_partner_manufacturer_id?: number | null
+          task_id?: number
+          task_name: string
+          task_status?: string
+          task_type?: string | null
+        }
+        Update: {
+          assigned_task_user_id?: string
+          completion_date?: string | null
+          creation_date?: string
+          creator_user_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          google_calendar_event_id?: string | null
+          priority?: string | null
+          related_contact_id?: number | null
+          related_custom_request_id?: number | null
+          related_deal_order_id?: number | null
+          related_lead_id?: number | null
+          related_partner_manufacturer_id?: number | null
+          task_id?: number
+          task_name?: string
+          task_status?: string
+          task_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_assigned_task_user_id_fkey"
+            columns: ["assigned_task_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_creator_user_id_fkey"
+            columns: ["creator_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_related_contact_id_fkey"
+            columns: ["related_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "tasks_related_custom_request_id_fkey"
+            columns: ["related_custom_request_id"]
+            isOneToOne: false
+            referencedRelation: "custom_requests"
+            referencedColumns: ["custom_request_id"]
+          },
+          {
+            foreignKeyName: "tasks_related_deal_order_id_fkey"
+            columns: ["related_deal_order_id"]
+            isOneToOne: false
+            referencedRelation: "deals_orders"
+            referencedColumns: ["deal_order_id"]
+          },
+          {
+            foreignKeyName: "tasks_related_lead_id_fkey"
+            columns: ["related_lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "tasks_related_partner_manufacturer_id_fkey"
+            columns: ["related_partner_manufacturer_id"]
+            isOneToOne: false
+            referencedRelation: "partners_manufacturers"
+            referencedColumns: ["partner_manufacturer_id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

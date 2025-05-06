@@ -1,3 +1,4 @@
+
 export interface FieldDefinition {
   name: string;
   type: string;
@@ -703,6 +704,192 @@ export const databaseSchema: TableDefinition[] = [
         type: "Timestamp with time zone",
         required: true,
         defaultValue: "NOW()"
+      },
+      {
+        name: "creator_user_id",
+        type: "UUID",
+        reference: {
+          table: "profiles",
+          field: "id"
+        }
+      }
+    ]
+  },
+  {
+    name: "suppliers",
+    description: "Поставщики материалов и комплектующих",
+    fields: [
+      {
+        name: "supplier_id",
+        type: "Serial",
+        required: true
+      },
+      {
+        name: "supplier_name",
+        type: "Text",
+        required: true
+      },
+      {
+        name: "contact_person",
+        type: "Text"
+      },
+      {
+        name: "phone",
+        type: "Text"
+      },
+      {
+        name: "email",
+        type: "Text"
+      },
+      {
+        name: "website",
+        type: "Text"
+      },
+      {
+        name: "terms",
+        type: "Text"
+      },
+      {
+        name: "product_categories",
+        type: "Text"
+      },
+      {
+        name: "creation_date",
+        type: "Timestamp with time zone",
+        required: true,
+        defaultValue: "NOW()"
+      },
+      {
+        name: "creator_user_id",
+        type: "UUID",
+        reference: {
+          table: "profiles",
+          field: "id"
+        }
+      }
+    ]
+  },
+  {
+    name: "tasks",
+    description: "Задачи сотрудников",
+    fields: [
+      {
+        name: "task_id",
+        type: "Serial",
+        required: true
+      },
+      {
+        name: "task_name",
+        type: "Text",
+        required: true
+      },
+      {
+        name: "task_type",
+        type: "Text",
+        options: [
+          "Звонок",
+          "Встреча",
+          "Замер",
+          "Подготовка КП",
+          "Дизайн",
+          "Монтаж",
+          "Другое"
+        ]
+      },
+      {
+        name: "task_status",
+        type: "Text",
+        required: true,
+        defaultValue: "'Новая'",
+        options: [
+          "Новая",
+          "В работе",
+          "Ожидает",
+          "Выполнена",
+          "Отменена"
+        ]
+      },
+      {
+        name: "due_date",
+        type: "Timestamp with time zone"
+      },
+      {
+        name: "assigned_task_user_id",
+        type: "UUID",
+        required: true,
+        reference: {
+          table: "profiles",
+          field: "id"
+        }
+      },
+      {
+        name: "priority",
+        type: "Text",
+        defaultValue: "'Средний'",
+        options: [
+          "Низкий",
+          "Средний",
+          "Высокий",
+          "Срочно"
+        ]
+      },
+      {
+        name: "description",
+        type: "Text"
+      },
+      {
+        name: "related_lead_id",
+        type: "Integer",
+        reference: {
+          table: "leads",
+          field: "lead_id"
+        }
+      },
+      {
+        name: "related_contact_id",
+        type: "Integer",
+        reference: {
+          table: "contacts",
+          field: "contact_id"
+        }
+      },
+      {
+        name: "related_deal_order_id",
+        type: "Integer",
+        reference: {
+          table: "deals_orders",
+          field: "deal_order_id"
+        }
+      },
+      {
+        name: "related_partner_manufacturer_id",
+        type: "Integer",
+        reference: {
+          table: "partners_manufacturers",
+          field: "partner_manufacturer_id"
+        }
+      },
+      {
+        name: "related_custom_request_id",
+        type: "Integer",
+        reference: {
+          table: "custom_requests",
+          field: "custom_request_id"
+        }
+      },
+      {
+        name: "creation_date",
+        type: "Timestamp with time zone",
+        required: true,
+        defaultValue: "NOW()"
+      },
+      {
+        name: "completion_date",
+        type: "Timestamp with time zone"
+      },
+      {
+        name: "google_calendar_event_id",
+        type: "Text"
       },
       {
         name: "creator_user_id",
