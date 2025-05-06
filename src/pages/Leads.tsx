@@ -28,10 +28,12 @@ import {
 import { Loader2 } from "lucide-react";
 
 // Define the Lead type with profile information
+interface ProfileData {
+  full_name: string | null;
+}
+
 type LeadWithProfile = Tables<"leads"> & {
-  profiles: {
-    full_name: string | null;
-  } | null;
+  profiles: ProfileData | null;
 };
 
 const Leads = () => {
@@ -70,11 +72,22 @@ const Leads = () => {
         }
 
         if (data) {
-          // Transform the data to match our LeadWithProfile type
-          const transformedData = data.map(item => ({
-            ...item,
-            profiles: item.profiles as { full_name: string | null } | null
-          }));
+          // Transform the data to match our LeadWithProfile type with safer type handling
+          const transformedData: LeadWithProfile[] = data.map(item => {
+            // Ensure profiles is of the correct shape or null
+            let profileData: ProfileData | null = null;
+            
+            if (item.profiles && typeof item.profiles === 'object' && 'full_name' in item.profiles) {
+              profileData = {
+                full_name: item.profiles.full_name
+              };
+            }
+            
+            return {
+              ...item,
+              profiles: profileData
+            };
+          });
           
           setLeads(transformedData);
         }
