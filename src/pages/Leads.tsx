@@ -77,10 +77,14 @@ const Leads = () => {
             // Ensure profiles is of the correct shape or null
             let profileData: ProfileData | null = null;
             
-            if (item.profiles && typeof item.profiles === 'object' && 'full_name' in item.profiles) {
-              profileData = {
-                full_name: item.profiles.full_name
-              };
+            // Add proper null check before accessing item.profiles
+            if (item.profiles && typeof item.profiles === 'object') {
+              // Check if full_name property exists in the profiles object
+              if ('full_name' in item.profiles) {
+                profileData = {
+                  full_name: item.profiles.full_name
+                };
+              }
             }
             
             return {
