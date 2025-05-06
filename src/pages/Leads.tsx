@@ -60,9 +60,7 @@ const Leads = () => {
           .from("leads")
           .select(`
             *,
-            profiles:assigned_user_id (
-              full_name
-            )
+            profiles:assigned_user_id(full_name)
           `)
           .range((page - 1) * itemsPerPage, page * itemsPerPage - 1)
           .order("creation_date", { ascending: false });
@@ -74,7 +72,7 @@ const Leads = () => {
 
         // Transform the data to match our LeadWithProfile type
         const transformedData: LeadWithProfile[] = data ? data.map(lead => ({
-          ...(lead as Tables<"leads">),
+          ...lead,
           profiles: lead.profiles as { full_name: string | null } | null
         })) : [];
 
