@@ -55,6 +55,7 @@ const Leads = () => {
         setTotalPages(Math.ceil(total / itemsPerPage));
 
         // Fetch the leads with pagination
+        // We specifically target the assigned_user_id column for the join
         const { data, error } = await supabase
           .from("leads")
           .select(`
