@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
 import Contacts from "./pages/Contacts";
+import Companies from "./pages/Companies";
 import NotFound from "./pages/NotFound";
 import AccessDenied from "./pages/AccessDenied";
 import Login from "./pages/auth/Login";
@@ -66,6 +67,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Contacts />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/companies"
+                element={
+                  <ProtectedRoute>
+                    <Companies />
                   </ProtectedRoute>
                 }
               />
