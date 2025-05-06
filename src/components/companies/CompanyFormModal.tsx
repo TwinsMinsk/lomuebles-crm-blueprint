@@ -91,11 +91,23 @@ const CompanyFormModal: React.FC<CompanyFormModalProps> = ({
 
   const onSubmit = async (data: FormValues) => {
     try {
+      // We ensure company_name is defined (it should be due to validation)
+      const companyData = {
+        company_name: data.company_name,
+        nif_cif: data.nif_cif,
+        phone: data.phone,
+        email: data.email,
+        address: data.address,
+        industry: data.industry,
+        owner_user_id: data.owner_user_id,
+        notes: data.notes,
+      };
+
       if (isEditing) {
         // Update existing company
         const { error } = await supabase
           .from("companies")
-          .update(data)
+          .update(companyData)
           .eq("company_id", company.company_id);
 
         if (error) throw error;
@@ -106,7 +118,7 @@ const CompanyFormModal: React.FC<CompanyFormModalProps> = ({
         });
       } else {
         // Create new company
-        const { error } = await supabase.from("companies").insert(data);
+        const { error } = await supabase.from("companies").insert(companyData);
 
         if (error) throw error;
 
