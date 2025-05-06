@@ -3,9 +3,10 @@ import React, { useState, useEffect } from "react";
 import { useContacts } from "@/hooks/useContacts";
 import PageHeader from "@/components/common/PageHeader";
 import ContactsTable from "@/components/contacts/ContactsTable";
+import ContactFormModal from "@/components/contacts/ContactFormModal";
 import ContactsPagination from "@/components/contacts/ContactsPagination";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Filter } from "lucide-react";
+import { Loader2, Filter, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { ContactWithRelations } from "@/components/contacts/ContactTableRow";
 
 // Types for companies and users dropdown
 type Company = {
@@ -44,6 +46,10 @@ const Contacts = () => {
   const [companyFilter, setCompanyFilter] = useState<string>('all');
   const [ownerFilter, setOwnerFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState<boolean>(false);
+  
+  // Modal state
+  const [isFormModalOpen, setIsFormModalOpen] = useState<boolean>(false);
+  const [contactToEdit, setContactToEdit] = useState<ContactWithRelations | undefined>(undefined);
 
   // Options for dropdowns
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -127,6 +133,30 @@ const Contacts = () => {
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
+  
+  // Open add contact modal
+  const handleAddContact = () => {
+    setContactToEdit(undefined);
+    setIsFormModalOpen(true);
+  };
+  
+  // Handle edit contact
+  const handleEditContact = (contact: ContactWithRelations) => {
+    setContactToEdit(contact);
+    setIsFormModalOpen(true);
+  };
+  
+  // Handle close modal
+  const handleModalClose = () => {
+    setIsFormModalOpen(false);
+    setContactToEdit(undefined);
+  };
+  
+  // Handle contact saved
+  const handleContactSaved = () => {
+    // Refresh the contacts list
+    setCurrentPage(1); // Reset to first page to show new contact
+  };
 
   // Show error toast if data fetching fails
   if (error) {
@@ -140,6 +170,11 @@ const Contacts = () => {
       <PageHeader
         title="Контакты"
         description="Управление контактами клиентов"
+        action={
+          <Button onClick={handleAddContact} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" /> Добавить контакт
+          </Button>
+        }
       />
 
       <Card>
@@ -244,6 +279,7 @@ const Contacts = () => {
                 onSort={handleSort}
                 sortColumn={sortColumn}
                 sortDirection={sortDirection}
+                onEditContact={handleEditContact}
               />
               {totalPages > 1 && (
                 <div className="mt-4">
@@ -258,6 +294,14 @@ const Contacts = () => {
           )}
         </CardContent>
       </Card>
+      
+      {/* Contact form modal */}
+      <ContactFormModal 
+        isOpen={isFormModalOpen}
+        onClose={handleModalClose}
+        contactToEdit={contactToEdit}
+        onContactSaved={handleContactSaved}
+      />
     </div>
   );
 };

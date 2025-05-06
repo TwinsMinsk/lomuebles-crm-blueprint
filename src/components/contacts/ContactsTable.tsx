@@ -17,6 +17,7 @@ interface ContactsTableProps {
   onSort?: (column: string) => void;
   sortColumn?: string;
   sortDirection?: 'asc' | 'desc';
+  onEditContact: (contact: ContactWithRelations) => void;
 }
 
 const ContactsTable: React.FC<ContactsTableProps> = ({
@@ -25,6 +26,7 @@ const ContactsTable: React.FC<ContactsTableProps> = ({
   onSort,
   sortColumn,
   sortDirection,
+  onEditContact,
 }) => {
   // Function to render sort indicator
   const renderSortIndicator = (column: string) => {
@@ -70,7 +72,11 @@ const ContactsTable: React.FC<ContactsTableProps> = ({
         <TableBody>
           {contacts.length > 0 ? (
             contacts.map((contact) => (
-              <ContactTableRow key={contact.contact_id} contact={contact} />
+              <ContactTableRow 
+                key={contact.contact_id} 
+                contact={contact} 
+                onEditClick={onEditContact}
+              />
             ))
           ) : (
             <TableRow>
