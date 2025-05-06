@@ -62,7 +62,9 @@ export function useContacts({
           if (companyFilter === 'null') {
             query = query.is('associated_company_id', null);
           } else if (companyFilter !== 'all') {
-            query = query.eq('associated_company_id', companyFilter);
+            // Fix: Convert string to number only when needed
+            const companyId = typeof companyFilter === 'string' ? parseInt(companyFilter, 10) : companyFilter;
+            query = query.eq('associated_company_id', companyId);
           }
         }
         
@@ -75,11 +77,11 @@ export function useContacts({
           }
         }
         
-        // Clone the query for count
-        const countQuery = query.clone();
-        
-        // Get total count for pagination
-        const { count: totalRecords, error: countError } = await countQuery.count();
+        // First get the count for pagination
+        const { count: totalRecords, error: countError } = await supabase
+          .from('contacts')
+          .select('*', { count: 'exact', head: true });
+          
         if (countError) throw countError;
         
         setTotalCount(totalRecords || 0);
