@@ -86,7 +86,7 @@ const ContactFilters: React.FC<ContactFiltersProps> = ({
                 <SelectContent>
                   <SelectGroup>
                     <SelectItem value="all">Все компании</SelectItem>
-                    <SelectItem value="null">Частные лица</SelectItem>
+                    <SelectItem value="not_assigned">Частные лица</SelectItem>
                     {companies.map((company) => (
                       <SelectItem key={company.company_id} value={String(company.company_id)}>
                         {company.company_name}
@@ -109,7 +109,7 @@ const ContactFilters: React.FC<ContactFiltersProps> = ({
                 <SelectContent>
                   <SelectGroup>
                     <SelectItem value="all">Все менеджеры</SelectItem>
-                    <SelectItem value="null">Не назначен</SelectItem>
+                    <SelectItem value="not_assigned">Не назначен</SelectItem>
                     {users.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.full_name || user.id}

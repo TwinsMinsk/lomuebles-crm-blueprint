@@ -108,7 +108,7 @@ const CompanyFilters: React.FC<CompanyFiltersProps> = ({
                 <SelectContent>
                   <SelectGroup>
                     <SelectItem value="all">Все менеджеры</SelectItem>
-                    <SelectItem value="null">Не назначен</SelectItem>
+                    <SelectItem value="not_assigned">Не назначен</SelectItem>
                     {users.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.full_name || user.id}
@@ -126,9 +126,6 @@ const CompanyFilters: React.FC<CompanyFiltersProps> = ({
               onClick={handleResetFilters}
             >
               Сбросить фильтры
-            </Button>
-            <Button onClick={toggleFilters}>
-              Применить фильтры
             </Button>
           </div>
         </div>

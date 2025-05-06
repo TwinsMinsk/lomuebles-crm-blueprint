@@ -464,7 +464,7 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="null">Не выбрана (частное лицо)</SelectItem>
+                          <SelectItem value="no_company">Не выбрана (частное лицо)</SelectItem>
                           {companies.map((company) => (
                             <SelectItem
                               key={company.company_id}
@@ -496,7 +496,7 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="null">Не назначен</SelectItem>
+                          <SelectItem value="no_manager">Не назначен</SelectItem>
                           {users.map((user) => (
                             <SelectItem key={user.id} value={user.id}>
                               {user.full_name}

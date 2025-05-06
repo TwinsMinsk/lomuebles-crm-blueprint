@@ -57,7 +57,7 @@ const CompanyClassificationFields: React.FC<CompanyClassificationFieldsProps> = 
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="">Не назначен</SelectItem>
+                <SelectItem value="no_manager">Не назначен</SelectItem>
                 {users.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.full_name || user.id}

@@ -400,7 +400,7 @@ const LeadFormModal: React.FC<LeadFormModalProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Не назначен</SelectItem>
+                      <SelectItem value="not_assigned">Не назначен</SelectItem>
                       {users.map((user) => (
                         <SelectItem key={user.id} value={user.id}>
                           {user.full_name || user.id}
