@@ -5,7 +5,11 @@ import * as z from "zod";
 export const companyFormSchema = z.object({
   company_name: z.string().min(1, "Название компании обязательно"),
   nif_cif: z.string().optional(),
-  phone: z.string().optional(),
+  phone: z.string()
+    .optional()
+    .refine(val => !val || /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,10}[-\s.]?[0-9]{1,10}$/.test(val), {
+      message: "Введите корректный номер телефона"
+    }),
   email: z.string().email("Некорректный формат email").optional().or(z.literal("")),
   address: z.string().optional(),
   industry: z.string().optional(),
