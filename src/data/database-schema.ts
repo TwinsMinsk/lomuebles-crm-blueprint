@@ -67,5 +67,82 @@ export const databaseSchema: TableDefinition[] = [
         defaultValue: "TRUE"
       }
     ]
+  },
+  {
+    name: "leads",
+    description: "Лиды - потенциальные клиенты",
+    fields: [
+      {
+        name: "lead_id",
+        type: "Serial",
+        required: true
+      },
+      {
+        name: "name",
+        type: "Text"
+      },
+      {
+        name: "phone",
+        type: "Text"
+      },
+      {
+        name: "email",
+        type: "Text"
+      },
+      {
+        name: "lead_source",
+        type: "Text",
+        options: [
+          "Веб-сайт Tilda",
+          "Телефонный звонок",
+          "Email-рассылка",
+          "Партнер",
+          "Мероприятие",
+          "Другое"
+        ]
+      },
+      {
+        name: "client_language",
+        type: "Text",
+        options: ["ES", "EN", "RU"]
+      },
+      {
+        name: "lead_status",
+        type: "Text",
+        options: [
+          "Новый",
+          "В обработке",
+          "Квалифицирован",
+          "Некачественный лид",
+          "Конвертирован"
+        ]
+      },
+      {
+        name: "initial_comment",
+        type: "Text"
+      },
+      {
+        name: "creation_date",
+        type: "Timestamp with time zone",
+        required: true,
+        defaultValue: "NOW()"
+      },
+      {
+        name: "assigned_user_id",
+        type: "UUID",
+        reference: {
+          table: "profiles",
+          field: "id"
+        }
+      },
+      {
+        name: "creator_user_id",
+        type: "UUID",
+        reference: {
+          table: "profiles",
+          field: "id"
+        }
+      }
+    ]
   }
 ];

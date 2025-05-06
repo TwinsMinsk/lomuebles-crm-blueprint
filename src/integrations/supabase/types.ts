@@ -9,6 +9,63 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      leads: {
+        Row: {
+          assigned_user_id: string | null
+          client_language: string | null
+          creation_date: string
+          creator_user_id: string | null
+          email: string | null
+          initial_comment: string | null
+          lead_id: number
+          lead_source: string | null
+          lead_status: string | null
+          name: string | null
+          phone: string | null
+        }
+        Insert: {
+          assigned_user_id?: string | null
+          client_language?: string | null
+          creation_date?: string
+          creator_user_id?: string | null
+          email?: string | null
+          initial_comment?: string | null
+          lead_id?: number
+          lead_source?: string | null
+          lead_status?: string | null
+          name?: string | null
+          phone?: string | null
+        }
+        Update: {
+          assigned_user_id?: string | null
+          client_language?: string | null
+          creation_date?: string
+          creator_user_id?: string | null
+          email?: string | null
+          initial_comment?: string | null
+          lead_id?: number
+          lead_source?: string | null
+          lead_status?: string | null
+          name?: string | null
+          phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_assigned_user_id_fkey"
+            columns: ["assigned_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_creator_user_id_fkey"
+            columns: ["creator_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           email: string
