@@ -131,6 +131,96 @@ export type Database = {
           },
         ]
       }
+      custom_requests: {
+        Row: {
+          assigned_user_id: string | null
+          associated_company_id: number | null
+          associated_contact_id: number
+          attached_files_sketch: Json | null
+          client_description: string | null
+          creation_date: string
+          creator_user_id: string | null
+          custom_request_id: number
+          desired_completion_date: string | null
+          desired_materials: string | null
+          estimated_dimensions: string | null
+          linked_deal_order_id: number | null
+          preliminary_cost: number | null
+          request_name: string | null
+          request_status: string | null
+        }
+        Insert: {
+          assigned_user_id?: string | null
+          associated_company_id?: number | null
+          associated_contact_id: number
+          attached_files_sketch?: Json | null
+          client_description?: string | null
+          creation_date?: string
+          creator_user_id?: string | null
+          custom_request_id?: number
+          desired_completion_date?: string | null
+          desired_materials?: string | null
+          estimated_dimensions?: string | null
+          linked_deal_order_id?: number | null
+          preliminary_cost?: number | null
+          request_name?: string | null
+          request_status?: string | null
+        }
+        Update: {
+          assigned_user_id?: string | null
+          associated_company_id?: number | null
+          associated_contact_id?: number
+          attached_files_sketch?: Json | null
+          client_description?: string | null
+          creation_date?: string
+          creator_user_id?: string | null
+          custom_request_id?: number
+          desired_completion_date?: string | null
+          desired_materials?: string | null
+          estimated_dimensions?: string | null
+          linked_deal_order_id?: number | null
+          preliminary_cost?: number | null
+          request_name?: string | null
+          request_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_requests_assigned_user_id_fkey"
+            columns: ["assigned_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_requests_associated_company_id_fkey"
+            columns: ["associated_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "custom_requests_associated_contact_id_fkey"
+            columns: ["associated_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "custom_requests_creator_user_id_fkey"
+            columns: ["creator_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_requests_linked_deal_order_id_fkey"
+            columns: ["linked_deal_order_id"]
+            isOneToOne: false
+            referencedRelation: "deals_orders"
+            referencedColumns: ["deal_order_id"]
+          },
+        ]
+      }
       deals_orders: {
         Row: {
           assigned_user_id: string | null
@@ -300,6 +390,47 @@ export type Database = {
           },
         ]
       }
+      order_items: {
+        Row: {
+          link_to_product_on_tilda: string | null
+          order_item_id: number
+          parent_deal_order_id: number
+          price_per_item_from_tilda: number
+          product_name_from_tilda: string
+          quantity: number
+          sku_from_tilda: string | null
+          total_item_price: number
+        }
+        Insert: {
+          link_to_product_on_tilda?: string | null
+          order_item_id?: number
+          parent_deal_order_id: number
+          price_per_item_from_tilda: number
+          product_name_from_tilda: string
+          quantity?: number
+          sku_from_tilda?: string | null
+          total_item_price: number
+        }
+        Update: {
+          link_to_product_on_tilda?: string | null
+          order_item_id?: number
+          parent_deal_order_id?: number
+          price_per_item_from_tilda?: number
+          product_name_from_tilda?: string
+          quantity?: number
+          sku_from_tilda?: string | null
+          total_item_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_parent_deal_order_id_fkey"
+            columns: ["parent_deal_order_id"]
+            isOneToOne: false
+            referencedRelation: "deals_orders"
+            referencedColumns: ["deal_order_id"]
+          },
+        ]
+      }
       partners_manufacturers: {
         Row: {
           attached_files_partner_docs: Json | null
@@ -346,6 +477,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "partners_manufacturers_creator_user_id_fkey"
+            columns: ["creator_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          base_price: number | null
+          category: string | null
+          creation_date: string
+          creator_user_id: string | null
+          description: string | null
+          internal_product_name: string
+          internal_sku: string | null
+          is_custom_template: boolean
+          notes: string | null
+          product_id: number
+          template_image: string | null
+        }
+        Insert: {
+          base_price?: number | null
+          category?: string | null
+          creation_date?: string
+          creator_user_id?: string | null
+          description?: string | null
+          internal_product_name: string
+          internal_sku?: string | null
+          is_custom_template?: boolean
+          notes?: string | null
+          product_id?: number
+          template_image?: string | null
+        }
+        Update: {
+          base_price?: number | null
+          category?: string | null
+          creation_date?: string
+          creator_user_id?: string | null
+          description?: string | null
+          internal_product_name?: string
+          internal_sku?: string | null
+          is_custom_template?: boolean
+          notes?: string | null
+          product_id?: number
+          template_image?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_creator_user_id_fkey"
             columns: ["creator_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"

@@ -506,5 +506,212 @@ export const databaseSchema: TableDefinition[] = [
         }
       }
     ]
+  },
+  {
+    name: "order_items",
+    description: "Позиции в заказе",
+    fields: [
+      {
+        name: "order_item_id",
+        type: "Serial",
+        required: true
+      },
+      {
+        name: "parent_deal_order_id",
+        type: "Integer",
+        required: true,
+        reference: {
+          table: "deals_orders",
+          field: "deal_order_id"
+        }
+      },
+      {
+        name: "product_name_from_tilda",
+        type: "Text",
+        required: true
+      },
+      {
+        name: "sku_from_tilda",
+        type: "Text"
+      },
+      {
+        name: "quantity",
+        type: "Integer",
+        required: true,
+        defaultValue: "1"
+      },
+      {
+        name: "price_per_item_from_tilda",
+        type: "Numeric",
+        required: true
+      },
+      {
+        name: "total_item_price",
+        type: "Numeric",
+        required: true
+      },
+      {
+        name: "link_to_product_on_tilda",
+        type: "Text"
+      }
+    ]
+  },
+  {
+    name: "custom_requests",
+    description: "Запросы на индивидуальное изготовление",
+    fields: [
+      {
+        name: "custom_request_id",
+        type: "Serial",
+        required: true
+      },
+      {
+        name: "request_name",
+        type: "Text"
+      },
+      {
+        name: "request_status",
+        type: "Text",
+        options: [
+          "Новый",
+          "В обработке",
+          "Требует уточнения",
+          "Оценен",
+          "Отклонен",
+          "Передан в заказ"
+        ]
+      },
+      {
+        name: "associated_contact_id",
+        type: "Integer",
+        required: true,
+        reference: {
+          table: "contacts",
+          field: "contact_id"
+        }
+      },
+      {
+        name: "associated_company_id",
+        type: "Integer",
+        reference: {
+          table: "companies",
+          field: "company_id"
+        }
+      },
+      {
+        name: "client_description",
+        type: "Text"
+      },
+      {
+        name: "attached_files_sketch",
+        type: "Json"
+      },
+      {
+        name: "desired_materials",
+        type: "Text"
+      },
+      {
+        name: "estimated_dimensions",
+        type: "Text"
+      },
+      {
+        name: "desired_completion_date",
+        type: "Date"
+      },
+      {
+        name: "preliminary_cost",
+        type: "Numeric(10, 2)"
+      },
+      {
+        name: "linked_deal_order_id",
+        type: "Integer",
+        reference: {
+          table: "deals_orders",
+          field: "deal_order_id"
+        }
+      },
+      {
+        name: "assigned_user_id",
+        type: "UUID",
+        reference: {
+          table: "profiles",
+          field: "id"
+        }
+      },
+      {
+        name: "creation_date",
+        type: "Timestamp with time zone",
+        required: true,
+        defaultValue: "NOW()"
+      },
+      {
+        name: "creator_user_id",
+        type: "UUID",
+        reference: {
+          table: "profiles",
+          field: "id"
+        }
+      }
+    ]
+  },
+  {
+    name: "products",
+    description: "Внутренний справочник товаров и шаблонов",
+    fields: [
+      {
+        name: "product_id",
+        type: "Serial",
+        required: true
+      },
+      {
+        name: "internal_product_name",
+        type: "Text",
+        required: true
+      },
+      {
+        name: "internal_sku",
+        type: "Text"
+      },
+      {
+        name: "description",
+        type: "Text"
+      },
+      {
+        name: "base_price",
+        type: "Numeric(10, 2)"
+      },
+      {
+        name: "category",
+        type: "Text"
+      },
+      {
+        name: "template_image",
+        type: "Text"
+      },
+      {
+        name: "is_custom_template",
+        type: "Boolean",
+        required: true,
+        defaultValue: "TRUE"
+      },
+      {
+        name: "notes",
+        type: "Text"
+      },
+      {
+        name: "creation_date",
+        type: "Timestamp with time zone",
+        required: true,
+        defaultValue: "NOW()"
+      },
+      {
+        name: "creator_user_id",
+        type: "UUID",
+        reference: {
+          table: "profiles",
+          field: "id"
+        }
+      }
+    ]
   }
 ];
