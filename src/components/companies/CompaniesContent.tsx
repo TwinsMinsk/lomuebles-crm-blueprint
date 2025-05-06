@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Loader2, Plus } from "lucide-react";
 import { Company } from "@/hooks/useCompanies";
 import CompaniesTable from "./CompaniesTable";
@@ -8,8 +8,6 @@ import CompanyFilters from "./CompanyFilters";
 import CompanyFormModal from "./CompanyFormModal";
 import DeleteCompanyDialog from "./DeleteCompanyDialog";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 interface CompaniesContentProps {
   companies: Company[];
@@ -32,6 +30,19 @@ interface CompaniesContentProps {
   refetch: () => void;
   users: Array<{ id: string; full_name: string }>;
   industries: Array<{ value: string; label: string }>;
+  // Form modal properties
+  isFormOpen: boolean;
+  selectedCompany: Company | null;
+  handleAddCompany: () => void;
+  handleEditCompany: (company: Company) => void;
+  handleCloseForm: () => void;
+  handleFormSuccess: () => void;
+  // Delete dialog properties
+  isDeleteDialogOpen: boolean;
+  companyToDelete: Company | null;
+  handleDeleteCompany: (company: Company) => void;
+  handleConfirmDeleteWithRefetch: () => void;
+  handleCloseDeleteDialog: () => void;
 }
 
 const CompaniesContent: React.FC<CompaniesContentProps> = ({
@@ -54,69 +65,21 @@ const CompaniesContent: React.FC<CompaniesContentProps> = ({
   handleResetFilters,
   refetch,
   users,
-  industries
+  industries,
+  // Form modal properties
+  isFormOpen,
+  selectedCompany,
+  handleAddCompany,
+  handleEditCompany,
+  handleCloseForm,
+  handleFormSuccess,
+  // Delete dialog properties
+  isDeleteDialogOpen,
+  companyToDelete,
+  handleDeleteCompany,
+  handleConfirmDeleteWithRefetch,
+  handleCloseDeleteDialog
 }) => {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [companyToDelete, setCompanyToDelete] = useState<Company | null>(null);
-
-  const handleAddCompany = () => {
-    setSelectedCompany(null);
-    setIsFormOpen(true);
-  };
-
-  const handleEditCompany = (company: Company) => {
-    setSelectedCompany(company);
-    setIsFormOpen(true);
-  };
-
-  const handleCloseForm = () => {
-    setIsFormOpen(false);
-    setSelectedCompany(null);
-  };
-
-  const handleDeleteCompany = (company: Company) => {
-    setCompanyToDelete(company);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!companyToDelete) return;
-
-    try {
-      const { error } = await supabase
-        .from('companies')
-        .delete()
-        .eq('company_id', companyToDelete.company_id);
-
-      if (error) {
-        throw error;
-      }
-
-      toast({
-        title: "Компания удалена",
-        description: `Компания "${companyToDelete.company_name}" успешно удалена.`,
-      });
-      
-      // Close the dialog and refresh the data
-      setIsDeleteDialogOpen(false);
-      setCompanyToDelete(null);
-      refetch();
-    } catch (error) {
-      console.error("Error deleting company:", error);
-      toast({
-        title: "Ошибка при удалении",
-        description: "Не удалось удалить компанию. Пожалуйста, попробуйте еще раз.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleFormSuccess = () => {
-    refetch();
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -185,11 +148,8 @@ const CompaniesContent: React.FC<CompaniesContentProps> = ({
       <DeleteCompanyDialog
         company={companyToDelete}
         isOpen={isDeleteDialogOpen}
-        onClose={() => {
-          setIsDeleteDialogOpen(false);
-          setCompanyToDelete(null);
-        }}
-        onConfirm={handleConfirmDelete}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleConfirmDeleteWithRefetch}
       />
     </>
   );

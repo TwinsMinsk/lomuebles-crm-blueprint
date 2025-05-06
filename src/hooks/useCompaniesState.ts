@@ -1,21 +1,49 @@
 
-import { useState } from "react";
 import { useCompanies, useUsers, useIndustries } from "./useCompanies";
+import { usePaginationAndSort } from "./companies/usePaginationAndSort";
+import { useCompaniesFilter } from "./companies/useCompaniesFilter";
+import { useCompanyFormModal } from "./companies/useCompanyFormModal";
+import { useCompanyDelete } from "./companies/useCompanyDelete";
 
 export const useCompaniesState = () => {
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  
-  // Sorting state
-  const [sortColumn, setSortColumn] = useState<string>("company_id");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  
-  // Filtering state
-  const [searchTerm, setSearchTerm] = useState("");
-  const [industryFilter, setIndustryFilter] = useState("all");
-  const [ownerFilter, setOwnerFilter] = useState("all");
-  const [showFilters, setShowFilters] = useState(false);
-  
+  // Use the smaller hooks
+  const { 
+    currentPage, 
+    sortColumn, 
+    sortDirection, 
+    handlePageChange, 
+    handleSort,
+    calculateTotalPages
+  } = usePaginationAndSort();
+
+  const {
+    searchTerm,
+    setSearchTerm,
+    industryFilter,
+    setIndustryFilter,
+    ownerFilter,
+    setOwnerFilter,
+    showFilters,
+    toggleFilters,
+    handleResetFilters
+  } = useCompaniesFilter();
+
+  const {
+    isFormOpen,
+    selectedCompany,
+    handleAddCompany,
+    handleEditCompany,
+    handleCloseForm
+  } = useCompanyFormModal();
+
+  const {
+    isDeleteDialogOpen,
+    companyToDelete,
+    handleDeleteCompany,
+    handleConfirmDelete,
+    handleCloseDeleteDialog
+  } = useCompanyDelete();
+
   // Fetch users for the owner filter
   const { users } = useUsers();
   
@@ -34,38 +62,18 @@ export const useCompaniesState = () => {
   );
 
   // Calculate total pages based on count
-  const totalPages = Math.max(1, Math.ceil(count / 10));
+  const totalPages = calculateTotalPages(count, 10);
 
-  // Handler for page changes
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+  const handleFormSuccess = () => {
+    refetch();
   };
 
-  // Handler for column sorting
-  const handleSort = (column: string) => {
-    if (column === sortColumn) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
-  };
-  
-  // Toggle filters visibility
-  const toggleFilters = () => {
-    setShowFilters(!showFilters);
-  };
-  
-  // Reset all filters
-  const handleResetFilters = () => {
-    setSearchTerm("");
-    setIndustryFilter("all");
-    setOwnerFilter("all");
-    // Reset to first page when filters change
-    setCurrentPage(1);
+  const handleConfirmDeleteWithRefetch = () => {
+    handleConfirmDelete(refetch);
   };
 
   return {
+    // Pagination and sorting
     companies,
     loading,
     totalPages,
@@ -75,6 +83,8 @@ export const useCompaniesState = () => {
     sortDirection,
     handleSort,
     refetch,
+    
+    // Filtering
     searchTerm,
     setSearchTerm,
     industryFilter,
@@ -84,7 +94,24 @@ export const useCompaniesState = () => {
     showFilters,
     toggleFilters,
     handleResetFilters,
+    
+    // Users and industries data
     users,
-    industries
+    industries,
+    
+    // Form modal
+    isFormOpen,
+    selectedCompany,
+    handleAddCompany,
+    handleEditCompany,
+    handleCloseForm,
+    handleFormSuccess,
+    
+    // Delete functionality
+    isDeleteDialogOpen,
+    companyToDelete,
+    handleDeleteCompany,
+    handleConfirmDeleteWithRefetch,
+    handleCloseDeleteDialog
   };
 };
