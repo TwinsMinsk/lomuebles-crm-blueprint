@@ -11,6 +11,7 @@ import Layout from "./components/layout/Layout";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
+import Contacts from "./pages/Contacts";
 import NotFound from "./pages/NotFound";
 import AccessDenied from "./pages/AccessDenied";
 import Login from "./pages/auth/Login";
@@ -57,6 +58,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Leads />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/contacts"
+                element={
+                  <ProtectedRoute>
+                    <Contacts />
                   </ProtectedRoute>
                 }
               />
