@@ -13,6 +13,7 @@ import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
 import Contacts from "./pages/Contacts";
 import Companies from "./pages/Companies";
+import Orders from "./pages/Orders";
 import NotFound from "./pages/NotFound";
 import AccessDenied from "./pages/AccessDenied";
 import Login from "./pages/auth/Login";
@@ -75,6 +76,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Companies />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute>
+                    <Orders />
                   </ProtectedRoute>
                 }
               />
