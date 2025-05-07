@@ -11,12 +11,12 @@ import { useCustomRequests } from "@/hooks/useCustomRequests";
 
 const RelatedEntitiesFields: React.FC = () => {
   const { control } = useFormContext();
-  const { leads } = useLeads();
-  const { contacts } = useContacts();
-  // Передаем пустой объект или определенные параметры, в зависимости от требований хука
-  const { fetchOrders } = useOrders({}); 
-  const { partners } = usePartners();
-  const { customRequests } = useCustomRequests();
+  const { leads = [] } = useLeads();
+  const { contacts = [] } = useContacts();
+  // Pass empty filters as required by the hook
+  const { fetchOrders } = useOrders(); 
+  const { partners = [] } = usePartners();
+  const { customRequests = [] } = useCustomRequests();
   
   const [orders, setOrders] = useState<any[]>([]);
 
@@ -28,9 +28,10 @@ const RelatedEntitiesFields: React.FC = () => {
           page: 1,
           pageSize: 100,
           sortColumn: 'creation_date',
-          sortDirection: 'desc'
+          sortDirection: 'desc',
+          filters: {}
         });
-        setOrders(fetchedOrders);
+        setOrders(fetchedOrders || []);
       } catch (error) {
         console.error("Failed to load orders:", error);
         setOrders([]);
@@ -52,7 +53,7 @@ const RelatedEntitiesFields: React.FC = () => {
               <FormLabel>Связанный лид</FormLabel>
               <Select
                 onValueChange={(value) => field.onChange(value === "none" ? null : parseInt(value))}
-                defaultValue={field.value?.toString() || "none"}
+                value={field.value?.toString() || "none"}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -61,8 +62,8 @@ const RelatedEntitiesFields: React.FC = () => {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="none">Нет</SelectItem>
-                  {leads?.map((lead) => (
-                    <SelectItem key={lead.lead_id} value={lead.lead_id.toString()}>
+                  {leads && leads.map((lead) => (
+                    <SelectItem key={lead.lead_id} value={lead.lead_id?.toString() || "unknown-lead"}>
                       {lead.name || "Лид без имени"}
                     </SelectItem>
                   ))}
@@ -81,7 +82,7 @@ const RelatedEntitiesFields: React.FC = () => {
               <FormLabel>Связанный контакт</FormLabel>
               <Select
                 onValueChange={(value) => field.onChange(value === "none" ? null : parseInt(value))}
-                defaultValue={field.value?.toString() || "none"}
+                value={field.value?.toString() || "none"}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -90,8 +91,8 @@ const RelatedEntitiesFields: React.FC = () => {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="none">Нет</SelectItem>
-                  {contacts?.map((contact) => (
-                    <SelectItem key={contact.contact_id} value={contact.contact_id.toString()}>
+                  {contacts && contacts.map((contact) => (
+                    <SelectItem key={contact.contact_id} value={contact.contact_id?.toString() || "unknown-contact"}>
                       {contact.full_name || "Контакт без имени"}
                     </SelectItem>
                   ))}
@@ -110,7 +111,7 @@ const RelatedEntitiesFields: React.FC = () => {
               <FormLabel>Связанный заказ</FormLabel>
               <Select
                 onValueChange={(value) => field.onChange(value === "none" ? null : parseInt(value))}
-                defaultValue={field.value?.toString() || "none"}
+                value={field.value?.toString() || "none"}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -119,8 +120,8 @@ const RelatedEntitiesFields: React.FC = () => {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="none">Нет</SelectItem>
-                  {orders?.map((order) => (
-                    <SelectItem key={order.deal_order_id} value={order.deal_order_id.toString()}>
+                  {orders && orders.map((order) => (
+                    <SelectItem key={order.deal_order_id} value={order.deal_order_id?.toString() || "unknown-order"}>
                       {order.order_number || "Заказ без номера"}
                     </SelectItem>
                   ))}
@@ -139,7 +140,7 @@ const RelatedEntitiesFields: React.FC = () => {
               <FormLabel>Связанный партнер</FormLabel>
               <Select
                 onValueChange={(value) => field.onChange(value === "none" ? null : parseInt(value))}
-                defaultValue={field.value?.toString() || "none"}
+                value={field.value?.toString() || "none"}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -148,8 +149,8 @@ const RelatedEntitiesFields: React.FC = () => {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="none">Нет</SelectItem>
-                  {partners?.map((partner) => (
-                    <SelectItem key={partner.partner_manufacturer_id} value={partner.partner_manufacturer_id.toString()}>
+                  {partners && partners.map((partner) => (
+                    <SelectItem key={partner.partner_manufacturer_id} value={partner.partner_manufacturer_id?.toString() || "unknown-partner"}>
                       {partner.company_name || "Партнер без названия"}
                     </SelectItem>
                   ))}
@@ -168,7 +169,7 @@ const RelatedEntitiesFields: React.FC = () => {
               <FormLabel>Связанный запрос</FormLabel>
               <Select
                 onValueChange={(value) => field.onChange(value === "none" ? null : parseInt(value))}
-                defaultValue={field.value?.toString() || "none"}
+                value={field.value?.toString() || "none"}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -177,8 +178,8 @@ const RelatedEntitiesFields: React.FC = () => {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="none">Нет</SelectItem>
-                  {customRequests?.map((request) => (
-                    <SelectItem key={request.custom_request_id} value={request.custom_request_id.toString()}>
+                  {customRequests && customRequests.map((request) => (
+                    <SelectItem key={request.custom_request_id} value={request.custom_request_id?.toString() || "unknown-request"}>
                       {request.request_name || "Запрос без названия"}
                     </SelectItem>
                   ))}
