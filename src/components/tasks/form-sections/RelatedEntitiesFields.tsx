@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
@@ -12,8 +13,8 @@ const RelatedEntitiesFields: React.FC = () => {
   const { control } = useFormContext();
   const { leads } = useLeads();
   const { contacts } = useContacts();
-  // Передаем пустой объект или определенные параметры, в зависимости от требований хука
-  const { fetchOrders } = useOrders({}); 
+  // Pass an empty object to useOrders hook as required by the function signature
+  const { fetchOrders } = useOrders();
   const { partners } = usePartners();
   const { customRequests } = useCustomRequests();
   
@@ -62,7 +63,7 @@ const RelatedEntitiesFields: React.FC = () => {
                   <SelectItem value="none">Нет</SelectItem>
                   {leads?.map((lead) => (
                     <SelectItem key={lead.lead_id} value={lead.lead_id.toString()}>
-                      {lead.name}
+                      {lead.name || "Лид без имени"}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -91,7 +92,7 @@ const RelatedEntitiesFields: React.FC = () => {
                   <SelectItem value="none">Нет</SelectItem>
                   {contacts?.map((contact) => (
                     <SelectItem key={contact.contact_id} value={contact.contact_id.toString()}>
-                      {contact.full_name}
+                      {contact.full_name || "Контакт без имени"}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -120,7 +121,7 @@ const RelatedEntitiesFields: React.FC = () => {
                   <SelectItem value="none">Нет</SelectItem>
                   {orders?.map((order) => (
                     <SelectItem key={order.deal_order_id} value={order.deal_order_id.toString()}>
-                      {order.order_number}
+                      {order.order_number || "Заказ без номера"}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -149,7 +150,7 @@ const RelatedEntitiesFields: React.FC = () => {
                   <SelectItem value="none">Нет</SelectItem>
                   {partners?.map((partner) => (
                     <SelectItem key={partner.partner_manufacturer_id} value={partner.partner_manufacturer_id.toString()}>
-                      {partner.company_name}
+                      {partner.company_name || "Партнер без названия"}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -178,7 +179,7 @@ const RelatedEntitiesFields: React.FC = () => {
                   <SelectItem value="none">Нет</SelectItem>
                   {customRequests?.map((request) => (
                     <SelectItem key={request.custom_request_id} value={request.custom_request_id.toString()}>
-                      {request.request_name}
+                      {request.request_name || "Запрос без названия"}
                     </SelectItem>
                   ))}
                 </SelectContent>
