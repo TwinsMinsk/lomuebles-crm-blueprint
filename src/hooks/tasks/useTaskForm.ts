@@ -15,6 +15,7 @@ export const useTaskForm = (
 ) => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const queryClient = useQueryClient();
 
   // Parse initial data for the form
@@ -95,6 +96,9 @@ export const useTaskForm = (
       // Invalidate task queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["calendarTasks"] });
+      
+      // Set success state
+      setIsSuccess(true);
 
       // Call success callback if provided
       if (onSuccess) {
@@ -111,6 +115,8 @@ export const useTaskForm = (
   return {
     form,
     isLoading,
+    isSubmitting: isLoading, // Add isSubmitting alias for isLoading
+    isSuccess,
     onSubmit,
     isEditing: !!initialData?.task_id,
   };

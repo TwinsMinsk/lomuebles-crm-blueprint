@@ -46,7 +46,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
             </DialogTitle>
           </DialogHeader>
           
-          <TaskForm task={task} />
+          <TaskForm task={task} onClose={onClose} />
           
           <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:justify-between mt-4">
             <div>
