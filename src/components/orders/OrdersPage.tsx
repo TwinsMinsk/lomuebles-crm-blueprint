@@ -2,8 +2,8 @@
 import React from "react";
 import PageHeader from "@/components/common/PageHeader";
 import OrdersContent from "./OrdersContent";
-import { Package } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { KanbanSquare, Package } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 const OrdersPage: React.FC = () => {
   return (
@@ -18,7 +18,11 @@ const OrdersPage: React.FC = () => {
         }
       />
       
-      <OrdersContent />
+      <Card>
+        <CardContent className="p-6">
+          <OrdersContent />
+        </CardContent>
+      </Card>
     </div>
   );
 };
