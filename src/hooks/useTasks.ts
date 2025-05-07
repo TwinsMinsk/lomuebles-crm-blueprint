@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Task, TasksQueryParams } from "@/types/task";
 import { useAuth } from "@/context/AuthContext";
+import { format } from "date-fns";
 
 export function useTasks() {
   const [totalCount, setTotalCount] = useState(0);
@@ -18,37 +19,67 @@ export function useTasks() {
     filters = {}
   }: TasksQueryParams) => {
     try {
-      const { search, taskStatus, taskType, priority, assignedToMe, createdByMe } = filters;
+      const { 
+        search, 
+        taskStatus, 
+        taskType, 
+        priority, 
+        assignedToMe, 
+        createdByMe, 
+        assignedUserId,
+        dueDateFrom,
+        dueDateTo
+      } = filters;
       
       // Start building the query
       let query = supabase
         .from('tasks')
         .select('*, profiles!tasks_assigned_task_user_id_fkey(full_name), creator:profiles!tasks_creator_user_id_fkey(full_name)', { count: 'exact' });
       
-      // Apply filters
+      // Apply search filter
       if (search) {
-        query = query.ilike('task_name', `%${search}%`);
+        query = query.or(`task_name.ilike.%${search}%,description.ilike.%${search}%`);
       }
       
+      // Apply status filter
       if (taskStatus) {
         query = query.eq('task_status', taskStatus);
       }
       
+      // Apply task type filter
       if (taskType) {
         query = query.eq('task_type', taskType);
       }
       
+      // Apply priority filter
       if (priority) {
         query = query.eq('priority', priority);
       }
       
-      // Filter by assigned to me or created by me
-      if (assignedToMe && createdByMe && user?.id) {
+      // Apply assigned user filter
+      if (assignedUserId) {
+        query = query.eq('assigned_task_user_id', assignedUserId);
+      }
+      // Filter by assigned to me or created by me if no specific assignedUserId is set
+      else if (assignedToMe && createdByMe && user?.id) {
         query = query.or(`assigned_task_user_id.eq.${user.id},creator_user_id.eq.${user.id}`);
       } else if (assignedToMe && user?.id) {
         query = query.eq('assigned_task_user_id', user.id);
       } else if (createdByMe && user?.id) {
         query = query.eq('creator_user_id', user.id);
+      }
+      
+      // Apply due date range filter
+      if (dueDateFrom && dueDateTo) {
+        const fromDateStr = format(dueDateFrom, 'yyyy-MM-dd');
+        const toDateStr = format(dueDateTo, 'yyyy-MM-dd');
+        query = query.gte('due_date', fromDateStr).lte('due_date', toDateStr + 'T23:59:59');
+      } else if (dueDateFrom) {
+        const fromDateStr = format(dueDateFrom, 'yyyy-MM-dd');
+        query = query.gte('due_date', fromDateStr);
+      } else if (dueDateTo) {
+        const toDateStr = format(dueDateTo, 'yyyy-MM-dd');
+        query = query.lte('due_date', toDateStr + 'T23:59:59');
       }
       
       // Add sorting

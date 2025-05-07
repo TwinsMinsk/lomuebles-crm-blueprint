@@ -42,4 +42,8 @@ export interface TaskFiltersType {
   assignedToMe?: boolean;
   createdByMe?: boolean;
   viewType?: 'my' | 'all';
+  assignedUserId?: string | null;
+  dueDateFrom?: Date | null;
+  dueDateTo?: Date | null;
+  dueDateRange?: string | null;
 }

@@ -9,8 +9,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import TaskTableRow from "./TaskTableRow";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { Task } from "@/types/task";
+import { format } from "date-fns";
 
 interface TasksTableProps {
   tasks: Task[];
@@ -54,6 +55,14 @@ const TasksTable: React.FC<TasksTableProps> = ({
     );
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -64,7 +73,7 @@ const TasksTable: React.FC<TasksTableProps> = ({
             {createSortableHeader("task_type", "Тип задачи")}
             {createSortableHeader("task_status", "Статус")}
             {createSortableHeader("due_date", "Срок выполнения")}
-            {createSortableHeader("assigned_name", "Ответственный")}
+            {createSortableHeader("assigned_task_user_id", "Ответственный")}
             {createSortableHeader("priority", "Приоритет")}
             <TableHead>Связанный объект</TableHead>
             {createSortableHeader("creation_date", "Дата создания")}
@@ -72,13 +81,7 @@ const TasksTable: React.FC<TasksTableProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {loading ? (
-            <TableRow>
-              <TableCell colSpan={10} className="text-center py-4">
-                Загрузка задач...
-              </TableCell>
-            </TableRow>
-          ) : tasks.length > 0 ? (
+          {tasks.length > 0 ? (
             tasks.map((task) => (
               <TaskTableRow 
                 key={task.task_id} 

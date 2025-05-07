@@ -19,6 +19,10 @@ export function useTasksState() {
     assignedToMe: true,
     createdByMe: true,
     viewType: "my",
+    assignedUserId: null,
+    dueDateFrom: null,
+    dueDateTo: null,
+    dueDateRange: null,
   });
 
   const { user } = useAuth();
@@ -60,6 +64,10 @@ export function useTasksState() {
       assignedToMe: true,
       createdByMe: true,
       viewType: "my",
+      assignedUserId: null,
+      dueDateFrom: null,
+      dueDateTo: null,
+      dueDateRange: null,
     });
   };
 

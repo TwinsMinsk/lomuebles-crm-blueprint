@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import TasksTable from "./TasksTable";
 import TaskFilters from "./TaskFilters";
@@ -27,15 +27,19 @@ const TasksContent: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between">
-        <TaskFilters 
-          filters={filters}
-          setFilters={setFilters}
-          resetFilters={resetFilters}
-        />
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" /> Новая задача
-        </Button>
+      <div className="flex flex-col md:flex-row justify-between gap-4">
+        <div className="flex-grow">
+          <TaskFilters 
+            filters={filters}
+            setFilters={setFilters}
+            resetFilters={resetFilters}
+          />
+        </div>
+        <div className="md:self-start">
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" /> Новая задача
+          </Button>
+        </div>
       </div>
       
       <TasksTable
