@@ -54,15 +54,20 @@ export const useTaskForm = (
 
     setIsLoading(true);
     try {
-      // Prepare task data
+      // Prepare task data and ensure types are correct
       const taskData = {
         ...data,
+        // Convert Date to ISO string for Supabase
+        due_date: data.due_date ? data.due_date.toISOString() : null,
         // Add creator ID for new tasks
         ...(initialData ? {} : { creator_user_id: user.id }),
         // Set or clear completion_date based on status
         completion_date: data.task_status === "Выполнена" 
           ? new Date().toISOString()
           : null,
+        // Ensure required fields are present
+        assigned_task_user_id: data.assigned_task_user_id || user.id,
+        task_name: data.task_name
       };
 
       // For existing tasks, update
