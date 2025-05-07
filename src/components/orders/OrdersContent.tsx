@@ -3,6 +3,7 @@ import React from "react";
 import { useOrdersState } from "@/hooks/orders/useOrdersState";
 import OrdersTable from "./OrdersTable";
 import OrdersPagination from "./OrdersPagination";
+import OrderFilters from "./OrderFilters";
 import { toast } from "sonner";
 
 const OrdersContent: React.FC = () => {
@@ -17,6 +18,8 @@ const OrdersContent: React.FC = () => {
     handleSort,
     sortColumn,
     sortDirection,
+    handleApplyFilters,
+    handleResetFilters,
     formatCurrency,
     formatDate,
     refetch
@@ -33,6 +36,15 @@ const OrdersContent: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      {/* Filters section */}
+      <div className="bg-card p-4 rounded-lg border">
+        <h2 className="text-lg font-medium mb-4">Фильтры</h2>
+        <OrderFilters 
+          onApplyFilters={handleApplyFilters}
+          onResetFilters={handleResetFilters}
+        />
+      </div>
+      
       {/* Orders table */}
       <OrdersTable
         orders={orders || []}

@@ -3,16 +3,29 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useOrders } from "../useOrders";
 
+export interface OrderFilters {
+  search?: string;
+  orderType?: string;
+  currentStatus?: string;
+  assignedUserId?: string;
+  paymentStatus?: string;
+  fromDate?: Date;
+  toDate?: Date;
+}
+
 export function useOrdersState() {
   // Pagination and sorting state
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [sortColumn, setSortColumn] = useState<string>("creation_date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  
+  // Filtering state
+  const [filters, setFilters] = useState<OrderFilters>({});
 
   const { fetchOrders, totalCount, formatCurrency, formatDate } = useOrders();
 
-  // Query to fetch orders with current pagination and sorting
+  // Query to fetch orders with current pagination, sorting, and filtering
   const { 
     data: orders, 
     isLoading, 
@@ -20,12 +33,13 @@ export function useOrdersState() {
     error,
     refetch
   } = useQuery({
-    queryKey: ["orders", currentPage, pageSize, sortColumn, sortDirection],
+    queryKey: ["orders", currentPage, pageSize, sortColumn, sortDirection, filters],
     queryFn: () => fetchOrders({
       page: currentPage,
       pageSize,
       sortColumn,
-      sortDirection
+      sortDirection,
+      filters
     })
   });
 
@@ -44,6 +58,18 @@ export function useOrdersState() {
     }
   };
 
+  // Handle filters
+  const handleApplyFilters = (newFilters: OrderFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  // Handle filter reset
+  const handleResetFilters = () => {
+    setFilters({});
+    setCurrentPage(1);
+  };
+
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -58,6 +84,9 @@ export function useOrdersState() {
     handleSort,
     sortColumn,
     sortDirection,
+    filters,
+    handleApplyFilters,
+    handleResetFilters,
     formatCurrency,
     formatDate,
     refetch
