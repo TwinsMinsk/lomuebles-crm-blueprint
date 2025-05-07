@@ -103,7 +103,7 @@ const OrderDetailPage: React.FC = () => {
       />
       
       <OrderForm 
-        orderId={isEditMode ? parseInt(orderId!) : undefined} 
+        orderId={isEditMode && orderId ? parseInt(orderId) : undefined} 
         defaultValues={order || undefined}
         isEdit={isEditMode} 
       />
