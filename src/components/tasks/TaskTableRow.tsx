@@ -1,10 +1,10 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Task } from "@/types/task";
 import { format, isAfter, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Trash } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import DeleteTaskDialog from "./DeleteTaskDialog";
 
 interface TaskTableRowProps {
   task: Task;
@@ -19,6 +20,8 @@ interface TaskTableRowProps {
 }
 
 const TaskTableRow: React.FC<TaskTableRowProps> = ({ task, onTaskClick }) => {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  
   // Format dates
   const formattedDueDate = task.due_date
     ? format(new Date(task.due_date), "dd.MM.yyyy HH:mm", { locale: ru })
@@ -121,8 +124,21 @@ const TaskTableRow: React.FC<TaskTableRowProps> = ({ task, onTaskClick }) => {
             <DropdownMenuItem onClick={() => onTaskClick && onTaskClick(task)}>
               Редактировать
             </DropdownMenuItem>
+            <DropdownMenuItem 
+              className="text-red-600 focus:text-red-600"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              <Trash className="h-4 w-4 mr-2" />
+              Удалить
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        
+        <DeleteTaskDialog 
+          task={task} 
+          open={deleteDialogOpen} 
+          onOpenChange={setDeleteDialogOpen}
+        />
       </TableCell>
     </TableRow>
   );
