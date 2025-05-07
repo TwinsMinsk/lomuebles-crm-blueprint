@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Task } from "@/types/task";
 import { useTaskForm } from "@/hooks/tasks/useTaskForm";
@@ -26,9 +27,26 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose }) => {
   const { users } = useUsers();
   const { leads } = useLeads();
   const { contacts } = useContacts();
-  const { orders } = useOrders();
+  const { fetchOrders } = useOrders();
   const { partners } = usePartners();
   const { customRequests } = useCustomRequests();
+  
+  const [orders, setOrders] = React.useState<any[]>([]);
+
+  // Fetch orders
+  React.useEffect(() => {
+    const loadOrders = async () => {
+      const fetchedOrders = await fetchOrders({
+        page: 1,
+        pageSize: 100,
+        sortColumn: 'creation_date',
+        sortDirection: 'desc'
+      });
+      setOrders(fetchedOrders);
+    };
+    
+    loadOrders();
+  }, [fetchOrders]);
 
   const taskTypes = [
     "Звонок",

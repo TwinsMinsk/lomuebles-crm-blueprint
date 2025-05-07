@@ -25,7 +25,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
   onClose,
   task,
 }) => {
-  const { isSubmitting, isSuccess } = useTaskForm();
+  const { isSubmitting, isSuccess } = useTaskForm(task);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const isNewTask = !task?.task_id;
   
