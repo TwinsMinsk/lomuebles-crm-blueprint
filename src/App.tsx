@@ -1,151 +1,89 @@
 
-import React from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "./context/AuthContext";
-import { Toaster } from "@/components/ui/sonner";
-
-// Layouts
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import React, { Suspense } from "react";
 import Layout from "./components/layout/Layout";
+import { AuthProvider } from "./context/AuthContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "./components/ui/toaster";
+import { Toaster as SonnerToaster } from "sonner";
+import { TaskFormProvider } from "./context/TaskFormContext";
 
-// Pages
-import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
-import Leads from "./pages/Leads";
-import Contacts from "./pages/Contacts";
-import Companies from "./pages/Companies";
-import Orders from "./pages/Orders";
-import OrderDetail from "./pages/OrderDetail";
-import Tasks from "./pages/Tasks";
-import Calendar from "./pages/Calendar";
-import NotFound from "./pages/NotFound";
-import AccessDenied from "./pages/AccessDenied";
-import Login from "./pages/auth/Login";
-import Register from "./pages/auth/Register";
-import Logout from "./pages/auth/Logout";
-import ForgotPassword from "./pages/auth/ForgotPassword";
-import ResetPassword from "./pages/auth/ResetPassword";
-import ProfileSettings from "./pages/user/ProfileSettings";
-import UserManagement from "./pages/admin/UserManagement";
-
-// Auth
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-
-// Create a new QueryClient instance
+// Create a client
 const queryClient = new QueryClient();
+
+// Routes
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Calendar = React.lazy(() => import('./pages/Calendar'));
+const Tasks = React.lazy(() => import('./pages/Tasks'));
+const Leads = React.lazy(() => import('./pages/Leads'));
+const Contacts = React.lazy(() => import('./pages/Contacts'));
+const Companies = React.lazy(() => import('./pages/Companies'));
+const Orders = React.lazy(() => import('./pages/Orders'));
+const OrderDetail = React.lazy(() => import('./pages/OrderDetail'));
+
+// Auth routes
+const Login = React.lazy(() => import('./pages/auth/Login'));
+const Register = React.lazy(() => import('./pages/auth/Register'));
+const ForgotPassword = React.lazy(() => import('./pages/auth/ForgotPassword'));
+const ResetPassword = React.lazy(() => import('./pages/auth/ResetPassword'));
+const Logout = React.lazy(() => import('./pages/auth/Logout'));
+
+// User routes
+const ProfileSettings = React.lazy(() => import('./pages/user/ProfileSettings'));
+
+// Admin routes
+const UserManagement = React.lazy(() => import('./pages/admin/UserManagement'));
+
+// Error pages
+const NotFound = React.lazy(() => import('./pages/NotFound'));
+const AccessDenied = React.lazy(() => import('./pages/AccessDenied'));
+
+// Loading component for suspense
+const SuspenseFallback = () => <div className="flex items-center justify-center min-h-screen">Loading...</div>;
 
 function App() {
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TaskFormProvider>
           <BrowserRouter>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Index />} />
-              
-              {/* Auth routes */}
-              <Route path="/auth/login" element={<Login />} />
-              <Route path="/auth/register" element={<Register />} />
-              <Route path="/auth/logout" element={<Logout />} />
-              <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-              <Route path="/auth/reset-password" element={<ResetPassword />} />
-              
-              {/* Protected routes with layout */}
-              <Route element={<Layout />}>
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/leads"
-                  element={
-                    <ProtectedRoute>
-                      <Leads />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/contacts"
-                  element={
-                    <ProtectedRoute>
-                      <Contacts />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/companies"
-                  element={
-                    <ProtectedRoute>
-                      <Companies />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/orders"
-                  element={
-                    <ProtectedRoute>
-                      <Orders />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/orders/:orderId"
-                  element={
-                    <ProtectedRoute>
-                      <OrderDetail />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/tasks"
-                  element={
-                    <ProtectedRoute>
-                      <Tasks />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/calendar"
-                  element={
-                    <ProtectedRoute>
-                      <Calendar />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings"
-                  element={
-                    <ProtectedRoute>
-                      <ProfileSettings />
-                    </ProtectedRoute>
-                  }
-                />
-                
-                {/* Admin routes */}
-                <Route
-                  path="/admin/users"
-                  element={
-                    <ProtectedRoute allowedRoles={["Главный Администратор"]}>
-                      <UserManagement />
-                    </ProtectedRoute>
-                  }
-                />
-              </Route>
-              
-              {/* Error routes */}
-              <Route path="/access-denied" element={<AccessDenied />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Toaster />
+            <Suspense fallback={<SuspenseFallback />}>
+              <Routes>
+                {/* Auth routes - No layout */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/logout" element={<Logout />} />
+
+                {/* Routes with Layout */}
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<Dashboard />} />
+                  <Route path="calendar" element={<Calendar />} />
+                  <Route path="tasks" element={<Tasks />} />
+                  <Route path="leads" element={<Leads />} />
+                  <Route path="contacts" element={<Contacts />} />
+                  <Route path="companies" element={<Companies />} />
+                  <Route path="orders" element={<Orders />} />
+                  <Route path="orders/:orderId" element={<OrderDetail />} />
+                  <Route path="profile" element={<ProfileSettings />} />
+                  <Route path="admin/users" element={<UserManagement />} />
+
+                  {/* Error pages */}
+                  <Route path="access-denied" element={<AccessDenied />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+
+                {/* Default redirect */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
-        </AuthProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
+          <Toaster />
+          <SonnerToaster position="top-right" />
+        </TaskFormProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
