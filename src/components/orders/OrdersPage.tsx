@@ -3,6 +3,7 @@ import React from "react";
 import PageHeader from "@/components/common/PageHeader";
 import OrdersContent from "./OrdersContent";
 import { Package } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const OrdersPage: React.FC = () => {
   return (
@@ -10,7 +11,11 @@ const OrdersPage: React.FC = () => {
       <PageHeader
         title="Заказы"
         description="Управление заказами клиентов"
-        icon={<Package className="w-6 h-6" />}
+        action={
+          <div className="flex items-center gap-2">
+            <Package className="w-6 h-6 text-muted-foreground" />
+          </div>
+        }
       />
       
       <OrdersContent />
