@@ -127,3 +127,18 @@
 .fc-event {
   @apply cursor-pointer transition-opacity hover:opacity-90;
 }
+
+/* Time grid specific styles */
+.fc .fc-timegrid-slot {
+  @apply h-12;
+}
+
+.fc .fc-timegrid-slot-lane {
+  @apply border-t border-gray-100;
+}
+
+/* Fix for timegrid view */
+.fc-direction-ltr .fc-timegrid-col-events {
+  @apply mr-1;
+}
+

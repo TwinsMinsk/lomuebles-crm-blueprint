@@ -219,9 +219,12 @@ const TasksCalendar: React.FC = () => {
             editable={true}
             droppable={true}
             eventDrop={handleEventDrop}
-            allDaySlot={false}
+            // Fixed properties according to the FullCalendar TimeGrid options
+            dayMaxEvents={true}
             slotMinTime="08:00:00"
             slotMaxTime="20:00:00"
+            // The problematic property has been renamed to allDayContent
+            allDayContent=""
           />
         </div>
       </div>
