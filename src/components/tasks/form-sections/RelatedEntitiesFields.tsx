@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
@@ -10,7 +9,7 @@ import { usePartners } from "@/hooks/usePartners";
 import { useCustomRequests } from "@/hooks/useCustomRequests";
 
 // Component for rendering fields related to task entities
-const RelatedEntitiesFields_TEMP: React.FC = () => {
+const RelatedEntitiesFields: React.FC = () => {
   const { control } = useFormContext();
   const { leads } = useLeads();
   const { contacts } = useContacts();
@@ -24,14 +23,13 @@ const RelatedEntitiesFields_TEMP: React.FC = () => {
   useEffect(() => {
     const loadOrders = async () => {
       try {
-        // Explicitly provide all required parameters
         const fetchedOrders = await fetchOrders({
           page: 1,
           pageSize: 100,
           sortColumn: 'creation_date',
           sortDirection: 'desc'
         });
-        setOrders(fetchedOrders || []);
+        setOrders(fetchedOrders);
       } catch (error) {
         console.error("Failed to load orders:", error);
         setOrders([]);
@@ -52,8 +50,8 @@ const RelatedEntitiesFields_TEMP: React.FC = () => {
             <FormItem>
               <FormLabel>Связанный лид</FormLabel>
               <Select
-                onValueChange={(value) => field.onChange(value === "null" ? null : parseInt(value))}
-                value={field.value?.toString() || "null"}
+                onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}
+                defaultValue={field.value?.toString()}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -61,7 +59,7 @@ const RelatedEntitiesFields_TEMP: React.FC = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="null">Нет</SelectItem>
+                  <SelectItem value="none">Нет</SelectItem>
                   {leads?.map((lead) => (
                     <SelectItem key={lead.lead_id} value={lead.lead_id.toString()}>
                       {lead.name}
@@ -81,8 +79,8 @@ const RelatedEntitiesFields_TEMP: React.FC = () => {
             <FormItem>
               <FormLabel>Связанный контакт</FormLabel>
               <Select
-                onValueChange={(value) => field.onChange(value === "null" ? null : parseInt(value))}
-                value={field.value?.toString() || "null"}
+                onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}
+                defaultValue={field.value?.toString()}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -90,7 +88,7 @@ const RelatedEntitiesFields_TEMP: React.FC = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="null">Нет</SelectItem>
+                  <SelectItem value="none">Нет</SelectItem>
                   {contacts?.map((contact) => (
                     <SelectItem key={contact.contact_id} value={contact.contact_id.toString()}>
                       {contact.full_name}
@@ -110,8 +108,8 @@ const RelatedEntitiesFields_TEMP: React.FC = () => {
             <FormItem>
               <FormLabel>Связанный заказ</FormLabel>
               <Select
-                onValueChange={(value) => field.onChange(value === "null" ? null : parseInt(value))}
-                value={field.value?.toString() || "null"}
+                onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}
+                defaultValue={field.value?.toString()}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -119,12 +117,9 @@ const RelatedEntitiesFields_TEMP: React.FC = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="null">Нет</SelectItem>
+                  <SelectItem value="none">Нет</SelectItem>
                   {orders?.map((order) => (
-                    <SelectItem 
-                      key={order.deal_order_id} 
-                      value={order.deal_order_id?.toString() || `order-${order.deal_order_id}`}
-                    >
+                    <SelectItem key={order.deal_order_id} value={order.deal_order_id.toString()}>
                       {order.order_number}
                     </SelectItem>
                   ))}
@@ -142,8 +137,8 @@ const RelatedEntitiesFields_TEMP: React.FC = () => {
             <FormItem>
               <FormLabel>Связанный партнер</FormLabel>
               <Select
-                onValueChange={(value) => field.onChange(value === "null" ? null : parseInt(value))}
-                value={field.value?.toString() || "null"}
+                onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}
+                defaultValue={field.value?.toString()}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -151,12 +146,9 @@ const RelatedEntitiesFields_TEMP: React.FC = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="null">Нет</SelectItem>
+                  <SelectItem value="none">Нет</SelectItem>
                   {partners?.map((partner) => (
-                    <SelectItem 
-                      key={partner.partner_manufacturer_id} 
-                      value={partner.partner_manufacturer_id?.toString() || `partner-${partner.partner_manufacturer_id}`}
-                    >
+                    <SelectItem key={partner.partner_manufacturer_id} value={partner.partner_manufacturer_id.toString()}>
                       {partner.company_name}
                     </SelectItem>
                   ))}
@@ -174,8 +166,8 @@ const RelatedEntitiesFields_TEMP: React.FC = () => {
             <FormItem>
               <FormLabel>Связанный запрос</FormLabel>
               <Select
-                onValueChange={(value) => field.onChange(value === "null" ? null : parseInt(value))}
-                value={field.value?.toString() || "null"}
+                onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}
+                defaultValue={field.value?.toString()}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -183,12 +175,9 @@ const RelatedEntitiesFields_TEMP: React.FC = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="null">Нет</SelectItem>
+                  <SelectItem value="none">Нет</SelectItem>
                   {customRequests?.map((request) => (
-                    <SelectItem 
-                      key={request.custom_request_id} 
-                      value={request.custom_request_id?.toString() || `request-${request.custom_request_id}`}
-                    >
+                    <SelectItem key={request.custom_request_id} value={request.custom_request_id.toString()}>
                       {request.request_name}
                     </SelectItem>
                   ))}
@@ -203,4 +192,4 @@ const RelatedEntitiesFields_TEMP: React.FC = () => {
   );
 };
 
-export default RelatedEntitiesFields_TEMP;
+export default RelatedEntitiesFields;
