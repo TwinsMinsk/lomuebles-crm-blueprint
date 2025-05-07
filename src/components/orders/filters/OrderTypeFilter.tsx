@@ -36,7 +36,7 @@ export const OrderTypeFilter: React.FC<OrderTypeFilterProps> = ({
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="">Все типы</SelectItem>
+              <SelectItem value="all">Все типы</SelectItem>
               {orderTypes.map((type) => (
                 <SelectItem key={type} value={type}>{type}</SelectItem>
               ))}

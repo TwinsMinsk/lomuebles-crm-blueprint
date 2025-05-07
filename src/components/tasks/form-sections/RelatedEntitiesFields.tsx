@@ -54,7 +54,7 @@ const RelatedEntitiesFields: React.FC = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">Нет</SelectItem>
+                  <SelectItem value="none">Нет</SelectItem>
                   {leads?.map((lead) => (
                     <SelectItem key={lead.lead_id} value={lead.lead_id.toString()}>
                       {lead.name}
@@ -83,7 +83,7 @@ const RelatedEntitiesFields: React.FC = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">Нет</SelectItem>
+                  <SelectItem value="none">Нет</SelectItem>
                   {contacts?.map((contact) => (
                     <SelectItem key={contact.contact_id} value={contact.contact_id.toString()}>
                       {contact.full_name}
@@ -112,7 +112,7 @@ const RelatedEntitiesFields: React.FC = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">Нет</SelectItem>
+                  <SelectItem value="none">Нет</SelectItem>
                   {orders?.map((order) => (
                     <SelectItem key={order.deal_order_id} value={order.deal_order_id.toString()}>
                       {order.order_number}
@@ -141,7 +141,7 @@ const RelatedEntitiesFields: React.FC = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">Нет</SelectItem>
+                  <SelectItem value="none">Нет</SelectItem>
                   {partners?.map((partner) => (
                     <SelectItem key={partner.partner_manufacturer_id} value={partner.partner_manufacturer_id.toString()}>
                       {partner.company_name}
@@ -170,7 +170,7 @@ const RelatedEntitiesFields: React.FC = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">Нет</SelectItem>
+                  <SelectItem value="none">Нет</SelectItem>
                   {customRequests?.map((request) => (
                     <SelectItem key={request.custom_request_id} value={request.custom_request_id.toString()}>
                       {request.request_name}

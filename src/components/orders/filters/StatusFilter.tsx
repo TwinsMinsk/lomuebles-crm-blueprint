@@ -38,7 +38,7 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="">Все статусы</SelectItem>
+              <SelectItem value="all">Все статусы</SelectItem>
               {statuses.map((status) => (
                 <SelectItem key={status} value={status}>{status}</SelectItem>
               ))}

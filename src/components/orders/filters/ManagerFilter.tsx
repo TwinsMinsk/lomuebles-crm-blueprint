@@ -35,7 +35,7 @@ export const ManagerFilter: React.FC<ManagerFilterProps> = ({ form, managers, is
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="">Все менеджеры</SelectItem>
+              <SelectItem value="all">Все менеджеры</SelectItem>
               {managers.map((manager) => (
                 <SelectItem key={manager.id} value={manager.id}>{manager.name}</SelectItem>
               ))}

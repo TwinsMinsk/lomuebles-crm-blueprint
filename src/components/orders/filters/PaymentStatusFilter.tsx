@@ -34,7 +34,7 @@ export const PaymentStatusFilter: React.FC<PaymentStatusFilterProps> = ({
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="">Все статусы оплаты</SelectItem>
+              <SelectItem value="all">Все статусы оплаты</SelectItem>
               {paymentStatuses.map((status) => (
                 <SelectItem key={status} value={status}>{status}</SelectItem>
               ))}
