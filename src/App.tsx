@@ -16,6 +16,7 @@ import Contacts from "./pages/Contacts";
 import Companies from "./pages/Companies";
 import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
+import Tasks from "./pages/Tasks";
 import NotFound from "./pages/NotFound";
 import AccessDenied from "./pages/AccessDenied";
 import Login from "./pages/auth/Login";
@@ -96,6 +97,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <OrderDetail />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/tasks"
+                  element={
+                    <ProtectedRoute>
+                      <Tasks />
                     </ProtectedRoute>
                   }
                 />
