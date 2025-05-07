@@ -11,6 +11,7 @@ import { BasicOrderInfoFields } from "./sections/BasicOrderInfoFields";
 import { RelatedEntitiesFields } from "./sections/RelatedEntitiesFields";
 import { FinancialInfoFields } from "./sections/FinancialInfoFields";
 import { AdditionalInfoFields } from "./sections/AdditionalInfoFields";
+import { OrderItemsSection } from "./sections/OrderItemsSection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -88,36 +89,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({
     
     fetchContactAddress();
   }, [associatedContactId, form]);
-  
-  // Fetch order items and calculate total amount if editing
-  useEffect(() => {
-    if (!isEdit || !orderId) return;
-    
-    const fetchOrderItems = async () => {
-      try {
-        const { data: orderItems, error } = await supabase
-          .from("order_items")
-          .select("total_item_price")
-          .eq("parent_deal_order_id", orderId);
-          
-        if (error) throw error;
-        
-        if (orderItems && orderItems.length > 0) {
-          // Calculate total amount from order items
-          const total = orderItems.reduce(
-            (sum, item) => sum + (item.total_item_price || 0),
-            0
-          );
-          
-          form.setValue("finalAmount", total);
-        }
-      } catch (error) {
-        console.error("Error fetching order items:", error);
-      }
-    };
-    
-    fetchOrderItems();
-  }, [isEdit, orderId, form]);
   
   const onSubmit = async (data: OrderFormValues) => {
     setIsLoading(true);
@@ -220,6 +191,9 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             <RelatedEntitiesFields form={form} orderType={orderType} />
           </CardContent>
         </Card>
+        
+        {/* Add the Order Items section */}
+        <OrderItemsSection form={form} orderId={orderId} />
         
         <Card>
           <CardHeader>

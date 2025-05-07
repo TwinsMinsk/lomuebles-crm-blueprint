@@ -5,12 +5,16 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { OrderFormValues } from "../orderFormSchema";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { formatCurrency } from "@/utils/formatters";
 
 interface FinancialInfoFieldsProps {
   form: UseFormReturn<OrderFormValues>;
 }
 
 export const FinancialInfoFields: React.FC<FinancialInfoFieldsProps> = ({ form }) => {
+  // Get current value to display formatted
+  const finalAmount = form.watch("finalAmount");
+  
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <FormField
@@ -21,14 +25,12 @@ export const FinancialInfoFields: React.FC<FinancialInfoFieldsProps> = ({ form }
             <FormLabel>Итоговая сумма заказа (€)</FormLabel>
             <FormControl>
               <Input 
-                {...field} 
-                value={field.value || ""} 
-                onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)} 
-                type="number" 
-                step="0.01"
+                value={finalAmount ? formatCurrency(finalAmount).replace('€', '') : ""} 
+                type="text"
                 placeholder="Рассчитывается автоматически"
                 readOnly
                 className="bg-gray-100"
+                disabled
               />
             </FormControl>
             <FormMessage />
