@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { OrderFilters } from "./orders/useOrdersState";
+import { formatCurrency, formatDate as formatDateUtil } from "@/utils/formatters";
 
 export interface Order {
   deal_order_id: number;
@@ -122,12 +123,6 @@ export function useOrders() {
     }));
   };
 
-  // Format currency
-  const formatCurrency = (amount: number | null): string => {
-    if (amount === null) return "Не указано";
-    return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'EUR' }).format(amount);
-  };
-
   // Format date
   const formatDate = (dateString: string): string => {
     try {
@@ -141,7 +136,6 @@ export function useOrders() {
   return {
     fetchOrders,
     totalCount,
-    formatCurrency,
     formatDate
   };
 }

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -6,7 +7,7 @@ import { UseFormReturn } from "react-hook-form";
 import { OrderFormValues } from "../orderFormSchema";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatCurrency } from "@/hooks/useOrders";
+import { formatCurrency } from "@/utils/formatters";
 
 // Define the OrderItem interface to match our database structure
 interface OrderItem {
