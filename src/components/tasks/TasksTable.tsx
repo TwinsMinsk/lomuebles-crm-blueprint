@@ -19,6 +19,7 @@ interface TasksTableProps {
   onSort?: (column: string) => void;
   sortColumn?: string;
   sortDirection?: 'asc' | 'desc';
+  onTaskClick?: (task: Task) => void;
 }
 
 const TasksTable: React.FC<TasksTableProps> = ({
@@ -27,6 +28,7 @@ const TasksTable: React.FC<TasksTableProps> = ({
   onSort,
   sortColumn,
   sortDirection,
+  onTaskClick,
 }) => {
   // Function to render sort indicator
   const renderSortIndicator = (column: string) => {
@@ -86,6 +88,7 @@ const TasksTable: React.FC<TasksTableProps> = ({
               <TaskTableRow 
                 key={task.task_id} 
                 task={task}
+                onTaskClick={onTaskClick}
               />
             ))
           ) : (

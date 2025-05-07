@@ -6,6 +6,8 @@ import TaskFilters from "./TaskFilters";
 import TasksPagination from "./TasksPagination";
 import { useTasksState } from "@/hooks/tasks/useTasksState";
 import { PlusCircle } from "lucide-react";
+import TaskFormModal from "./TaskFormModal";
+import { useTaskFormModal } from "@/hooks/tasks/useTaskFormModal";
 
 const TasksContent: React.FC = () => {
   const {
@@ -23,7 +25,10 @@ const TasksContent: React.FC = () => {
     setSortDirection,
     setFilters,
     resetFilters,
+    refetch,
   } = useTasksState();
+
+  const { isOpen, selectedTask, openModal, closeModal } = useTaskFormModal();
 
   return (
     <div className="space-y-4">
@@ -36,7 +41,7 @@ const TasksContent: React.FC = () => {
           />
         </div>
         <div className="md:self-start">
-          <Button>
+          <Button onClick={() => openModal()}>
             <PlusCircle className="mr-2 h-4 w-4" /> Новая задача
           </Button>
         </div>
@@ -55,6 +60,7 @@ const TasksContent: React.FC = () => {
             setSortDirection('asc');
           }
         }}
+        onTaskClick={(task) => openModal(task)}
       />
       
       {pageCount > 1 && (
@@ -66,6 +72,15 @@ const TasksContent: React.FC = () => {
           />
         </div>
       )}
+
+      <TaskFormModal 
+        open={isOpen} 
+        onClose={() => {
+          closeModal();
+          refetch();
+        }} 
+        task={selectedTask} 
+      />
     </div>
   );
 };
