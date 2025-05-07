@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -37,7 +37,7 @@ export interface OrdersQueryParams {
 export function useOrders() {
   const [totalCount, setTotalCount] = useState<number>(0);
 
-  const fetchOrders = async ({ page, pageSize, sortColumn, sortDirection, filters }: OrdersQueryParams) => {
+  const fetchOrders = useCallback(async ({ page, pageSize, sortColumn, sortDirection, filters }: OrdersQueryParams) => {
     // Calculate offset for pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
@@ -121,7 +121,7 @@ export function useOrders() {
         ? order.status_ready_made 
         : order.status_custom_made
     }));
-  };
+  }, []);
 
   // Format date
   const formatDate = (dateString: string): string => {

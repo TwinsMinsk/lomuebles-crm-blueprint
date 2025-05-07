@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
@@ -22,13 +21,18 @@ const RelatedEntitiesFields: React.FC = () => {
   // Fetch orders with required parameters
   useEffect(() => {
     const loadOrders = async () => {
-      const fetchedOrders = await fetchOrders({
-        page: 1,
-        pageSize: 100,
-        sortColumn: 'creation_date',
-        sortDirection: 'desc'
-      });
-      setOrders(fetchedOrders);
+      try {
+        const fetchedOrders = await fetchOrders({
+          page: 1,
+          pageSize: 100,
+          sortColumn: 'creation_date',
+          sortDirection: 'desc'
+        });
+        setOrders(fetchedOrders);
+      } catch (error) {
+        console.error("Failed to load orders:", error);
+        setOrders([]);
+      }
     };
     
     loadOrders();
