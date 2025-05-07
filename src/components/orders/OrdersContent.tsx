@@ -8,9 +8,11 @@ import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KanbanSquare, List } from "lucide-react";
 import OrdersKanbanBoard from "./kanban/OrdersKanbanBoard";
+import { useNavigate } from "react-router-dom";
 
 const OrdersContent: React.FC = () => {
   const [view, setView] = useState<"table" | "kanban">("table");
+  const navigate = useNavigate();
   
   const {
     orders,
@@ -38,6 +40,10 @@ const OrdersContent: React.FC = () => {
       });
     }
   }, [isError, error]);
+
+  const handleOrderClick = (orderId: number) => {
+    navigate(`/orders/${orderId}`);
+  };
 
   return (
     <div className="space-y-4">
@@ -74,6 +80,7 @@ const OrdersContent: React.FC = () => {
             onSort={handleSort}
             formatCurrency={formatCurrency}
             formatDate={formatDate}
+            onOrderClick={handleOrderClick}
           />
           
           {/* Pagination */}

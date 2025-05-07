@@ -14,6 +14,7 @@ import Leads from "./pages/Leads";
 import Contacts from "./pages/Contacts";
 import Companies from "./pages/Companies";
 import Orders from "./pages/Orders";
+import OrderDetail from "./pages/OrderDetail";
 import NotFound from "./pages/NotFound";
 import AccessDenied from "./pages/AccessDenied";
 import Login from "./pages/auth/Login";
@@ -84,6 +85,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Orders />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders/:orderId"
+                element={
+                  <ProtectedRoute>
+                    <OrderDetail />
                   </ProtectedRoute>
                 }
               />
