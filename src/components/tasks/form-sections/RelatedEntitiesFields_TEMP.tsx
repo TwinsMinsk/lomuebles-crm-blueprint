@@ -121,7 +121,10 @@ const RelatedEntitiesFields_TEMP: React.FC = () => {
                 <SelectContent>
                   <SelectItem value="null">Нет</SelectItem>
                   {orders?.map((order) => (
-                    <SelectItem key={order.deal_order_id} value={order.deal_order_id.toString()}>
+                    <SelectItem 
+                      key={order.deal_order_id} 
+                      value={order.deal_order_id?.toString() || `order-${order.deal_order_id}`}
+                    >
                       {order.order_number}
                     </SelectItem>
                   ))}
@@ -150,7 +153,10 @@ const RelatedEntitiesFields_TEMP: React.FC = () => {
                 <SelectContent>
                   <SelectItem value="null">Нет</SelectItem>
                   {partners?.map((partner) => (
-                    <SelectItem key={partner.partner_manufacturer_id} value={partner.partner_manufacturer_id.toString()}>
+                    <SelectItem 
+                      key={partner.partner_manufacturer_id} 
+                      value={partner.partner_manufacturer_id?.toString() || `partner-${partner.partner_manufacturer_id}`}
+                    >
                       {partner.company_name}
                     </SelectItem>
                   ))}
@@ -179,7 +185,10 @@ const RelatedEntitiesFields_TEMP: React.FC = () => {
                 <SelectContent>
                   <SelectItem value="null">Нет</SelectItem>
                   {customRequests?.map((request) => (
-                    <SelectItem key={request.custom_request_id} value={request.custom_request_id.toString()}>
+                    <SelectItem 
+                      key={request.custom_request_id} 
+                      value={request.custom_request_id?.toString() || `request-${request.custom_request_id}`}
+                    >
                       {request.request_name}
                     </SelectItem>
                   ))}
