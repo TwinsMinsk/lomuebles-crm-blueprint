@@ -5,7 +5,7 @@ import { useTaskForm } from "@/hooks/tasks/useTaskForm";
 import { Form } from "@/components/ui/form";
 import BasicTaskFields from "./form-sections/BasicTaskFields";
 import AssignmentFields from "./form-sections/AssignmentFields";
-import RelatedEntitiesFields from "./form-sections/RelatedEntitiesFields";
+import RelatedEntitiesFields_TEMP from "./form-sections/RelatedEntitiesFields_TEMP";
 
 interface TaskFormProps {
   task?: Task;
@@ -26,7 +26,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose }) => {
           <AssignmentFields />
         </div>
         
-        <RelatedEntitiesFields />
+        <RelatedEntitiesFields_TEMP />
       </form>
     </Form>
   );
