@@ -39,6 +39,8 @@ export const useTaskForm = (
         task_status: "Новая",
         priority: "Средний",
         assigned_task_user_id: user?.id || "",
+        // If initialData exists but doesn't have task_name (from calendar), parse the due_date
+        due_date: initialData?.due_date ? new Date(initialData.due_date) : null,
       };
 
   const form = useForm<TaskFormValues>({
@@ -60,7 +62,7 @@ export const useTaskForm = (
         // Convert Date to ISO string for Supabase
         due_date: data.due_date ? data.due_date.toISOString() : null,
         // Add creator ID for new tasks
-        ...(initialData ? {} : { creator_user_id: user.id }),
+        ...(initialData?.task_id ? {} : { creator_user_id: user.id }),
         // Set or clear completion_date based on status
         completion_date: data.task_status === "Выполнена" 
           ? new Date().toISOString()
@@ -71,7 +73,7 @@ export const useTaskForm = (
       };
 
       // For existing tasks, update
-      if (initialData) {
+      if (initialData?.task_id) {
         const { error } = await supabase
           .from('tasks')
           .update(taskData)
@@ -92,6 +94,7 @@ export const useTaskForm = (
 
       // Invalidate task queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["calendarTasks"] });
 
       // Call success callback if provided
       if (onSuccess) {
@@ -109,6 +112,6 @@ export const useTaskForm = (
     form,
     isLoading,
     onSubmit,
-    isEditing: !!initialData,
+    isEditing: !!initialData?.task_id,
   };
 };

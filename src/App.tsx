@@ -17,6 +17,7 @@ import Companies from "./pages/Companies";
 import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
 import Tasks from "./pages/Tasks";
+import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
 import AccessDenied from "./pages/AccessDenied";
 import Login from "./pages/auth/Login";
@@ -105,6 +106,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Tasks />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/calendar"
+                  element={
+                    <ProtectedRoute>
+                      <Calendar />
                     </ProtectedRoute>
                   }
                 />
