@@ -23,11 +23,7 @@ export function useTasks() {
       // Start building the query
       let query = supabase
         .from('tasks')
-        .select(`
-          *,
-          profiles!assigned_task_user_id(full_name),
-          profiles!creator_user_id(full_name)
-        `, { count: 'exact' });
+        .select('*, profiles!tasks_assigned_task_user_id_fkey(full_name), creator:profiles!tasks_creator_user_id_fkey(full_name)', { count: 'exact' });
       
       // Apply filters
       if (search) {
@@ -77,19 +73,11 @@ export function useTasks() {
       
       // Process the data
       const processedTasks: Task[] = data.map(task => {
-        // Extract profile names
-        const assignedUserName = task.profiles?.full_name;
-        const creatorUserName = task.creator_user_id ? 
-          data.find(t => t.profiles && t.creator_user_id === task.creator_user_id)?.profiles?.full_name : undefined;
-        
-        // Initialize the processed task
-        const processedTask: Task = {
+        return {
           ...task,
-          assigned_user_name: assignedUserName,
-          creator_user_name: creatorUserName,
+          assigned_user_name: task.profiles?.full_name || null,
+          creator_user_name: task.creator?.full_name || null
         };
-        
-        return processedTask;
       });
       
       // Fetch related entity names in separate queries
