@@ -13,8 +13,8 @@ const RelatedEntitiesFields: React.FC = () => {
   const { control } = useFormContext();
   const { leads = [] } = useLeads();
   const { contacts = [] } = useContacts();
-  // Pass empty filters as required by the hook
-  const { fetchOrders } = useOrders(); 
+  // Передаем пустой объект или определенные параметры, в зависимости от требований хука
+  const { fetchOrders } = useOrders({}); 
   const { partners = [] } = usePartners();
   const { customRequests = [] } = useCustomRequests();
   
