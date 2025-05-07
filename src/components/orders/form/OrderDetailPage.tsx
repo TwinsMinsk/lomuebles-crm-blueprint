@@ -90,6 +90,9 @@ const OrderDetailPage: React.FC = () => {
     );
   }
   
+  // Parse orderId from string to number when passing it to OrderForm
+  const orderIdNumber = isEditMode && orderId ? parseInt(orderId, 10) : undefined;
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <PageHeader
@@ -103,7 +106,7 @@ const OrderDetailPage: React.FC = () => {
       />
       
       <OrderForm 
-        orderId={isEditMode && orderId ? parseInt(orderId) : undefined} 
+        orderId={orderIdNumber} 
         defaultValues={order || undefined}
         isEdit={isEditMode} 
       />
