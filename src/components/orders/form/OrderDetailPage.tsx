@@ -13,6 +13,9 @@ const OrderDetailPage: React.FC = () => {
   const isEditMode = orderId !== "new";
   const navigate = useNavigate();
   
+  // Parse orderId from string to number for database operations
+  const orderIdNumber = isEditMode && orderId ? parseInt(orderId, 10) : undefined;
+  
   const [order, setOrder] = useState<OrderFormValues | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(isEditMode);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +29,7 @@ const OrderDetailPage: React.FC = () => {
         const { data, error } = await supabase
           .from("deals_orders")
           .select("*")
-          .eq("deal_order_id", orderId)
+          .eq("deal_order_id", orderIdNumber)
           .single();
           
         if (error) throw error;
@@ -63,7 +66,7 @@ const OrderDetailPage: React.FC = () => {
     };
     
     fetchOrder();
-  }, [orderId, isEditMode]);
+  }, [orderId, isEditMode, orderIdNumber]);
   
   if (isLoading) {
     return (
@@ -89,9 +92,6 @@ const OrderDetailPage: React.FC = () => {
       </div>
     );
   }
-  
-  // Parse orderId from string to number when passing it to OrderForm
-  const orderIdNumber = isEditMode && orderId ? parseInt(orderId, 10) : undefined;
 
   return (
     <div className="container mx-auto py-6 space-y-6">
