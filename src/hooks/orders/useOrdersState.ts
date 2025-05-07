@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useOrders } from "../useOrders";
+import { formatCurrency } from "@/utils/formatters";
 
 export interface OrderFilters {
   search?: string;
@@ -23,7 +24,7 @@ export function useOrdersState() {
   // Filtering state
   const [filters, setFilters] = useState<OrderFilters>({});
 
-  const { fetchOrders, totalCount, formatCurrency, formatDate } = useOrders();
+  const { fetchOrders, totalCount, formatDate } = useOrders();
 
   // Query to fetch orders with current pagination, sorting, and filtering
   const { 
