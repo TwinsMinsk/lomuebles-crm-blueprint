@@ -52,6 +52,7 @@ const OrderDetailPage: React.FC = () => {
             paymentStatus: data.payment_status,
             deliveryAddressFull: data.delivery_address_full,
             notesHistory: data.notes_history,
+            attachedFilesOrderDocs: data.attached_files_order_docs,
             creatorUserId: data.creator_user_id,
             creationDate: data.creation_date,
             closingDate: data.closing_date

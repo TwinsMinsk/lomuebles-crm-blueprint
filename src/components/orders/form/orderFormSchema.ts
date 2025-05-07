@@ -30,11 +30,12 @@ export const orderFormSchema = z.object({
   // Additional information
   deliveryAddressFull: z.string().optional(),
   notesHistory: z.string().optional(),
+  attachedFilesOrderDocs: z.any().optional(),
+  closingDate: z.string().optional().nullable(),
   
   // These will be set automatically, not from form
   creatorUserId: z.string().optional(),
   creationDate: z.string().optional(),
-  closingDate: z.string().optional().nullable(),
 });
 
 export type OrderFormValues = z.infer<typeof orderFormSchema>;
