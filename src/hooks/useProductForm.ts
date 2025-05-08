@@ -76,9 +76,16 @@ export const useProductForm = ({
         if (error) throw error;
         toast.success("Товар успешно обновлен!");
       } else {
-        // Create new product - ensure internal_product_name is set and not optional
+        // Create new product - ensure internal_product_name is explicitly set
         const { error } = await supabase.from("products").insert({
-          ...values, // This includes internal_product_name which is required
+          internal_product_name: values.internal_product_name,
+          internal_sku: values.internal_sku,
+          description: values.description,
+          base_price: values.base_price,
+          category: values.category,
+          is_custom_template: values.is_custom_template,
+          template_image: values.template_image,
+          notes: values.notes,
           creator_user_id: user?.id || null,
         });
 

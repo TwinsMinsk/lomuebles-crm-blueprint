@@ -60,6 +60,6 @@ export const useProducts = ({
   return useQuery({
     queryKey: ["products", { page, limit, searchQuery, category, isCustomTemplate }],
     queryFn: fetchProducts,
-    placeholderData: keepPreviousData => keepPreviousData,
+    placeholderData: previousData => previousData,
   });
 };
