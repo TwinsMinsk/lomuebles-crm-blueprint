@@ -21,7 +21,8 @@ const Companies = React.lazy(() => import('./pages/Companies'));
 const Orders = React.lazy(() => import('./pages/Orders'));
 const OrderDetail = React.lazy(() => import('./pages/OrderDetail'));
 const Products = React.lazy(() => import('./pages/Products'));
-const Suppliers = React.lazy(() => import('./pages/Suppliers')); // New suppliers route
+const Suppliers = React.lazy(() => import('./pages/Suppliers')); 
+const Partners = React.lazy(() => import('./pages/Partners')); // Added partners route
 
 // Auth routes
 const Login = React.lazy(() => import('./pages/auth/Login'));
@@ -69,7 +70,8 @@ function App() {
                   <Route path="orders" element={<Orders />} />
                   <Route path="orders/:orderId" element={<OrderDetail />} />
                   <Route path="products" element={<Products />} />
-                  <Route path="suppliers" element={<Suppliers />} /> {/* Added suppliers route */}
+                  <Route path="suppliers" element={<Suppliers />} />
+                  <Route path="partners" element={<Partners />} /> {/* Added partners route */}
                   <Route path="profile" element={<ProfileSettings />} />
                   <Route path="admin/users" element={<UserManagement />} />
 

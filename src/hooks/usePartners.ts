@@ -1,24 +1,38 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Partner } from "@/types/partner";
 
-export interface Partner {
-  partner_manufacturer_id: number;
-  company_name: string;
-  contact_person: string | null;
-  phone: string | null;
-  email: string | null;
-  specialization: string | null;
+interface UsePartnersOptions {
+  page?: number;
+  limit?: number;
+  searchQuery?: string;
+  specialization?: string | null;
 }
 
-export function usePartners() {
-  const { data: partners, isLoading, error } = useQuery({
-    queryKey: ["partners"],
+export function usePartners(options: UsePartnersOptions = {}) {
+  const { searchQuery, specialization } = options;
+  
+  const { data: partners, isLoading, error, refetch } = useQuery({
+    queryKey: ["partners", { searchQuery, specialization }],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("partners_manufacturers")
-        .select("partner_manufacturer_id, company_name, contact_person, phone, email, specialization")
+        .select("*")
         .order("company_name", { ascending: true });
+
+      // Apply filters
+      if (searchQuery) {
+        query = query.or(
+          `company_name.ilike.%${searchQuery}%,contact_person.ilike.%${searchQuery}%,specialization.ilike.%${searchQuery}%`
+        );
+      }
+
+      if (specialization) {
+        query = query.ilike("specialization", `%${specialization}%`);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         throw error;
@@ -28,5 +42,5 @@ export function usePartners() {
     },
   });
 
-  return { partners: partners || [], isLoading, error };
+  return { partners: partners || [], isLoading, error, refetch };
 }
