@@ -16,14 +16,14 @@ interface PriorityFilterProps {
 const PriorityFilter: React.FC<PriorityFilterProps> = ({ value, onChange }) => {
   return (
     <Select
-      value={value || ""}
-      onValueChange={(value) => onChange(value !== "" ? value : null)}
+      value={value || "all"}
+      onValueChange={(value) => onChange(value !== "all" ? value : null)}
     >
       <SelectTrigger>
         <SelectValue placeholder="Приоритет" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">Все приоритеты</SelectItem>
+        <SelectItem value="all">Все приоритеты</SelectItem>
         <SelectItem value="Низкий">Низкий</SelectItem>
         <SelectItem value="Средний">Средний</SelectItem>
         <SelectItem value="Высокий">Высокий</SelectItem>

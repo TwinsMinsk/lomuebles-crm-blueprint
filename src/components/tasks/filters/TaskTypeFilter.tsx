@@ -16,14 +16,14 @@ interface TaskTypeFilterProps {
 const TaskTypeFilter: React.FC<TaskTypeFilterProps> = ({ value, onChange }) => {
   return (
     <Select
-      value={value || ""}
-      onValueChange={(value) => onChange(value !== "" ? value : null)}
+      value={value || "all"}
+      onValueChange={(value) => onChange(value !== "all" ? value : null)}
     >
       <SelectTrigger>
         <SelectValue placeholder="Тип задачи" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">Все типы</SelectItem>
+        <SelectItem value="all">Все типы</SelectItem>
         <SelectItem value="Звонок">Звонок</SelectItem>
         <SelectItem value="Встреча">Встреча</SelectItem>
         <SelectItem value="Замер">Замер</SelectItem>

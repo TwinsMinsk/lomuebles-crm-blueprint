@@ -33,7 +33,7 @@ const ContactAdditionalFields: React.FC<ContactAdditionalFieldsProps> = ({ form,
             <FormLabel>Связанная компания</FormLabel>
             <Select
               onValueChange={field.onChange}
-              value={field.value?.toString() || ""}
+              value={field.value?.toString() || "none"}
             >
               <FormControl>
                 <SelectTrigger>
@@ -41,7 +41,7 @@ const ContactAdditionalFields: React.FC<ContactAdditionalFieldsProps> = ({ form,
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="null">Не выбрана (частное лицо)</SelectItem>
+                <SelectItem value="none">Не выбрана (частное лицо)</SelectItem>
                 {companies.map((company) => (
                   <SelectItem
                     key={company.company_id}
@@ -65,7 +65,7 @@ const ContactAdditionalFields: React.FC<ContactAdditionalFieldsProps> = ({ form,
             <FormLabel>Ответственный менеджер</FormLabel>
             <Select
               onValueChange={field.onChange}
-              value={field.value || ""}
+              value={field.value || "none"}
             >
               <FormControl>
                 <SelectTrigger>
@@ -73,7 +73,7 @@ const ContactAdditionalFields: React.FC<ContactAdditionalFieldsProps> = ({ form,
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="null">Не назначен</SelectItem>
+                <SelectItem value="none">Не назначен</SelectItem>
                 {users.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.full_name}

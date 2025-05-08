@@ -74,10 +74,13 @@ export function useTaskFilters(
   const handleUserFilterChange = useCallback((value: string) => {
     if (value === "all") {
       handleFilterChange("assignedUserId", null);
+      handleFilterChange("assignedToMe", false);
     } else if (value === "my") {
       handleFilterChange("assignedUserId", user?.id || null);
+      handleFilterChange("assignedToMe", true);
     } else {
       handleFilterChange("assignedUserId", value);
+      handleFilterChange("assignedToMe", false);
     }
   }, [handleFilterChange, user]);
 
