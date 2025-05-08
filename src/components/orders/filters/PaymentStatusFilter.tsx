@@ -25,7 +25,7 @@ export const PaymentStatusFilter: React.FC<PaymentStatusFilterProps> = ({
           <FormLabel>Статус оплаты</FormLabel>
           <Select
             onValueChange={field.onChange}
-            value={field.value}
+            value={field.value || "all"}
             disabled={isLoading}
           >
             <FormControl>
@@ -36,7 +36,7 @@ export const PaymentStatusFilter: React.FC<PaymentStatusFilterProps> = ({
             <SelectContent>
               <SelectItem value="all">Все статусы оплаты</SelectItem>
               {paymentStatuses.map((status) => (
-                <SelectItem key={status} value={status}>{status}</SelectItem>
+                <SelectItem key={status} value={status || "unknown-status"}>{status || "Неизвестный статус"}</SelectItem>
               ))}
             </SelectContent>
           </Select>

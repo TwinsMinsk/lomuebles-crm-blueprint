@@ -26,7 +26,7 @@ export const ManagerFilter: React.FC<ManagerFilterProps> = ({ form, managers, is
           <FormLabel>Ответственный менеджер</FormLabel>
           <Select
             onValueChange={field.onChange}
-            value={field.value}
+            value={field.value || "all"}
             disabled={isLoading}
           >
             <FormControl>
@@ -37,7 +37,7 @@ export const ManagerFilter: React.FC<ManagerFilterProps> = ({ form, managers, is
             <SelectContent>
               <SelectItem value="all">Все менеджеры</SelectItem>
               {managers.map((manager) => (
-                <SelectItem key={manager.id} value={manager.id}>{manager.name}</SelectItem>
+                <SelectItem key={manager.id} value={manager.id || "unknown-manager"}>{manager.name || "Менеджер без имени"}</SelectItem>
               ))}
             </SelectContent>
           </Select>

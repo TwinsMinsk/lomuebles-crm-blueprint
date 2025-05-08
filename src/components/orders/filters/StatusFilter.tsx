@@ -29,7 +29,7 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
           <FormLabel>Текущий статус</FormLabel>
           <Select
             onValueChange={field.onChange}
-            value={field.value}
+            value={field.value || "all"}
             disabled={isLoading || !selectedOrderType}
           >
             <FormControl>
@@ -40,7 +40,7 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
             <SelectContent>
               <SelectItem value="all">Все статусы</SelectItem>
               {statuses.map((status) => (
-                <SelectItem key={status} value={status}>{status}</SelectItem>
+                <SelectItem key={status} value={status || "unknown-status"}>{status || "Неизвестный статус"}</SelectItem>
               ))}
             </SelectContent>
           </Select>

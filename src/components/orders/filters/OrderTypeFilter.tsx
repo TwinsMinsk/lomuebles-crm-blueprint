@@ -27,7 +27,7 @@ export const OrderTypeFilter: React.FC<OrderTypeFilterProps> = ({
           <FormLabel>Тип заказа</FormLabel>
           <Select
             onValueChange={(value) => onOrderTypeChange(value)}
-            value={field.value}
+            value={field.value || "all"}
             disabled={isLoading}
           >
             <FormControl>
@@ -38,7 +38,7 @@ export const OrderTypeFilter: React.FC<OrderTypeFilterProps> = ({
             <SelectContent>
               <SelectItem value="all">Все типы</SelectItem>
               {orderTypes.map((type) => (
-                <SelectItem key={type} value={type}>{type}</SelectItem>
+                <SelectItem key={type} value={type || "unknown-type"}>{type || "Неизвестный тип"}</SelectItem>
               ))}
             </SelectContent>
           </Select>
