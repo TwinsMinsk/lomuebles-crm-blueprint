@@ -13,8 +13,7 @@ const RelatedEntitiesFields: React.FC = () => {
   const { control } = useFormContext();
   const { leads = [] } = useLeads();
   const { contacts = [] } = useContacts();
-  // Передаем пустой объект или определенные параметры, в зависимости от требований хука
-  const { fetchOrders } = useOrders({}); 
+  const { fetchOrders } = useOrders(); // Fixed: No empty object parameter
   const { partners = [] } = usePartners();
   const { customRequests = [] } = useCustomRequests();
   
@@ -31,7 +30,7 @@ const RelatedEntitiesFields: React.FC = () => {
           sortDirection: 'desc',
           filters: {}
         });
-        setOrders(fetchedOrders || []);
+        setOrders(Array.isArray(fetchedOrders) ? fetchedOrders : []);
       } catch (error) {
         console.error("Failed to load orders:", error);
         setOrders([]);
@@ -62,11 +61,16 @@ const RelatedEntitiesFields: React.FC = () => {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="none">Нет</SelectItem>
-                  {leads && leads.map((lead) => (
-                    <SelectItem key={lead.lead_id} value={lead.lead_id?.toString() || "unknown-lead"}>
+                  {leads && leads.length > 0 ? leads.map((lead) => (
+                    <SelectItem 
+                      key={lead.lead_id} 
+                      value={String(lead.lead_id || "unknown")} // Ensure non-empty string value
+                    >
                       {lead.name || "Лид без имени"}
                     </SelectItem>
-                  ))}
+                  )) : (
+                    <SelectItem value="no-leads">Нет доступных лидов</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -91,11 +95,16 @@ const RelatedEntitiesFields: React.FC = () => {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="none">Нет</SelectItem>
-                  {contacts && contacts.map((contact) => (
-                    <SelectItem key={contact.contact_id} value={contact.contact_id?.toString() || "unknown-contact"}>
+                  {contacts && contacts.length > 0 ? contacts.map((contact) => (
+                    <SelectItem 
+                      key={contact.contact_id} 
+                      value={String(contact.contact_id || "unknown")} // Ensure non-empty string value
+                    >
                       {contact.full_name || "Контакт без имени"}
                     </SelectItem>
-                  ))}
+                  )) : (
+                    <SelectItem value="no-contacts">Нет доступных контактов</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -120,11 +129,16 @@ const RelatedEntitiesFields: React.FC = () => {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="none">Нет</SelectItem>
-                  {orders && orders.map((order) => (
-                    <SelectItem key={order.deal_order_id} value={order.deal_order_id?.toString() || "unknown-order"}>
+                  {orders && orders.length > 0 ? orders.map((order) => (
+                    <SelectItem 
+                      key={order.deal_order_id} 
+                      value={String(order.deal_order_id || "unknown")} // Ensure non-empty string value
+                    >
                       {order.order_number || "Заказ без номера"}
                     </SelectItem>
-                  ))}
+                  )) : (
+                    <SelectItem value="no-orders">Нет доступных заказов</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -149,11 +163,16 @@ const RelatedEntitiesFields: React.FC = () => {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="none">Нет</SelectItem>
-                  {partners && partners.map((partner) => (
-                    <SelectItem key={partner.partner_manufacturer_id} value={partner.partner_manufacturer_id?.toString() || "unknown-partner"}>
+                  {partners && partners.length > 0 ? partners.map((partner) => (
+                    <SelectItem 
+                      key={partner.partner_manufacturer_id} 
+                      value={String(partner.partner_manufacturer_id || "unknown")} // Ensure non-empty string value
+                    >
                       {partner.company_name || "Партнер без названия"}
                     </SelectItem>
-                  ))}
+                  )) : (
+                    <SelectItem value="no-partners">Нет доступных партнеров</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -178,11 +197,16 @@ const RelatedEntitiesFields: React.FC = () => {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="none">Нет</SelectItem>
-                  {customRequests && customRequests.map((request) => (
-                    <SelectItem key={request.custom_request_id} value={request.custom_request_id?.toString() || "unknown-request"}>
+                  {customRequests && customRequests.length > 0 ? customRequests.map((request) => (
+                    <SelectItem 
+                      key={request.custom_request_id} 
+                      value={String(request.custom_request_id || "unknown")} // Ensure non-empty string value
+                    >
                       {request.request_name || "Запрос без названия"}
                     </SelectItem>
-                  ))}
+                  )) : (
+                    <SelectItem value="no-requests">Нет доступных запросов</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
               <FormMessage />
