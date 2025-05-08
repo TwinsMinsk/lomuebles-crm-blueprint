@@ -3,12 +3,19 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LeadWithProfile } from "@/components/leads/LeadTableRow";
 
-export const useLeads = () => {
+interface UseLeadsParams {
+  page?: number;
+  pageSize?: number;
+  sortColumn?: string;
+  sortDirection?: 'asc' | 'desc';
+}
+
+export const useLeads = (params?: UseLeadsParams) => {
   const [leads, setLeads] = useState<LeadWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(params?.page || 1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = params?.pageSize || 10;
 
   const fetchLeads = useCallback(async () => {
     setLoading(true);
@@ -30,7 +37,7 @@ export const useLeads = () => {
           profiles:assigned_user_id(full_name)
         `)
         .range((page - 1) * itemsPerPage, page * itemsPerPage - 1)
-        .order("creation_date", { ascending: false });
+        .order(params?.sortColumn || "creation_date", { ascending: (params?.sortDirection || "desc") === "asc" });
 
       if (error) {
         console.error("Error fetching leads:", error);
@@ -67,7 +74,7 @@ export const useLeads = () => {
     } finally {
       setLoading(false);
     }
-  }, [page]);
+  }, [page, itemsPerPage, params?.sortColumn, params?.sortDirection]);
 
   useEffect(() => {
     fetchLeads();
