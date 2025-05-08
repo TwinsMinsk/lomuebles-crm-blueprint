@@ -46,7 +46,8 @@ const AssignmentAndCommentFields: React.FC<AssignmentAndCommentFieldsProps> = ({
             <FormLabel>Ответственный менеджер</FormLabel>
             <Select
               onValueChange={field.onChange}
-              defaultValue={field.value}
+              defaultValue={field.value || "not_assigned"}
+              value={field.value || "not_assigned"}
             >
               <FormControl>
                 <SelectTrigger>
@@ -56,8 +57,8 @@ const AssignmentAndCommentFields: React.FC<AssignmentAndCommentFieldsProps> = ({
               <SelectContent>
                 <SelectItem value="not_assigned">Не назначен</SelectItem>
                 {users.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.full_name || user.id}
+                  <SelectItem key={user.id} value={user.id || "unknown-user"}>
+                    {user.full_name || user.id || "Неизвестный пользователь"}
                   </SelectItem>
                 ))}
               </SelectContent>

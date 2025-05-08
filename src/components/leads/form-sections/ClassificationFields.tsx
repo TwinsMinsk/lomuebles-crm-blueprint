@@ -30,8 +30,8 @@ const ClassificationFields: React.FC<ClassificationFieldsProps> = ({ form }) => 
               </FormControl>
               <SelectContent>
                 {leadSources.map((source) => (
-                  <SelectItem key={source} value={source}>
-                    {source}
+                  <SelectItem key={source} value={source || "unknown-source"}>
+                    {source || "Неизвестный источник"}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -59,8 +59,8 @@ const ClassificationFields: React.FC<ClassificationFieldsProps> = ({ form }) => 
               </FormControl>
               <SelectContent>
                 {clientLanguages.map((language) => (
-                  <SelectItem key={language} value={language}>
-                    {language}
+                  <SelectItem key={language} value={language || "unknown-language"}>
+                    {language || "Неизвестный язык"}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -88,8 +88,8 @@ const ClassificationFields: React.FC<ClassificationFieldsProps> = ({ form }) => 
               </FormControl>
               <SelectContent>
                 {leadStatuses.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {status}
+                  <SelectItem key={status} value={status || "unknown-status"}>
+                    {status || "Неизвестный статус"}
                   </SelectItem>
                 ))}
               </SelectContent>

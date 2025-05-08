@@ -18,8 +18,8 @@ const AssignmentFields: React.FC = () => {
           <FormLabel>Ответственный*</FormLabel>
           <Select
             onValueChange={field.onChange}
-            defaultValue={field.value || ""}
-            value={field.value || ""}
+            defaultValue={field.value || "not_assigned"}
+            value={field.value || "not_assigned"}
           >
             <FormControl>
               <SelectTrigger>

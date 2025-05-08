@@ -87,8 +87,8 @@ const CompanyFilters: React.FC<CompanyFiltersProps> = ({
                   <SelectGroup>
                     <SelectItem value="all">Все отрасли</SelectItem>
                     {industryOptions.map((industry) => (
-                      <SelectItem key={industry.value} value={industry.value}>
-                        {industry.label}
+                      <SelectItem key={industry.value} value={industry.value || "unknown-industry"}>
+                        {industry.label || "Неизвестная отрасль"}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -110,8 +110,8 @@ const CompanyFilters: React.FC<CompanyFiltersProps> = ({
                     <SelectItem value="all">Все менеджеры</SelectItem>
                     <SelectItem value="not_assigned">Не назначен</SelectItem>
                     {users.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.full_name || user.id}
+                      <SelectItem key={user.id} value={user.id || "unknown-user"}>
+                        {user.full_name || user.id || "Неизвестный пользователь"}
                       </SelectItem>
                     ))}
                   </SelectGroup>
