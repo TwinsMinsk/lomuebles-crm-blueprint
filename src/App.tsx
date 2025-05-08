@@ -20,6 +20,7 @@ const Contacts = React.lazy(() => import('./pages/Contacts'));
 const Companies = React.lazy(() => import('./pages/Companies'));
 const Orders = React.lazy(() => import('./pages/Orders'));
 const OrderDetail = React.lazy(() => import('./pages/OrderDetail'));
+const Products = React.lazy(() => import('./pages/Products')); // New products route
 
 // Auth routes
 const Login = React.lazy(() => import('./pages/auth/Login'));
@@ -66,6 +67,7 @@ function App() {
                   <Route path="companies" element={<Companies />} />
                   <Route path="orders" element={<Orders />} />
                   <Route path="orders/:orderId" element={<OrderDetail />} />
+                  <Route path="products" element={<Products />} /> {/* Added products route */}
                   <Route path="profile" element={<ProfileSettings />} />
                   <Route path="admin/users" element={<UserManagement />} />
 
