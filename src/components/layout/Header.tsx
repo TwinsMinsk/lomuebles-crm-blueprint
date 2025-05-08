@@ -51,7 +51,7 @@ const Header = () => {
                   <DropdownMenuSeparator />
                   {userRole && <DropdownMenuItem className="text-gray-500">Роль: {userRole}</DropdownMenuItem>}
                   <DropdownMenuItem asChild>
-                    <Link to="/settings">Мой профиль</Link>
+                    <Link to="/settings">Настройки</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="text-red-500 cursor-pointer">
