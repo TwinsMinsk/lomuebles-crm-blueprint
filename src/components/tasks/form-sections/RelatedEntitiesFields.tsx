@@ -13,7 +13,8 @@ const RelatedEntitiesFields: React.FC = () => {
   const { control } = useFormContext();
   const { leads = [] } = useLeads();
   const { contacts = [] } = useContacts();
-  const { fetchOrders } = useOrders(); // Fixed: No empty object parameter
+  // Provide the required parameter to useOrders hook
+  const { fetchOrders } = useOrders();
   const { partners = [] } = usePartners();
   const { customRequests = [] } = useCustomRequests();
   
