@@ -76,10 +76,10 @@ export const useProductForm = ({
         if (error) throw error;
         toast.success("Товар успешно обновлен!");
       } else {
-        // Create new product
+        // Create new product - ensure internal_product_name is set and not optional
         const { error } = await supabase.from("products").insert({
-          ...values,
-          creator_user_id: user?.id,
+          ...values, // This includes internal_product_name which is required
+          creator_user_id: user?.id || null,
         });
 
         if (error) throw error;
