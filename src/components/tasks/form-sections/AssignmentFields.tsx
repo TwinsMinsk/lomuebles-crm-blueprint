@@ -19,6 +19,7 @@ const AssignmentFields: React.FC = () => {
           <Select
             onValueChange={field.onChange}
             defaultValue={field.value || ""}
+            value={field.value || ""}
           >
             <FormControl>
               <SelectTrigger>
