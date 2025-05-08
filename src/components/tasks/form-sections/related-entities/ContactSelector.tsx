@@ -7,7 +7,12 @@ import { useContacts } from "@/hooks/useContacts";
 
 const ContactSelector: React.FC = () => {
   const { control } = useFormContext();
-  const { contacts = [] } = useContacts();
+  const { contacts = [] } = useContacts({
+    page: 1,
+    pageSize: 100,
+    sortColumn: 'creation_date',
+    sortDirection: 'desc'
+  });
 
   return (
     <FormField

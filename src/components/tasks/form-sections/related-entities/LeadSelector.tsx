@@ -7,7 +7,12 @@ import { useLeads } from "@/hooks/useLeads";
 
 const LeadSelector: React.FC = () => {
   const { control } = useFormContext();
-  const { leads = [] } = useLeads();
+  const { leads = [] } = useLeads({
+    page: 1,
+    pageSize: 100,
+    sortColumn: 'creation_date',
+    sortDirection: 'desc'
+  });
 
   return (
     <FormField
