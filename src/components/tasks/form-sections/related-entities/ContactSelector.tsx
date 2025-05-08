@@ -35,9 +35,9 @@ const ContactSelector: React.FC = () => {
               {contacts && contacts.length > 0 ? contacts.map((contact) => (
                 <SelectItem 
                   key={contact.contact_id} 
-                  value={String(contact.contact_id || "unknown")}
+                  value={String(contact.contact_id)}
                 >
-                  {contact.full_name || "Контакт без имени"}
+                  {contact.full_name || `Контакт #${contact.contact_id}`}
                 </SelectItem>
               )) : (
                 <SelectItem value="no-contacts-available">Нет доступных контактов</SelectItem>

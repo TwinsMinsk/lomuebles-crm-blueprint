@@ -35,9 +35,9 @@ const LeadSelector: React.FC = () => {
               {leads && leads.length > 0 ? leads.map((lead) => (
                 <SelectItem 
                   key={lead.lead_id} 
-                  value={String(lead.lead_id || "unknown")}
+                  value={String(lead.lead_id)}
                 >
-                  {lead.name || "Лид без имени"}
+                  {lead.name || `Лид #${lead.lead_id}`}
                 </SelectItem>
               )) : (
                 <SelectItem value="no-leads-available">Нет доступных лидов</SelectItem>

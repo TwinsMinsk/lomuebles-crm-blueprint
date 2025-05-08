@@ -30,9 +30,9 @@ const CustomRequestSelector: React.FC = () => {
               {customRequests && customRequests.length > 0 ? customRequests.map((request) => (
                 <SelectItem 
                   key={request.custom_request_id} 
-                  value={String(request.custom_request_id || "unknown")}
+                  value={String(request.custom_request_id)}
                 >
-                  {request.request_name || "Запрос без названия"}
+                  {request.request_name || `Запрос #${request.custom_request_id}`}
                 </SelectItem>
               )) : (
                 <SelectItem value="no-requests-available">Нет доступных запросов</SelectItem>

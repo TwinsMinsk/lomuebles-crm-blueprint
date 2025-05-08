@@ -40,7 +40,12 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
             <SelectContent>
               <SelectItem value="all">Все статусы</SelectItem>
               {statuses.map((status) => (
-                <SelectItem key={status} value={status || "unknown-status"}>{status || "Неизвестный статус"}</SelectItem>
+                <SelectItem 
+                  key={status || "unknown-status"} 
+                  value={status || "unknown-status"}
+                >
+                  {status || "Неизвестный статус"}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

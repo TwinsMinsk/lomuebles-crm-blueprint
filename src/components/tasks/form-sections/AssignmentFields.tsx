@@ -18,7 +18,7 @@ const AssignmentFields: React.FC = () => {
           <FormLabel>Ответственный*</FormLabel>
           <Select
             onValueChange={field.onChange}
-            defaultValue={field.value}
+            defaultValue={field.value || ""}
           >
             <FormControl>
               <SelectTrigger>
@@ -27,10 +27,13 @@ const AssignmentFields: React.FC = () => {
             </FormControl>
             <SelectContent>
               {users?.map((user) => (
-                <SelectItem key={user.id} value={user.id}>
-                  {user.full_name || user.email}
+                <SelectItem key={user.id} value={user.id || "unknown-user"}>
+                  {user.full_name || user.email || `Пользователь ${user.id}`}
                 </SelectItem>
               ))}
+              {(!users || users.length === 0) && (
+                <SelectItem value="no-users-available">Нет доступных пользователей</SelectItem>
+              )}
             </SelectContent>
           </Select>
           <FormMessage />

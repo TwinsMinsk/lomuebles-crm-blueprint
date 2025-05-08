@@ -30,9 +30,9 @@ const OrderSelector: React.FC = () => {
               {orders && orders.length > 0 ? orders.map((order) => (
                 <SelectItem 
                   key={order.deal_order_id} 
-                  value={String(order.deal_order_id || "unknown")}
+                  value={String(order.deal_order_id)}
                 >
-                  {order.order_number || "Заказ без номера"}
+                  {order.order_number || `Заказ #${order.deal_order_id}`}
                 </SelectItem>
               )) : (
                 <SelectItem value="no-orders-available">Нет доступных заказов</SelectItem>

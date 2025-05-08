@@ -36,7 +36,12 @@ export const PaymentStatusFilter: React.FC<PaymentStatusFilterProps> = ({
             <SelectContent>
               <SelectItem value="all">Все статусы оплаты</SelectItem>
               {paymentStatuses.map((status) => (
-                <SelectItem key={status} value={status || "unknown-status"}>{status || "Неизвестный статус"}</SelectItem>
+                <SelectItem 
+                  key={status || "unknown-status"} 
+                  value={status || "unknown-status"}
+                >
+                  {status || "Неизвестный статус"}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

@@ -20,7 +20,7 @@ const ClassificationFields: React.FC<ClassificationFieldsProps> = ({ form }) => 
             <FormLabel>Источник лида</FormLabel>
             <Select
               onValueChange={field.onChange}
-              defaultValue={field.value}
+              defaultValue={field.value || "website"}
             >
               <FormControl>
                 <SelectTrigger>
@@ -48,7 +48,7 @@ const ClassificationFields: React.FC<ClassificationFieldsProps> = ({ form }) => 
             <FormLabel>Язык клиента *</FormLabel>
             <Select
               onValueChange={field.onChange}
-              defaultValue={field.value}
+              defaultValue={field.value || "ES"}
             >
               <FormControl>
                 <SelectTrigger>
@@ -76,7 +76,7 @@ const ClassificationFields: React.FC<ClassificationFieldsProps> = ({ form }) => 
             <FormLabel>Статус лида</FormLabel>
             <Select
               onValueChange={field.onChange}
-              defaultValue={field.value}
+              defaultValue={field.value || "new"}
             >
               <FormControl>
                 <SelectTrigger>

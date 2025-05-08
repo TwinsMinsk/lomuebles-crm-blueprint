@@ -38,7 +38,12 @@ export const OrderTypeFilter: React.FC<OrderTypeFilterProps> = ({
             <SelectContent>
               <SelectItem value="all">Все типы</SelectItem>
               {orderTypes.map((type) => (
-                <SelectItem key={type} value={type || "unknown-type"}>{type || "Неизвестный тип"}</SelectItem>
+                <SelectItem 
+                  key={type || "unknown-type"} 
+                  value={type || "unknown-type"}
+                >
+                  {type || "Неизвестный тип"}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

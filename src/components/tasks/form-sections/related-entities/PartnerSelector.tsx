@@ -30,9 +30,9 @@ const PartnerSelector: React.FC = () => {
               {partners && partners.length > 0 ? partners.map((partner) => (
                 <SelectItem 
                   key={partner.partner_manufacturer_id} 
-                  value={String(partner.partner_manufacturer_id || "unknown")}
+                  value={String(partner.partner_manufacturer_id)}
                 >
-                  {partner.company_name || "Партнер без названия"}
+                  {partner.company_name || `Партнер #${partner.partner_manufacturer_id}`}
                 </SelectItem>
               )) : (
                 <SelectItem value="no-partners-available">Нет доступных партнеров</SelectItem>
