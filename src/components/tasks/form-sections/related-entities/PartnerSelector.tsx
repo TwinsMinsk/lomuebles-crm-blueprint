@@ -35,7 +35,7 @@ const PartnerSelector: React.FC = () => {
                   {partner.company_name || "Партнер без названия"}
                 </SelectItem>
               )) : (
-                <SelectItem value="no-partners">Нет доступных партнеров</SelectItem>
+                <SelectItem value="no-partners-available">Нет доступных партнеров</SelectItem>
               )}
             </SelectContent>
           </Select>

@@ -40,7 +40,7 @@ const LeadSelector: React.FC = () => {
                   {lead.name || "Лид без имени"}
                 </SelectItem>
               )) : (
-                <SelectItem value="no-leads">Нет доступных лидов</SelectItem>
+                <SelectItem value="no-leads-available">Нет доступных лидов</SelectItem>
               )}
             </SelectContent>
           </Select>

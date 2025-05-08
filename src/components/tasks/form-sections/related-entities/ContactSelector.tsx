@@ -40,7 +40,7 @@ const ContactSelector: React.FC = () => {
                   {contact.full_name || "Контакт без имени"}
                 </SelectItem>
               )) : (
-                <SelectItem value="no-contacts">Нет доступных контактов</SelectItem>
+                <SelectItem value="no-contacts-available">Нет доступных контактов</SelectItem>
               )}
             </SelectContent>
           </Select>

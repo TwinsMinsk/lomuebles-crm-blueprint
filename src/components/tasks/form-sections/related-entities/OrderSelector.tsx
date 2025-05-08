@@ -35,7 +35,7 @@ const OrderSelector: React.FC = () => {
                   {order.order_number || "Заказ без номера"}
                 </SelectItem>
               )) : (
-                <SelectItem value="no-orders">Нет доступных заказов</SelectItem>
+                <SelectItem value="no-orders-available">Нет доступных заказов</SelectItem>
               )}
             </SelectContent>
           </Select>

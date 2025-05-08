@@ -35,7 +35,7 @@ const CustomRequestSelector: React.FC = () => {
                   {request.request_name || "Запрос без названия"}
                 </SelectItem>
               )) : (
-                <SelectItem value="no-requests">Нет доступных запросов</SelectItem>
+                <SelectItem value="no-requests-available">Нет доступных запросов</SelectItem>
               )}
             </SelectContent>
           </Select>
