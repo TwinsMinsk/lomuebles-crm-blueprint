@@ -68,7 +68,7 @@ const NavigationMenu: React.FC<NavigationMenuProps> = ({ onItemClick }) => {
   
   return (
     <nav className={cn(
-      "flex flex-col md:flex-row md:items-center",
+      "flex flex-col md:flex-row md:items-center bg-white md:bg-transparent",
       isMobile ? "w-full" : ""
     )}>
       <ul className={cn(
@@ -92,7 +92,7 @@ const NavigationMenu: React.FC<NavigationMenuProps> = ({ onItemClick }) => {
                   isActive 
                     ? "text-blue-600 font-medium" 
                     : "text-gray-700 hover:text-blue-600",
-                  isMobile ? "py-2" : ""
+                  isMobile ? "py-2 px-2 bg-white w-full block" : ""
                 )}
                 onClick={onItemClick}
               >

@@ -67,7 +67,7 @@ const SidebarNavigation = () => {
   };
 
   return (
-    <SidebarGroup>
+    <SidebarGroup className="bg-white">
       <SidebarGroupLabel>Меню</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
@@ -85,6 +85,7 @@ const SidebarNavigation = () => {
                   isActive={isActive}
                   asChild
                   tooltip={item.label}
+                  className="bg-white"
                 >
                   <Link to={item.path}>
                     <item.icon />

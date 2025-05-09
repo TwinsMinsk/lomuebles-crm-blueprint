@@ -17,7 +17,7 @@ const Layout = () => {
         <Header />
         <div className="flex flex-1">
           <Sidebar>
-            <SidebarContent>
+            <SidebarContent className="bg-white">
               <SidebarNavigation />
             </SidebarContent>
           </Sidebar>
