@@ -74,7 +74,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
           <Button 
             type="submit" 
             disabled={loading}
-            onClick={form.handleSubmit(onSubmit)}
+            onClick={() => form.handleSubmit(onSubmit)()}
           >
             {loading ? "Сохранение..." : "Сохранить"}
           </Button>

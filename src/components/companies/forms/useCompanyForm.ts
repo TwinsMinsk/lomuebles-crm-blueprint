@@ -85,7 +85,7 @@ export const useCompanyForm = ({ company, onSuccess, onClose }: UseCompanyFormPr
 
   return {
     form,
-    onSubmit: form.handleSubmit(onSubmit),
+    onSubmit,
     isEditing,
   };
 };

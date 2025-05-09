@@ -56,7 +56,7 @@ const CompanyFormModal: React.FC<CompanyFormModalProps> = ({
 
         <ScrollArea className="max-h-[calc(85vh-130px)] px-6">
           <Form {...form}>
-            <form onSubmit={onSubmit} className="space-y-4 py-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
               <CompanyBasicInfoFields form={form} />
               <CompanyContactFields form={form} />
               <CompanyAddressField form={form} />
@@ -70,7 +70,7 @@ const CompanyFormModal: React.FC<CompanyFormModalProps> = ({
           <Button variant="outline" type="button" onClick={onClose}>
             Отмена
           </Button>
-          <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
+          <Button type="submit" onClick={() => form.handleSubmit(onSubmit)()}>
             Сохранить
           </Button>
         </DialogFooter>

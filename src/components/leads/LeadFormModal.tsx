@@ -81,7 +81,7 @@ const LeadFormModal: React.FC<LeadFormModalProps> = ({
           <Button 
             type="submit" 
             disabled={loading}
-            onClick={form.handleSubmit(onSubmit)}
+            onClick={() => form.handleSubmit(onSubmit)()}
           >
             {loading ? "Сохранение..." : "Сохранить"}
           </Button>
