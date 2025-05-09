@@ -42,7 +42,7 @@ const CompanyFormModal: React.FC<CompanyFormModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-hidden p-0">
+      <DialogContent className="sm:max-w-xl flex flex-col max-h-[85vh] p-0">
         <DialogHeader className="px-6 pt-6">
           <DialogTitle>
             {isEditing ? "Редактирование компании" : "Добавление компании"}
@@ -54,7 +54,7 @@ const CompanyFormModal: React.FC<CompanyFormModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[calc(85vh-130px)] px-6">
+        <ScrollArea className="flex-1 px-6 overflow-y-auto">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
               <CompanyBasicInfoFields form={form} />
@@ -66,7 +66,7 @@ const CompanyFormModal: React.FC<CompanyFormModalProps> = ({
           </Form>
         </ScrollArea>
 
-        <DialogFooter className="px-6 py-4 border-t">
+        <DialogFooter className="px-6 py-4 border-t mt-auto">
           <Button variant="outline" type="button" onClick={onClose}>
             Отмена
           </Button>

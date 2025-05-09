@@ -38,7 +38,7 @@ const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-hidden p-0">
+      <DialogContent className="sm:max-w-[600px] flex flex-col max-h-[85vh] p-0">
         <DialogHeader className="px-6 pt-6">
           <DialogTitle>
             {supplier ? "Редактировать поставщика" : "Добавить нового поставщика"}
@@ -48,7 +48,7 @@ const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[calc(85vh-130px)] px-6">
+        <ScrollArea className="flex-1 px-6 overflow-y-auto">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -66,7 +66,7 @@ const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
           </Form>
         </ScrollArea>
 
-        <DialogFooter className="px-6 py-4 border-t">
+        <DialogFooter className="px-6 py-4 border-t mt-auto">
           <Button
             type="button"
             variant="outline"
@@ -78,7 +78,7 @@ const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
           <Button 
             type="submit" 
             disabled={loading}
-            onClick={form.handleSubmit(onSubmit)}
+            onClick={() => form.handleSubmit(onSubmit)()}
           >
             {loading ? "Сохранение..." : "Сохранить"}
           </Button>

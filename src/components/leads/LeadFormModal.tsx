@@ -41,7 +41,7 @@ const LeadFormModal: React.FC<LeadFormModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-hidden p-0">
+      <DialogContent className="sm:max-w-[500px] flex flex-col max-h-[85vh] p-0">
         <DialogHeader className="px-6 pt-6">
           <DialogTitle>
             {lead ? "Редактировать лид" : "Добавить новый лид"}
@@ -51,7 +51,7 @@ const LeadFormModal: React.FC<LeadFormModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[calc(85vh-130px)] px-6">
+        <ScrollArea className="flex-1 px-6 overflow-y-auto">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -69,7 +69,7 @@ const LeadFormModal: React.FC<LeadFormModalProps> = ({
           </Form>
         </ScrollArea>
 
-        <DialogFooter className="px-6 py-4 border-t">
+        <DialogFooter className="px-6 py-4 border-t mt-auto">
           <Button
             type="button"
             variant="outline"
