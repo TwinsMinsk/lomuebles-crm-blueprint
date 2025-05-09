@@ -17,6 +17,7 @@ import CompanyContactFields from "./forms/CompanyContactFields";
 import CompanyAddressField from "./forms/CompanyAddressField";
 import CompanyClassificationFields from "./forms/CompanyClassificationFields";
 import CompanyNotesField from "./forms/CompanyNotesField";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface CompanyFormModalProps {
   company?: Company | null;
@@ -41,8 +42,8 @@ const CompanyFormModal: React.FC<CompanyFormModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-hidden p-0">
+        <DialogHeader className="px-6 pt-6">
           <DialogTitle>
             {isEditing ? "Редактирование компании" : "Добавление компании"}
           </DialogTitle>
@@ -53,22 +54,26 @@ const CompanyFormModal: React.FC<CompanyFormModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={onSubmit} className="space-y-4">
-            <CompanyBasicInfoFields form={form} />
-            <CompanyContactFields form={form} />
-            <CompanyAddressField form={form} />
-            <CompanyClassificationFields form={form} users={users} />
-            <CompanyNotesField form={form} />
+        <ScrollArea className="max-h-[calc(85vh-130px)] px-6">
+          <Form {...form}>
+            <form onSubmit={onSubmit} className="space-y-4 py-4">
+              <CompanyBasicInfoFields form={form} />
+              <CompanyContactFields form={form} />
+              <CompanyAddressField form={form} />
+              <CompanyClassificationFields form={form} users={users} />
+              <CompanyNotesField form={form} />
+            </form>
+          </Form>
+        </ScrollArea>
 
-            <DialogFooter>
-              <Button variant="outline" type="button" onClick={onClose}>
-                Отмена
-              </Button>
-              <Button type="submit">Сохранить</Button>
-            </DialogFooter>
-          </form>
-        </Form>
+        <DialogFooter className="px-6 py-4 border-t">
+          <Button variant="outline" type="button" onClick={onClose}>
+            Отмена
+          </Button>
+          <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
+            Сохранить
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

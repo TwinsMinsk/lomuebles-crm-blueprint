@@ -15,6 +15,7 @@ import { usePartnerForm } from "@/hooks/usePartnerForm";
 import PartnerBasicInfoFields from "./form-sections/PartnerBasicInfoFields";
 import PartnerContactFields from "./form-sections/PartnerContactFields";
 import PartnerBusinessFields from "./form-sections/PartnerBusinessFields";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface PartnerFormModalProps {
   isOpen: boolean;
@@ -37,8 +38,8 @@ const PartnerFormModal: React.FC<PartnerFormModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-hidden p-0">
+        <DialogHeader className="px-6 pt-6">
           <DialogTitle>
             {partner ? "Редактировать партнера" : "Добавить нового партнера"}
           </DialogTitle>
@@ -47,35 +48,41 @@ const PartnerFormModal: React.FC<PartnerFormModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 py-4"
+        <ScrollArea className="max-h-[calc(85vh-130px)] px-6">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-6 py-4"
+            >
+              {/* Basic Information */}
+              <PartnerBasicInfoFields form={form} />
+
+              {/* Contact Information */}
+              <PartnerContactFields form={form} />
+
+              {/* Business Information */}
+              <PartnerBusinessFields form={form} />
+            </form>
+          </Form>
+        </ScrollArea>
+
+        <DialogFooter className="px-6 py-4 border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={loading}
           >
-            {/* Basic Information */}
-            <PartnerBasicInfoFields form={form} />
-
-            {/* Contact Information */}
-            <PartnerContactFields form={form} />
-
-            {/* Business Information */}
-            <PartnerBusinessFields form={form} />
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                disabled={loading}
-              >
-                Отмена
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Сохранение..." : "Сохранить"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+            Отмена
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={loading}
+            onClick={form.handleSubmit(onSubmit)}
+          >
+            {loading ? "Сохранение..." : "Сохранить"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

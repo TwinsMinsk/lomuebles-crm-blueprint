@@ -14,6 +14,7 @@ import { Product } from "@/types/product";
 import { useProductForm } from "@/hooks/useProductForm";
 import ProductBasicInfoFields from "./form-sections/ProductBasicInfoFields";
 import ProductDetailsFields from "./form-sections/ProductDetailsFields";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -36,8 +37,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-hidden p-0">
+        <DialogHeader className="px-6 pt-6">
           <DialogTitle>
             {product ? "Редактировать товар" : "Добавить новый товар"}
           </DialogTitle>
@@ -46,32 +47,38 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 py-4"
+        <ScrollArea className="max-h-[calc(85vh-130px)] px-6">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-6 py-4"
+            >
+              {/* Basic Information */}
+              <ProductBasicInfoFields form={form} />
+
+              {/* Additional Details */}
+              <ProductDetailsFields form={form} />
+            </form>
+          </Form>
+        </ScrollArea>
+
+        <DialogFooter className="px-6 py-4 border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={loading}
           >
-            {/* Basic Information */}
-            <ProductBasicInfoFields form={form} />
-
-            {/* Additional Details */}
-            <ProductDetailsFields form={form} />
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                disabled={loading}
-              >
-                Отмена
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Сохранение..." : "Сохранить"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+            Отмена
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={loading}
+            onClick={form.handleSubmit(onSubmit)}
+          >
+            {loading ? "Сохранение..." : "Сохранить"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

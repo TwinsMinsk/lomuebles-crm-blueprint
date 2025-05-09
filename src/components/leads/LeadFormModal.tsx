@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Import form sections
 import BasicInfoFields from "./form-sections/BasicInfoFields";
@@ -40,8 +41,8 @@ const LeadFormModal: React.FC<LeadFormModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-hidden p-0">
+        <DialogHeader className="px-6 pt-6">
           <DialogTitle>
             {lead ? "Редактировать лид" : "Добавить новый лид"}
           </DialogTitle>
@@ -50,35 +51,41 @@ const LeadFormModal: React.FC<LeadFormModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 py-4"
+        <ScrollArea className="max-h-[calc(85vh-130px)] px-6">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 py-4"
+            >
+              {/* Basic Information */}
+              <BasicInfoFields form={form} />
+
+              {/* Classification Information */}
+              <ClassificationFields form={form} />
+
+              {/* Assignment and Comment */}
+              <AssignmentAndCommentFields form={form} users={users} />
+            </form>
+          </Form>
+        </ScrollArea>
+
+        <DialogFooter className="px-6 py-4 border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={loading}
           >
-            {/* Basic Information */}
-            <BasicInfoFields form={form} />
-
-            {/* Classification Information */}
-            <ClassificationFields form={form} />
-
-            {/* Assignment and Comment */}
-            <AssignmentAndCommentFields form={form} users={users} />
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                disabled={loading}
-              >
-                Отмена
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Сохранение..." : "Сохранить"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+            Отмена
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={loading}
+            onClick={form.handleSubmit(onSubmit)}
+          >
+            {loading ? "Сохранение..." : "Сохранить"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

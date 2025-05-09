@@ -15,6 +15,7 @@ import { useSupplierForm } from "@/hooks/useSupplierForm";
 import SupplierBasicInfoFields from "./form-sections/SupplierBasicInfoFields";
 import SupplierContactFields from "./form-sections/SupplierContactFields";
 import SupplierBusinessFields from "./form-sections/SupplierBusinessFields";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SupplierFormModalProps {
   isOpen: boolean;
@@ -37,8 +38,8 @@ const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-hidden p-0">
+        <DialogHeader className="px-6 pt-6">
           <DialogTitle>
             {supplier ? "Редактировать поставщика" : "Добавить нового поставщика"}
           </DialogTitle>
@@ -47,35 +48,41 @@ const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 py-4"
+        <ScrollArea className="max-h-[calc(85vh-130px)] px-6">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-6 py-4"
+            >
+              {/* Basic Information */}
+              <SupplierBasicInfoFields form={form} />
+
+              {/* Contact Information */}
+              <SupplierContactFields form={form} />
+
+              {/* Business Information */}
+              <SupplierBusinessFields form={form} />
+            </form>
+          </Form>
+        </ScrollArea>
+
+        <DialogFooter className="px-6 py-4 border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={loading}
           >
-            {/* Basic Information */}
-            <SupplierBasicInfoFields form={form} />
-
-            {/* Contact Information */}
-            <SupplierContactFields form={form} />
-
-            {/* Business Information */}
-            <SupplierBusinessFields form={form} />
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                disabled={loading}
-              >
-                Отмена
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Сохранение..." : "Сохранить"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+            Отмена
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={loading}
+            onClick={form.handleSubmit(onSubmit)}
+          >
+            {loading ? "Сохранение..." : "Сохранить"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
