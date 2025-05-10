@@ -40,7 +40,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   // Get the current value from form
   const currentValue = form.watch(fieldName);
   
-  // Ensure options is an array to prevent iteration errors
+  // Ensure options is ALWAYS an array to prevent iteration errors
   const safeOptions = Array.isArray(options) ? options : [];
   
   // Filter options based on search query if needed
@@ -60,7 +60,8 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
       currentValue,
       selectedOption: selectedOption || "none",
       isSearchActive: !!searchQuery,
-      filteredOptionsCount: filteredOptions.length
+      filteredOptionsCount: filteredOptions.length,
+      options: safeOptions // Log the actual options array
     });
   }, [fieldName, safeOptions.length, currentValue, selectedOption, searchQuery, filteredOptions.length]);
 

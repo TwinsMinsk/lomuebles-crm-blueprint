@@ -15,8 +15,9 @@ const ContactSelector: React.FC<ContactSelectorProps> = ({ form, contacts = [], 
   useEffect(() => {
     console.log("ContactSelector rendered with:", {
       contactsLength: contacts?.length || 0,
-      firstContact: contacts?.[0],
-      isLoading
+      firstContact: contacts?.[0] || "none",
+      isLoading,
+      contactsArray: contacts // Log the actual contacts array
     });
   }, [contacts, isLoading]);
 
