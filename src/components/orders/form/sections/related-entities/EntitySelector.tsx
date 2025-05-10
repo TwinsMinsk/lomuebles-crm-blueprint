@@ -76,7 +76,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
                   {safeOptions.map((option) => (
                     <CommandItem
                       key={option.id}
-                      value={option.name}
+                      value={String(option.name)} // Ensure value is a string
                       onSelect={() => {
                         form.setValue(fieldName as any, option.id);
                       }}

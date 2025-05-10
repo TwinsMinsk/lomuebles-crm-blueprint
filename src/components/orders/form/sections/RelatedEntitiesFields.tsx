@@ -20,20 +20,40 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Associated Contact (required) */}
-      <ContactSelector form={form} contacts={contacts} isLoading={isLoading} />
+      <ContactSelector 
+        form={form} 
+        contacts={Array.isArray(contacts) ? contacts : []} 
+        isLoading={isLoading} 
+      />
 
       {/* Associated Company (optional) */}
-      <CompanySelector form={form} companies={companies} isLoading={isLoading} />
+      <CompanySelector 
+        form={form} 
+        companies={Array.isArray(companies) ? companies : []} 
+        isLoading={isLoading} 
+      />
 
       {/* Source Lead (optional) */}
-      <LeadSelector form={form} leads={leads} isLoading={isLoading} />
+      <LeadSelector 
+        form={form} 
+        leads={Array.isArray(leads) ? leads : []} 
+        isLoading={isLoading} 
+      />
 
       {/* Assigned Manager (optional) */}
-      <ManagerSelector form={form} managers={managers} isLoading={isLoading} />
+      <ManagerSelector 
+        form={form} 
+        managers={Array.isArray(managers) ? managers : []} 
+        isLoading={isLoading} 
+      />
 
       {/* Partner/Manufacturer - only visible when orderType is "Мебель на заказ" */}
       {orderType === "Мебель на заказ" && (
-        <PartnerSelector form={form} partners={partners} isLoading={isLoading} />
+        <PartnerSelector 
+          form={form} 
+          partners={Array.isArray(partners) ? partners : []} 
+          isLoading={isLoading} 
+        />
       )}
     </div>
   );
