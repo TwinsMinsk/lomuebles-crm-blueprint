@@ -36,7 +36,7 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
       try {
         console.log("Fetching related entities data...");
         
-        // Function to safely fetch data and handle errors - using typed table names directly
+        // Function to safely fetch contacts and handle errors
         const fetchContacts = async (): Promise<EntityOption[]> => {
           try {
             console.log("Fetching contacts...");
@@ -61,6 +61,7 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
           }
         };
 
+        // Function to safely fetch companies and handle errors
         const fetchCompanies = async (): Promise<EntityOption[]> => {
           try {
             console.log("Fetching companies...");
@@ -85,6 +86,7 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
           }
         };
 
+        // Function to safely fetch leads and handle errors
         const fetchLeads = async (): Promise<EntityOption[]> => {
           try {
             console.log("Fetching leads...");
@@ -109,6 +111,7 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
           }
         };
 
+        // Function to safely fetch managers and handle errors
         const fetchManagers = async (): Promise<EntityOption[]> => {
           try {
             console.log("Fetching managers...");
@@ -133,6 +136,7 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
           }
         };
 
+        // Function to safely fetch partners and handle errors
         const fetchPartners = async (): Promise<EntityOption[]> => {
           try {
             console.log("Fetching partners...");

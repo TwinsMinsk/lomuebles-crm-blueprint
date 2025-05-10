@@ -44,7 +44,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   const safeOptions = Array.isArray(options) ? options : [];
   
   // Filter options based on search query if needed
-  const filteredOptions = searchQuery && safeOptions.length > 0
+  const filteredOptions = safeOptions.length > 0 && searchQuery
     ? safeOptions.filter(option => 
         option.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
@@ -122,6 +122,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
                         placeholder={`Поиск ${placeholder.toLowerCase()}...`} 
                         onValueChange={setSearchQuery}
                         value={searchQuery}
+                        className="h-9"
                       />
                       <CommandGroup>
                         {filteredOptions.map((option) => (
