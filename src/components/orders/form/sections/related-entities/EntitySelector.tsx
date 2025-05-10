@@ -28,14 +28,14 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   form,
   fieldName,
   label,
-  options = [], // Provide default empty array to prevent undefined
+  options = [], // Default to empty array
   placeholder,
   emptyMessage,
   isLoading
 }) => {
   const field = form.watch(fieldName);
   
-  // Ensure options is always an array
+  // Double ensure options is an array for safety
   const safeOptions = Array.isArray(options) ? options : [];
 
   return (

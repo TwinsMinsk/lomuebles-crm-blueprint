@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -17,6 +16,7 @@ export interface RelatedEntitiesData {
 }
 
 export const useRelatedEntitiesData = (): RelatedEntitiesData => {
+  // Initialize all data states with empty arrays to avoid undefined
   const [contacts, setContacts] = useState<EntityOption[]>([]);
   const [companies, setCompanies] = useState<EntityOption[]>([]);
   const [leads, setLeads] = useState<EntityOption[]>([]);
@@ -36,12 +36,11 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
         
         if (contactsError) {
           console.error("Error fetching contacts:", contactsError);
-          setContacts([]);
         } else {
-          setContacts(contactsData?.map(contact => ({
+          setContacts((contactsData || []).map(contact => ({
             id: contact.contact_id,
             name: contact.full_name || `Клиент #${contact.contact_id}`
-          })) || []);
+          })));
         }
         
         // Fetch companies
@@ -52,12 +51,11 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
         
         if (companiesError) {
           console.error("Error fetching companies:", companiesError);
-          setCompanies([]);
         } else {
-          setCompanies(companiesData?.map(company => ({
+          setCompanies((companiesData || []).map(company => ({
             id: company.company_id,
             name: company.company_name || `Компания #${company.company_id}`
-          })) || []);
+          })));
         }
         
         // Fetch leads
@@ -68,12 +66,11 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
         
         if (leadsError) {
           console.error("Error fetching leads:", leadsError);
-          setLeads([]);
         } else {
-          setLeads(leadsData?.map(lead => ({
+          setLeads((leadsData || []).map(lead => ({
             id: lead.lead_id,
             name: lead.name || `Лид #${lead.lead_id}`
-          })) || []);
+          })));
         }
         
         // Fetch managers
@@ -84,12 +81,11 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
         
         if (managersError) {
           console.error("Error fetching managers:", managersError);
-          setManagers([]);
         } else {
-          setManagers(managersData?.map(manager => ({
+          setManagers((managersData || []).map(manager => ({
             id: manager.id,
-            name: manager.full_name || manager.id || `Менеджер #${manager.id}`
-          })) || []);
+            name: manager.full_name || `Менеджер #${manager.id}`
+          })));
         }
         
         // Fetch partners/manufacturers
@@ -100,22 +96,16 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
         
         if (partnersError) {
           console.error("Error fetching partners:", partnersError);
-          setPartners([]);
         } else {
-          setPartners(partnersData?.map(partner => ({
+          setPartners((partnersData || []).map(partner => ({
             id: partner.partner_manufacturer_id,
             name: partner.company_name || `Партнер #${partner.partner_manufacturer_id}`
-          })) || []);
+          })));
         }
         
       } catch (error) {
         console.error("Error fetching related data:", error);
-        // Ensure all states have default empty arrays in case of errors
-        setContacts([]);
-        setCompanies([]);
-        setLeads([]);
-        setManagers([]);
-        setPartners([]);
+        // We keep arrays initialized as empty above, so no need to reset them here
       } finally {
         setIsLoading(false);
       }
