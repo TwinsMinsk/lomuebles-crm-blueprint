@@ -40,7 +40,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   // Get the current value from form
   const currentValue = form.watch(fieldName);
   
-  // Always ensure options is an array to prevent iteration errors
+  // Ensure options is an array to prevent iteration errors
   const safeOptions = Array.isArray(options) ? options : [];
   
   // Filter options based on search query if needed
@@ -53,17 +53,13 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   // Find the selected option
   const selectedOption = safeOptions.find(option => option.id === currentValue);
   
-  // Cleanup when component unmounts to prevent React state updates on unmounted components
+  // Log for debugging
   useEffect(() => {
+    console.log(`EntitySelector ${fieldName} mounted with ${safeOptions.length} options, current value:`, currentValue);
     return () => {
-      setOpen(false);
+      console.log(`EntitySelector ${fieldName} unmounted`);
     };
-  }, []);
-
-  // Close popover when search query changes to prevent stale data
-  useEffect(() => {
-    // Implement debounce for search if needed
-  }, [searchQuery]);
+  }, [fieldName, safeOptions.length, currentValue]);
 
   return (
     <FormField
@@ -109,7 +105,6 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
             </Tooltip>
           </TooltipProvider>
           
-          {/* IMPORTANT: The Popover must be separate from the tooltip component tree */}
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverContent className="w-[300px] p-0 max-h-[300px] overflow-auto" align="start">
               {isLoading ? (

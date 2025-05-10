@@ -2,8 +2,7 @@
 import React from "react";
 import { UseFormReturn } from "react-hook-form";
 import { OrderFormValues } from "../../orderFormSchema";
-import EntitySelector from "./EntitySelector";
-import { EntityOption } from "./EntitySelector";
+import EntitySelector, { EntityOption } from "./EntitySelector";
 
 interface ContactSelectorProps {
   form: UseFormReturn<OrderFormValues>;
@@ -11,7 +10,12 @@ interface ContactSelectorProps {
   isLoading: boolean;
 }
 
-const ContactSelector: React.FC<ContactSelectorProps> = ({ form, contacts, isLoading }) => {
+const ContactSelector: React.FC<ContactSelectorProps> = ({ form, contacts = [], isLoading }) => {
+  // Log for debugging
+  React.useEffect(() => {
+    console.log("ContactSelector mounted with", contacts?.length || 0, "contacts");
+  }, [contacts]);
+
   return (
     <EntitySelector
       form={form}

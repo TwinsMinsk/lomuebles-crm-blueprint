@@ -29,14 +29,16 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
 
   // Log the current state for debugging
   React.useEffect(() => {
-    console.log("RelatedEntitiesFields data:", { 
-      contacts: Array.isArray(contacts) ? contacts.length : "not an array", 
-      companies: Array.isArray(companies) ? companies.length : "not an array", 
-      leads: Array.isArray(leads) ? leads.length : "not an array", 
-      managers: Array.isArray(managers) ? managers.length : "not an array", 
-      partners: Array.isArray(partners) ? partners.length : "not an array"
+    console.log("RelatedEntitiesFields data loaded:", { 
+      contacts: contacts?.length || 0, 
+      companies: companies?.length || 0, 
+      leads: leads?.length || 0, 
+      managers: managers?.length || 0, 
+      partners: partners?.length || 0,
+      isLoading,
+      error: error ? "Yes" : "No"
     });
-  }, [contacts, companies, leads, managers, partners]);
+  }, [contacts, companies, leads, managers, partners, isLoading, error]);
 
   if (isLoading) {
     return (
@@ -46,13 +48,6 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
       </div>
     );
   }
-
-  // Ensure we have arrays for all entity types
-  const safeContacts = Array.isArray(contacts) ? contacts : [];
-  const safeCompanies = Array.isArray(companies) ? companies : [];
-  const safeLeads = Array.isArray(leads) ? leads : [];
-  const safeManagers = Array.isArray(managers) ? managers : [];
-  const safePartners = Array.isArray(partners) ? partners : [];
 
   return (
     <div className="space-y-4">
@@ -73,28 +68,28 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
         {/* Associated Contact (required) */}
         <ContactSelector 
           form={form} 
-          contacts={safeContacts} 
+          contacts={contacts} 
           isLoading={isLoading} 
         />
 
         {/* Associated Company (optional) */}
         <CompanySelector 
           form={form} 
-          companies={safeCompanies} 
+          companies={companies} 
           isLoading={isLoading} 
         />
 
         {/* Source Lead (optional) */}
         <LeadSelector 
           form={form} 
-          leads={safeLeads} 
+          leads={leads} 
           isLoading={isLoading} 
         />
 
         {/* Assigned Manager (optional) */}
         <ManagerSelector 
           form={form} 
-          managers={safeManagers}
+          managers={managers}
           isLoading={isLoading} 
         />
 
@@ -102,7 +97,7 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
         {orderType === "Мебель на заказ" && (
           <PartnerSelector 
             form={form} 
-            partners={safePartners} 
+            partners={partners} 
             isLoading={isLoading} 
           />
         )}
