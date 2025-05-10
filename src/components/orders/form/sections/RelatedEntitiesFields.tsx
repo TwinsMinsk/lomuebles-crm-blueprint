@@ -9,7 +9,7 @@ import LeadSelector from "./related-entities/LeadSelector";
 import ManagerSelector from "./related-entities/ManagerSelector";
 import PartnerSelector from "./related-entities/PartnerSelector";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 interface RelatedEntitiesFieldsProps {
   form: UseFormReturn<OrderFormValues>;
@@ -18,22 +18,43 @@ interface RelatedEntitiesFieldsProps {
 
 export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ form, orderType }) => {
   const { 
-    contacts = [], 
-    companies = [], 
-    leads = [], 
-    managers = [], 
-    partners = [], 
+    contacts, 
+    companies, 
+    leads, 
+    managers, 
+    partners, 
     isLoading,
     error 
   } = useRelatedEntitiesData();
   
   // Add some console logs for debugging
   React.useEffect(() => {
-    console.log("RelatedEntitiesFields data:", 
-      { contacts: contacts.length, companies: companies.length, 
-        leads: leads.length, managers: managers.length, 
-        partners: partners.length, isLoading, error });
+    console.log("RelatedEntitiesFields data:", { 
+      contacts: Array.isArray(contacts) ? contacts.length : "not an array", 
+      companies: Array.isArray(companies) ? companies.length : "not an array", 
+      leads: Array.isArray(leads) ? leads.length : "not an array", 
+      managers: Array.isArray(managers) ? managers.length : "not an array", 
+      partners: Array.isArray(partners) ? partners.length : "not an array", 
+      isLoading, 
+      error 
+    });
   }, [contacts, companies, leads, managers, partners, isLoading, error]);
+
+  // Always ensure we pass arrays to child components
+  const safeContacts = Array.isArray(contacts) ? contacts : [];
+  const safeCompanies = Array.isArray(companies) ? companies : [];
+  const safeLeads = Array.isArray(leads) ? leads : [];
+  const safeManagers = Array.isArray(managers) ? managers : [];
+  const safePartners = Array.isArray(partners) ? partners : [];
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8">
+        <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+        <p className="text-lg font-medium">Загрузка связанных данных...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -54,28 +75,28 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
         {/* Associated Contact (required) */}
         <ContactSelector 
           form={form} 
-          contacts={Array.isArray(contacts) ? contacts : []} 
+          contacts={safeContacts} 
           isLoading={isLoading} 
         />
 
         {/* Associated Company (optional) */}
         <CompanySelector 
           form={form} 
-          companies={Array.isArray(companies) ? companies : []} 
+          companies={safeCompanies} 
           isLoading={isLoading} 
         />
 
         {/* Source Lead (optional) */}
         <LeadSelector 
           form={form} 
-          leads={Array.isArray(leads) ? leads : []} 
+          leads={safeLeads} 
           isLoading={isLoading} 
         />
 
         {/* Assigned Manager (optional) */}
         <ManagerSelector 
           form={form} 
-          managers={Array.isArray(managers) ? managers : []} 
+          managers={safeManagers}
           isLoading={isLoading} 
         />
 
@@ -83,7 +104,7 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
         {orderType === "Мебель на заказ" && (
           <PartnerSelector 
             form={form} 
-            partners={Array.isArray(partners) ? partners : []} 
+            partners={safePartners} 
             isLoading={isLoading} 
           />
         )}

@@ -36,115 +36,55 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
       try {
         console.log("Fetching related entities data...");
         
-        // Fetch contacts
-        try {
-          console.log("Fetching contacts...");
-          const { data: contactsData, error: contactsError } = await supabase
-            .from("contacts")
-            .select("contact_id, full_name")
-            .order("full_name");
-          
-          if (contactsError) {
-            console.error("Error fetching contacts:", contactsError);
-            throw new Error(`Ошибка загрузки контактов: ${contactsError.message}`);
+        // Function to safely fetch data and handle errors
+        const safelyFetchData = async (
+          tableName: string, 
+          idField: string, 
+          nameField: string,
+          orderBy: string
+        ): Promise<EntityOption[]> => {
+          try {
+            console.log(`Fetching ${tableName}...`);
+            const { data, error } = await supabase
+              .from(tableName)
+              .select(`${idField}, ${nameField}`)
+              .order(orderBy);
+            
+            if (error) {
+              console.error(`Error fetching ${tableName}:`, error);
+              throw new Error(`Ошибка загрузки ${tableName}: ${error.message}`);
+            }
+            
+            console.log(`${tableName} fetched:`, data);
+            return (data || []).map(item => ({
+              id: item[idField],
+              name: item[nameField] || `${tableName} #${item[idField]}`
+            }));
+          } catch (err) {
+            console.error(`Failed to fetch ${tableName}:`, err);
+            // Return empty array to maintain app stability
+            return [];
           }
-          
-          console.log("Contacts fetched:", contactsData);
-          setContacts((contactsData || []).map(contact => ({
-            id: contact.contact_id,
-            name: contact.full_name || `Клиент #${contact.contact_id}`
-          })));
-        } catch (contactErr) {
-          console.error("Failed to fetch contacts:", contactErr);
-          // Don't set global error to allow other entities to load
-        }
+        };
         
-        // Fetch companies
-        try {
-          console.log("Fetching companies...");
-          const { data: companiesData, error: companiesError } = await supabase
-            .from("companies")
-            .select("company_id, company_name")
-            .order("company_name");
-          
-          if (companiesError) {
-            console.error("Error fetching companies:", companiesError);
-          } else {
-            console.log("Companies fetched:", companiesData);
-            setCompanies((companiesData || []).map(company => ({
-              id: company.company_id,
-              name: company.company_name || `Компания #${company.company_id}`
-            })));
-          }
-        } catch (companyErr) {
-          console.error("Failed to fetch companies:", companyErr);
-        }
+        // Fetch all data in parallel for better performance
+        const [contactsData, companiesData, leadsData, managersData, partnersData] = await Promise.all([
+          safelyFetchData("contacts", "contact_id", "full_name", "full_name"),
+          safelyFetchData("companies", "company_id", "company_name", "company_name"),
+          safelyFetchData("leads", "lead_id", "name", "name"),
+          safelyFetchData("profiles", "id", "full_name", "full_name"),
+          safelyFetchData("partners_manufacturers", "partner_manufacturer_id", "company_name", "company_name")
+        ]);
         
-        // Fetch leads
-        try {
-          console.log("Fetching leads...");
-          const { data: leadsData, error: leadsError } = await supabase
-            .from("leads")
-            .select("lead_id, name")
-            .order("name");
-          
-          if (leadsError) {
-            console.error("Error fetching leads:", leadsError);
-          } else {
-            console.log("Leads fetched:", leadsData);
-            setLeads((leadsData || []).map(lead => ({
-              id: lead.lead_id,
-              name: lead.name || `Лид #${lead.lead_id}`
-            })));
-          }
-        } catch (leadErr) {
-          console.error("Failed to fetch leads:", leadErr);
-        }
-        
-        // Fetch managers
-        try {
-          console.log("Fetching managers...");
-          const { data: managersData, error: managersError } = await supabase
-            .from("profiles")
-            .select("id, full_name")
-            .order("full_name");
-          
-          if (managersError) {
-            console.error("Error fetching managers:", managersError);
-          } else {
-            console.log("Managers fetched:", managersData);
-            setManagers((managersData || []).map(manager => ({
-              id: manager.id,
-              name: manager.full_name || `Менеджер #${manager.id}`
-            })));
-          }
-        } catch (managerErr) {
-          console.error("Failed to fetch managers:", managerErr);
-        }
-        
-        // Fetch partners/manufacturers
-        try {
-          console.log("Fetching partners...");
-          const { data: partnersData, error: partnersError } = await supabase
-            .from("partners_manufacturers")
-            .select("partner_manufacturer_id, company_name")
-            .order("company_name");
-          
-          if (partnersError) {
-            console.error("Error fetching partners:", partnersError);
-          } else {
-            console.log("Partners fetched:", partnersData);
-            setPartners((partnersData || []).map(partner => ({
-              id: partner.partner_manufacturer_id,
-              name: partner.company_name || `Партнер #${partner.partner_manufacturer_id}`
-            })));
-          }
-        } catch (partnerErr) {
-          console.error("Failed to fetch partners:", partnerErr);
-        }
+        // Update state with fetched data (always as arrays)
+        setContacts(contactsData);
+        setCompanies(companiesData);
+        setLeads(leadsData);
+        setManagers(managersData);
+        setPartners(partnersData);
         
       } catch (error: any) {
-        console.error("Error fetching related data:", error);
+        console.error("Error in fetchRelatedData:", error);
         setError(error.message || "Ошибка при загрузке связанных данных");
         toast.error("Ошибка загрузки данных", {
           description: "Не удалось загрузить связанные сущности"
