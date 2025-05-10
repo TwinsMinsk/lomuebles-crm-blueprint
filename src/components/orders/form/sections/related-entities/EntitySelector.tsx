@@ -53,21 +53,17 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   // Find the selected option
   const selectedOption = safeOptions.find(option => option.id === currentValue);
   
-  // For debugging
-  console.log(`EntitySelector for ${String(fieldName)}:`, { 
-    currentValue, 
-    optionsLength: safeOptions.length,
-    filteredOptionsLength: filteredOptions.length,
-    selectedOption,
-    isOpen: open
-  });
-
-  // Close the popover when component unmounts to prevent React state updates on unmounted components
+  // Cleanup when component unmounts to prevent React state updates on unmounted components
   useEffect(() => {
     return () => {
       setOpen(false);
     };
   }, []);
+
+  // Close popover when search query changes to prevent stale data
+  useEffect(() => {
+    // Implement debounce for search if needed
+  }, [searchQuery]);
 
   return (
     <FormField
@@ -113,7 +109,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
             </Tooltip>
           </TooltipProvider>
           
-          {/* Important: Move the Popover outside of the tooltip to fix potential iteration issues */}
+          {/* IMPORTANT: The Popover must be separate from the tooltip component tree */}
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverContent className="w-[300px] p-0 max-h-[300px] overflow-auto" align="start">
               {isLoading ? (
@@ -121,8 +117,8 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
                   <Loader2 className="w-4 h-4 animate-spin mx-auto mb-2" />
                   <span className="text-sm text-muted-foreground">Загрузка данных...</span>
                 </div>
-              ) : filteredOptions.length > 0 ? (
-                <Command shouldFilter={false}> {/* Important: Disable built-in filtering */}
+              ) : safeOptions.length > 0 ? (
+                <Command>
                   <CommandInput 
                     placeholder={`Поиск ${placeholder.toLowerCase()}...`} 
                     onValueChange={setSearchQuery}

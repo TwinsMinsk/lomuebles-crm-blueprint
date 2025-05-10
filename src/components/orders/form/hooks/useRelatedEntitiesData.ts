@@ -36,146 +36,52 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
       try {
         console.log("Fetching related entities data...");
         
-        // Function to safely fetch contacts and handle errors
-        const fetchContacts = async (): Promise<EntityOption[]> => {
+        // Function to safely fetch data and always return an array
+        const safeFetch = async (tableName: string, idField: string, nameField: string): Promise<EntityOption[]> => {
           try {
-            console.log("Fetching contacts...");
+            console.log(`Fetching from ${tableName}...`);
             const { data, error } = await supabase
-              .from("contacts")
-              .select("contact_id, full_name")
-              .order("full_name");
+              .from(tableName)
+              .select(`${idField}, ${nameField}`)
+              .order(nameField);
             
             if (error) {
-              console.error("Error fetching contacts:", error);
-              throw new Error(`Ошибка загрузки контактов: ${error.message}`);
+              console.error(`Error fetching ${tableName}:`, error);
+              throw new Error(`Ошибка загрузки данных из ${tableName}: ${error.message}`);
             }
             
-            console.log("Contacts fetched:", data);
-            return (data || []).map(item => ({
-              id: item.contact_id,
-              name: item.full_name || `Contact #${item.contact_id}`
+            // Always ensure we return an array
+            if (!Array.isArray(data)) {
+              console.warn(`Data from ${tableName} is not an array, returning empty array`);
+              return [];
+            }
+            
+            console.log(`${tableName} fetched:`, data);
+            return data.map(item => ({
+              id: item[idField],
+              name: item[nameField] || `#${item[idField]}`
             }));
           } catch (err) {
-            console.error("Failed to fetch contacts:", err);
-            return [];
+            console.error(`Failed to fetch ${tableName}:`, err);
+            return []; // Return empty array on error
           }
         };
 
-        // Function to safely fetch companies and handle errors
-        const fetchCompanies = async (): Promise<EntityOption[]> => {
-          try {
-            console.log("Fetching companies...");
-            const { data, error } = await supabase
-              .from("companies")
-              .select("company_id, company_name")
-              .order("company_name");
-            
-            if (error) {
-              console.error("Error fetching companies:", error);
-              throw new Error(`Ошибка загрузки компаний: ${error.message}`);
-            }
-            
-            console.log("Companies fetched:", data);
-            return (data || []).map(item => ({
-              id: item.company_id,
-              name: item.company_name || `Company #${item.company_id}`
-            }));
-          } catch (err) {
-            console.error("Failed to fetch companies:", err);
-            return [];
-          }
-        };
-
-        // Function to safely fetch leads and handle errors
-        const fetchLeads = async (): Promise<EntityOption[]> => {
-          try {
-            console.log("Fetching leads...");
-            const { data, error } = await supabase
-              .from("leads")
-              .select("lead_id, name")
-              .order("name");
-            
-            if (error) {
-              console.error("Error fetching leads:", error);
-              throw new Error(`Ошибка загрузки лидов: ${error.message}`);
-            }
-            
-            console.log("Leads fetched:", data);
-            return (data || []).map(item => ({
-              id: item.lead_id,
-              name: item.name || `Lead #${item.lead_id}`
-            }));
-          } catch (err) {
-            console.error("Failed to fetch leads:", err);
-            return [];
-          }
-        };
-
-        // Function to safely fetch managers and handle errors
-        const fetchManagers = async (): Promise<EntityOption[]> => {
-          try {
-            console.log("Fetching managers...");
-            const { data, error } = await supabase
-              .from("profiles")
-              .select("id, full_name")
-              .order("full_name");
-            
-            if (error) {
-              console.error("Error fetching managers:", error);
-              throw new Error(`Ошибка загрузки менеджеров: ${error.message}`);
-            }
-            
-            console.log("Managers fetched:", data);
-            return (data || []).map(item => ({
-              id: item.id,
-              name: item.full_name || `Manager #${item.id}`
-            }));
-          } catch (err) {
-            console.error("Failed to fetch managers:", err);
-            return [];
-          }
-        };
-
-        // Function to safely fetch partners and handle errors
-        const fetchPartners = async (): Promise<EntityOption[]> => {
-          try {
-            console.log("Fetching partners...");
-            const { data, error } = await supabase
-              .from("partners_manufacturers")
-              .select("partner_manufacturer_id, company_name")
-              .order("company_name");
-            
-            if (error) {
-              console.error("Error fetching partners:", error);
-              throw new Error(`Ошибка загрузки партнеров: ${error.message}`);
-            }
-            
-            console.log("Partners fetched:", data);
-            return (data || []).map(item => ({
-              id: item.partner_manufacturer_id,
-              name: item.company_name || `Partner #${item.partner_manufacturer_id}`
-            }));
-          } catch (err) {
-            console.error("Failed to fetch partners:", err);
-            return [];
-          }
-        };
-        
-        // Fetch all data in parallel for better performance
+        // Fetch all data in parallel with typed table names
         const [contactsData, companiesData, leadsData, managersData, partnersData] = await Promise.all([
-          fetchContacts(),
-          fetchCompanies(),
-          fetchLeads(),
-          fetchManagers(),
-          fetchPartners()
+          safeFetch('contacts', 'contact_id', 'full_name'),
+          safeFetch('companies', 'company_id', 'company_name'),
+          safeFetch('leads', 'lead_id', 'name'),
+          safeFetch('profiles', 'id', 'full_name'),
+          safeFetch('partners_manufacturers', 'partner_manufacturer_id', 'company_name')
         ]);
         
         // Update state with fetched data - ensuring they're always arrays
-        setContacts(contactsData || []);
-        setCompanies(companiesData || []);
-        setLeads(leadsData || []);
-        setManagers(managersData || []);
-        setPartners(partnersData || []);
+        setContacts(contactsData);
+        setCompanies(companiesData);
+        setLeads(leadsData);
+        setManagers(managersData);
+        setPartners(partnersData);
         
       } catch (error: any) {
         console.error("Error in fetchRelatedData:", error);
@@ -191,6 +97,7 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
     fetchRelatedData();
   }, []);
 
+  // Always return arrays for all entity types, even if there was an error
   return {
     contacts,
     companies,
