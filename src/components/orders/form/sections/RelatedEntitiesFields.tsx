@@ -15,25 +15,32 @@ interface RelatedEntitiesFieldsProps {
 }
 
 export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ form, orderType }) => {
-  const { contacts, companies, leads, managers, partners, isLoading } = useRelatedEntitiesData();
+  const { contacts = [], companies = [], leads = [], managers = [], partners = [], isLoading } = useRelatedEntitiesData();
+
+  // Ensure we are passing arrays, not undefined
+  const safeContacts = Array.isArray(contacts) ? contacts : [];
+  const safeCompanies = Array.isArray(companies) ? companies : [];
+  const safeLeads = Array.isArray(leads) ? leads : [];
+  const safeManagers = Array.isArray(managers) ? managers : [];
+  const safePartners = Array.isArray(partners) ? partners : [];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Associated Contact (required) */}
-      <ContactSelector form={form} contacts={contacts} isLoading={isLoading} />
+      <ContactSelector form={form} contacts={safeContacts} isLoading={isLoading} />
 
       {/* Associated Company (optional) */}
-      <CompanySelector form={form} companies={companies} isLoading={isLoading} />
+      <CompanySelector form={form} companies={safeCompanies} isLoading={isLoading} />
 
       {/* Source Lead (optional) */}
-      <LeadSelector form={form} leads={leads} isLoading={isLoading} />
+      <LeadSelector form={form} leads={safeLeads} isLoading={isLoading} />
 
       {/* Assigned Manager (optional) */}
-      <ManagerSelector form={form} managers={managers} isLoading={isLoading} />
+      <ManagerSelector form={form} managers={safeManagers} isLoading={isLoading} />
 
       {/* Partner/Manufacturer - only visible when orderType is "Мебель на заказ" */}
       {orderType === "Мебель на заказ" && (
-        <PartnerSelector form={form} partners={partners} isLoading={isLoading} />
+        <PartnerSelector form={form} partners={safePartners} isLoading={isLoading} />
       )}
     </div>
   );

@@ -34,11 +34,15 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
           .select("contact_id, full_name")
           .order("full_name");
         
-        if (contactsError) throw contactsError;
-        setContacts(contactsData?.map(contact => ({
-          id: contact.contact_id,
-          name: contact.full_name || `Клиент #${contact.contact_id}`
-        })) || []);
+        if (contactsError) {
+          console.error("Error fetching contacts:", contactsError);
+          setContacts([]);
+        } else {
+          setContacts(contactsData?.map(contact => ({
+            id: contact.contact_id,
+            name: contact.full_name || `Клиент #${contact.contact_id}`
+          })) || []);
+        }
         
         // Fetch companies
         const { data: companiesData, error: companiesError } = await supabase
@@ -46,11 +50,15 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
           .select("company_id, company_name")
           .order("company_name");
         
-        if (companiesError) throw companiesError;
-        setCompanies(companiesData?.map(company => ({
-          id: company.company_id,
-          name: company.company_name || `Компания #${company.company_id}`
-        })) || []);
+        if (companiesError) {
+          console.error("Error fetching companies:", companiesError);
+          setCompanies([]);
+        } else {
+          setCompanies(companiesData?.map(company => ({
+            id: company.company_id,
+            name: company.company_name || `Компания #${company.company_id}`
+          })) || []);
+        }
         
         // Fetch leads
         const { data: leadsData, error: leadsError } = await supabase
@@ -58,11 +66,15 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
           .select("lead_id, name")
           .order("name");
         
-        if (leadsError) throw leadsError;
-        setLeads(leadsData?.map(lead => ({
-          id: lead.lead_id,
-          name: lead.name || `Лид #${lead.lead_id}`
-        })) || []);
+        if (leadsError) {
+          console.error("Error fetching leads:", leadsError);
+          setLeads([]);
+        } else {
+          setLeads(leadsData?.map(lead => ({
+            id: lead.lead_id,
+            name: lead.name || `Лид #${lead.lead_id}`
+          })) || []);
+        }
         
         // Fetch managers
         const { data: managersData, error: managersError } = await supabase
@@ -70,11 +82,15 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
           .select("id, full_name")
           .order("full_name");
         
-        if (managersError) throw managersError;
-        setManagers(managersData?.map(manager => ({
-          id: manager.id,
-          name: manager.full_name || manager.id || `Менеджер #${manager.id}`
-        })) || []);
+        if (managersError) {
+          console.error("Error fetching managers:", managersError);
+          setManagers([]);
+        } else {
+          setManagers(managersData?.map(manager => ({
+            id: manager.id,
+            name: manager.full_name || manager.id || `Менеджер #${manager.id}`
+          })) || []);
+        }
         
         // Fetch partners/manufacturers
         const { data: partnersData, error: partnersError } = await supabase
@@ -82,14 +98,24 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
           .select("partner_manufacturer_id, company_name")
           .order("company_name");
         
-        if (partnersError) throw partnersError;
-        setPartners(partnersData?.map(partner => ({
-          id: partner.partner_manufacturer_id,
-          name: partner.company_name || `Партнер #${partner.partner_manufacturer_id}`
-        })) || []);
+        if (partnersError) {
+          console.error("Error fetching partners:", partnersError);
+          setPartners([]);
+        } else {
+          setPartners(partnersData?.map(partner => ({
+            id: partner.partner_manufacturer_id,
+            name: partner.company_name || `Партнер #${partner.partner_manufacturer_id}`
+          })) || []);
+        }
         
       } catch (error) {
         console.error("Error fetching related data:", error);
+        // Ensure all states have default empty arrays in case of errors
+        setContacts([]);
+        setCompanies([]);
+        setLeads([]);
+        setManagers([]);
+        setPartners([]);
       } finally {
         setIsLoading(false);
       }

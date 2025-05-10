@@ -28,12 +28,15 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   form,
   fieldName,
   label,
-  options,
+  options = [], // Provide default empty array to prevent undefined
   placeholder,
   emptyMessage,
   isLoading
 }) => {
   const field = form.watch(fieldName);
+  
+  // Ensure options is always an array
+  const safeOptions = Array.isArray(options) ? options : [];
 
   return (
     <FormField
@@ -57,7 +60,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
                   {isLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : formField.value ? (
-                    options.find((option) => option.id === formField.value)?.name || placeholder
+                    safeOptions.find((option) => option.id === formField.value)?.name || placeholder
                   ) : (
                     placeholder
                   )}
@@ -70,7 +73,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
                 <CommandInput placeholder={`Поиск ${placeholder.toLowerCase()}...`} />
                 <CommandEmpty>{emptyMessage}</CommandEmpty>
                 <CommandGroup>
-                  {options.map((option) => (
+                  {safeOptions.map((option) => (
                     <CommandItem
                       key={option.id}
                       value={option.name}
