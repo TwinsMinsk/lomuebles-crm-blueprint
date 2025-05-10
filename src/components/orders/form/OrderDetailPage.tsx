@@ -52,7 +52,9 @@ const OrderDetailPage: React.FC = () => {
             paymentStatus: data.payment_status || null,
             deliveryAddressFull: data.delivery_address_full || "",
             notesHistory: data.notes_history || "",
-            attachedFilesOrderDocs: data.attached_files_order_docs || [],
+            attachedFilesOrderDocs: Array.isArray(data.attached_files_order_docs) 
+              ? data.attached_files_order_docs 
+              : [],
             creatorUserId: data.creator_user_id || null,
             creationDate: data.creation_date || null,
             closingDate: data.closing_date || null
