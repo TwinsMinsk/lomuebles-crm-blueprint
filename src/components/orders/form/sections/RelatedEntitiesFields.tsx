@@ -29,7 +29,7 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
   
   // Add some console logs for debugging
   React.useEffect(() => {
-    console.log("RelatedEntitiesFields rendered with data:", 
+    console.log("RelatedEntitiesFields data:", 
       { contacts: contacts.length, companies: companies.length, 
         leads: leads.length, managers: managers.length, 
         partners: partners.length, isLoading, error });
@@ -41,7 +41,12 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>
+            {error}
+            <div className="mt-2 text-sm">
+              Пожалуйста, убедитесь, что у вас есть доступ к данным. Возможно, требуется авторизация.
+            </div>
+          </AlertDescription>
         </Alert>
       )}
       

@@ -40,7 +40,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   // Get the current value from form
   const currentValue = form.watch(fieldName);
   
-  // Ensure options is always a valid array
+  // Always ensure options is an array
   const safeOptions = Array.isArray(options) ? options : [];
   
   // Filter options based on search query if needed
@@ -52,6 +52,14 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
 
   // Find the selected option
   const selectedOption = safeOptions.find(option => option.id === currentValue);
+  
+  console.log(`EntitySelector for ${String(fieldName)}:`, { 
+    currentValue, 
+    optionsLength: safeOptions.length,
+    filteredOptionsLength: filteredOptions.length,
+    selectedOption,
+    isOpen: open
+  });
 
   return (
     <FormField
@@ -95,40 +103,47 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
                    safeOptions.length === 0 ? "Нет доступных данных" : 
                    `Нажмите для выбора ${label.toLowerCase()}`}
                 </TooltipContent>
-                <PopoverContent className="w-[300px] p-0 max-h-[300px] overflow-auto">
-                  <Command>
-                    <CommandInput 
-                      placeholder={`Поиск ${placeholder.toLowerCase()}...`} 
-                      onValueChange={setSearchQuery}
-                    />
-                    <CommandEmpty>{emptyMessage}</CommandEmpty>
-                    {filteredOptions.length > 0 ? (
-                      <CommandGroup>
-                        {filteredOptions.map((option) => (
-                          <CommandItem
-                            key={String(option.id)}
-                            value={String(option.name)}
-                            onSelect={() => {
-                              form.setValue(fieldName as any, option.id);
-                              setOpen(false);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                option.id === formField.value
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {option.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    ) : (
-                      <CommandEmpty>{emptyMessage}</CommandEmpty>
-                    )}
-                  </Command>
+                <PopoverContent className="w-[300px] p-0 max-h-[300px] overflow-auto" align="start">
+                  {filteredOptions.length > 0 || searchQuery ? (
+                    <Command>
+                      <CommandInput 
+                        placeholder={`Поиск ${placeholder.toLowerCase()}...`} 
+                        onValueChange={setSearchQuery}
+                        value={searchQuery}
+                      />
+                      {filteredOptions.length > 0 ? (
+                        <CommandGroup>
+                          {filteredOptions.map((option) => (
+                            <CommandItem
+                              key={String(option.id)}
+                              value={String(option.name)}
+                              onSelect={() => {
+                                form.setValue(fieldName as any, option.id);
+                                setSearchQuery("");
+                                setOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  option.id === formField.value
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {option.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      ) : (
+                        <CommandEmpty>{emptyMessage}</CommandEmpty>
+                      )}
+                    </Command>
+                  ) : (
+                    <div className="py-6 text-center text-sm">
+                      {emptyMessage}
+                    </div>
+                  )}
                 </PopoverContent>
               </Popover>
             </Tooltip>
