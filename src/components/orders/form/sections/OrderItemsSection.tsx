@@ -49,6 +49,8 @@ export const OrderItemsSection: React.FC<OrderItemsSectionProps> = ({ form, orde
       setError(null);
       
       try {
+        console.log("Fetching order items for orderId:", orderId);
+        
         const { data, error } = await supabase
           .from("order_items")
           .select("*")
@@ -56,11 +58,15 @@ export const OrderItemsSection: React.FC<OrderItemsSectionProps> = ({ form, orde
           
         if (error) throw error;
         
-        setOrderItems(data || []);
+        console.log("Order items data:", data);
+        
+        // Ensure data is always an array, even if null or undefined
+        const safeData = Array.isArray(data) ? data : [];
+        setOrderItems(safeData);
         
         // Calculate and update the final amount
-        if (data && data.length > 0) {
-          const totalAmount = data.reduce((sum, item) => sum + (item.total_item_price || 0), 0);
+        if (safeData.length > 0) {
+          const totalAmount = safeData.reduce((sum, item) => sum + (item.total_item_price || 0), 0);
           form.setValue("finalAmount", totalAmount);
         }
       } catch (err: any) {

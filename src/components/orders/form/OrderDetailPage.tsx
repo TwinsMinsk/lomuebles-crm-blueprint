@@ -35,7 +35,13 @@ const OrderDetailPage: React.FC = () => {
         if (error) throw error;
         
         if (data) {
+          console.log("Fetched order data:", data);
           // Transform the data to match our form schema
+          // Ensure arrays are properly initialized even if data is null/undefined
+          const attachedFiles = Array.isArray(data.attached_files_order_docs) 
+            ? data.attached_files_order_docs 
+            : [];
+            
           setOrder({
             orderNumber: data.order_number,
             orderName: data.order_name || "",
@@ -52,9 +58,7 @@ const OrderDetailPage: React.FC = () => {
             paymentStatus: data.payment_status || null,
             deliveryAddressFull: data.delivery_address_full || "",
             notesHistory: data.notes_history || "",
-            attachedFilesOrderDocs: Array.isArray(data.attached_files_order_docs) 
-              ? data.attached_files_order_docs 
-              : [],
+            attachedFilesOrderDocs: attachedFiles,
             creatorUserId: data.creator_user_id || null,
             creationDate: data.creation_date || null,
             closingDate: data.closing_date || null

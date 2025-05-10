@@ -27,14 +27,20 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   // Ensure defaultValues has the correct format for attachedFilesOrderDocs
   const formattedDefaultValues = {
     ...defaultValues,
-    attachedFilesOrderDocs: defaultValues?.attachedFilesOrderDocs || []
+    // Always initialize as an array, even if undefined or null
+    attachedFilesOrderDocs: Array.isArray(defaultValues?.attachedFilesOrderDocs) 
+      ? defaultValues.attachedFilesOrderDocs 
+      : []
   };
+  
+  console.log("Formatted default values:", formattedDefaultValues);
   
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderFormSchema),
     defaultValues: {
       orderType: "Готовая мебель (Tilda)",
       clientLanguage: "ES",
+      attachedFilesOrderDocs: [],
       ...formattedDefaultValues
     },
     mode: "onChange"
