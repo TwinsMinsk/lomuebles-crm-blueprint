@@ -53,13 +53,16 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   // Find the selected option
   const selectedOption = safeOptions.find(option => option.id === currentValue);
   
-  // Log for debugging
+  // Enhanced logging for debugging
   useEffect(() => {
-    console.log(`EntitySelector ${fieldName} mounted with ${safeOptions.length} options, current value:`, currentValue);
-    return () => {
-      console.log(`EntitySelector ${fieldName} unmounted`);
-    };
-  }, [fieldName, safeOptions.length, currentValue]);
+    console.log(`EntitySelector ${fieldName} mounted with:`, {
+      optionsLength: safeOptions.length,
+      currentValue,
+      selectedOption: selectedOption || "none",
+      isSearchActive: !!searchQuery,
+      filteredOptionsCount: filteredOptions.length
+    });
+  }, [fieldName, safeOptions.length, currentValue, selectedOption, searchQuery, filteredOptions.length]);
 
   return (
     <FormField

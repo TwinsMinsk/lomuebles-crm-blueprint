@@ -52,6 +52,14 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
         setManagers(managersData);
         setPartners(partnersData);
         
+        console.log("Data fetched successfully:", {
+          contacts: contactsData.length,
+          companies: companiesData.length,
+          leads: leadsData.length,
+          managers: managersData.length,
+          partners: partnersData.length
+        });
+        
       } catch (error: any) {
         console.error("Error in fetchRelatedData:", error);
         setError(error.message || "Ошибка при загрузке связанных данных");
@@ -74,7 +82,10 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
         .select('contact_id, full_name')
         .order('full_name');
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error fetching contacts:", error);
+        throw error;
+      }
       
       return Array.isArray(data) ? data.map(item => ({
         id: item.contact_id,
@@ -94,7 +105,10 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
         .select('company_id, company_name')
         .order('company_name');
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error fetching companies:", error);
+        throw error;
+      }
       
       return Array.isArray(data) ? data.map(item => ({
         id: item.company_id,
@@ -114,7 +128,10 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
         .select('lead_id, name')
         .order('name');
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error fetching leads:", error);
+        throw error;
+      }
       
       return Array.isArray(data) ? data.map(item => ({
         id: item.lead_id,
@@ -134,7 +151,10 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
         .select('id, full_name')
         .order('full_name');
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error fetching managers:", error);
+        throw error;
+      }
       
       return Array.isArray(data) ? data.map(item => ({
         id: item.id,
@@ -154,7 +174,10 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
         .select('partner_manufacturer_id, company_name')
         .order('company_name');
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error fetching partners:", error);
+        throw error;
+      }
       
       return Array.isArray(data) ? data.map(item => ({
         id: item.partner_manufacturer_id,

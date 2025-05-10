@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { OrderFormValues } from "../orderFormSchema";
 import { useRelatedEntitiesData } from "../hooks/useRelatedEntitiesData";
@@ -27,8 +27,8 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
     error 
   } = useRelatedEntitiesData();
 
-  // Log the current state for debugging
-  React.useEffect(() => {
+  // Enhanced logging for debugging
+  useEffect(() => {
     console.log("RelatedEntitiesFields data loaded:", { 
       contacts: contacts?.length || 0, 
       companies: companies?.length || 0, 
@@ -36,7 +36,7 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
       managers: managers?.length || 0, 
       partners: partners?.length || 0,
       isLoading,
-      error: error ? "Yes" : "No"
+      error: error ? error : "No error"
     });
   }, [contacts, companies, leads, managers, partners, isLoading, error]);
 
