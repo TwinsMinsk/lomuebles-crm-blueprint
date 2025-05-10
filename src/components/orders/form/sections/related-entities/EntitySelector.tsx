@@ -117,7 +117,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
                   <span className="text-sm text-muted-foreground">Загрузка данных...</span>
                 </div>
               ) : safeOptions.length > 0 ? (
-                <Command>
+                <Command shouldFilter={false}>
                   <CommandInput 
                     placeholder={`Поиск ${placeholder.toLowerCase()}...`} 
                     onValueChange={setSearchQuery}
