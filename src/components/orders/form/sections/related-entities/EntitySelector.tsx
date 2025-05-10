@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   const safeOptions = Array.isArray(options) ? options : [];
   
   // Filter options based on search query if needed
-  const filteredOptions = searchQuery 
+  const filteredOptions = searchQuery && safeOptions.length > 0
     ? safeOptions.filter(option => 
         option.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
@@ -62,7 +62,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   });
 
   // Close the popover when component unmounts to prevent React state updates on unmounted components
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       setOpen(false);
     };
@@ -77,7 +77,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
           <FormLabel>{label}</FormLabel>
           <TooltipProvider>
             <Tooltip>
-              <PopoverTrigger asChild>
+              <TooltipTrigger asChild>
                 <FormControl>
                   <Button
                     variant="outline"
@@ -103,7 +103,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </FormControl>
-              </PopoverTrigger>
+              </TooltipTrigger>
               <TooltipContent side="top">
                 {isLoading ? "Загрузка данных..." : 
                 safeOptions.length === 0 ? "Нет доступных данных" : 
@@ -142,7 +142,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
                                   : "opacity-0"
                               )}
                             />
-                            {option.name}
+                            {option.name || `#${option.id}`}
                           </CommandItem>
                         ))}
                       </CommandGroup>

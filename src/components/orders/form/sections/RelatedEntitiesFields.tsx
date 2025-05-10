@@ -40,13 +40,6 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
     });
   }, [contacts, companies, leads, managers, partners, isLoading, error]);
 
-  // Always ensure we pass arrays to child components
-  const safeContacts = Array.isArray(contacts) ? contacts : [];
-  const safeCompanies = Array.isArray(companies) ? companies : [];
-  const safeLeads = Array.isArray(leads) ? leads : [];
-  const safeManagers = Array.isArray(managers) ? managers : [];
-  const safePartners = Array.isArray(partners) ? partners : [];
-
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-8">
@@ -75,28 +68,28 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
         {/* Associated Contact (required) */}
         <ContactSelector 
           form={form} 
-          contacts={safeContacts} 
+          contacts={contacts || []} 
           isLoading={isLoading} 
         />
 
         {/* Associated Company (optional) */}
         <CompanySelector 
           form={form} 
-          companies={safeCompanies} 
+          companies={companies || []} 
           isLoading={isLoading} 
         />
 
         {/* Source Lead (optional) */}
         <LeadSelector 
           form={form} 
-          leads={safeLeads} 
+          leads={leads || []} 
           isLoading={isLoading} 
         />
 
         {/* Assigned Manager (optional) */}
         <ManagerSelector 
           form={form} 
-          managers={safeManagers}
+          managers={managers || []}
           isLoading={isLoading} 
         />
 
@@ -104,7 +97,7 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
         {orderType === "Мебель на заказ" && (
           <PartnerSelector 
             form={form} 
-            partners={safePartners} 
+            partners={partners || []} 
             isLoading={isLoading} 
           />
         )}
