@@ -11,13 +11,16 @@ interface CompanySelectorProps {
   isLoading: boolean;
 }
 
-const CompanySelector: React.FC<CompanySelectorProps> = ({ form, companies, isLoading }) => {
+const CompanySelector: React.FC<CompanySelectorProps> = ({ form, companies = [], isLoading }) => {
+  // Ensure companies is always an array
+  const safeCompanies = Array.isArray(companies) ? companies : [];
+  
   return (
     <EntitySelector
       form={form}
       fieldName="associatedCompanyId"
       label="Компания клиента"
-      options={companies}
+      options={safeCompanies}
       placeholder="Выберите компанию"
       emptyMessage="Компания не найдена."
       isLoading={isLoading}

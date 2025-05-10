@@ -30,11 +30,11 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
   // Enhanced logging for debugging
   useEffect(() => {
     console.log("RelatedEntitiesFields data loaded:", { 
-      contacts: contacts?.length || 0, 
-      companies: companies?.length || 0, 
-      leads: leads?.length || 0, 
-      managers: managers?.length || 0, 
-      partners: partners?.length || 0,
+      contacts: Array.isArray(contacts) ? contacts.length : 0, 
+      companies: Array.isArray(companies) ? companies.length : 0, 
+      leads: Array.isArray(leads) ? leads.length : 0, 
+      managers: Array.isArray(managers) ? managers.length : 0, 
+      partners: Array.isArray(partners) ? partners.length : 0,
       isLoading,
       error: error ? error : "No error",
       contactsArray: contacts, // Log the actual arrays for debugging
@@ -73,28 +73,28 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
         {/* Associated Contact (required) */}
         <ContactSelector 
           form={form} 
-          contacts={contacts || []} 
+          contacts={Array.isArray(contacts) ? contacts : []} 
           isLoading={isLoading} 
         />
 
         {/* Associated Company (optional) */}
         <CompanySelector 
           form={form} 
-          companies={companies || []} 
+          companies={Array.isArray(companies) ? companies : []} 
           isLoading={isLoading} 
         />
 
         {/* Source Lead (optional) */}
         <LeadSelector 
           form={form} 
-          leads={leads || []} 
+          leads={Array.isArray(leads) ? leads : []} 
           isLoading={isLoading} 
         />
 
         {/* Assigned Manager (optional) */}
         <ManagerSelector 
           form={form} 
-          managers={managers || []}
+          managers={Array.isArray(managers) ? managers : []}
           isLoading={isLoading} 
         />
 
@@ -102,7 +102,7 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
         {orderType === "Мебель на заказ" && (
           <PartnerSelector 
             form={form} 
-            partners={partners || []} 
+            partners={Array.isArray(partners) ? partners : []} 
             isLoading={isLoading} 
           />
         )}

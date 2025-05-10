@@ -29,7 +29,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   form,
   fieldName,
   label,
-  options = [], // Default to empty array
+  options = [],
   placeholder,
   emptyMessage,
   isLoading
@@ -40,28 +40,31 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   // Get the current value from form
   const currentValue = form.watch(fieldName);
   
-  // Ensure options is ALWAYS an array to prevent iteration errors
+  // Ensure options is ALWAYS an array
   const safeOptions = Array.isArray(options) ? options : [];
   
-  // Filter options based on search query if needed
-  const filteredOptions = safeOptions.length > 0 && searchQuery
-    ? safeOptions.filter(option => 
-        option.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : safeOptions;
+  // Filter options based on search query
+  const filteredOptions = React.useMemo(() => {
+    if (!searchQuery) return safeOptions;
+    return safeOptions.filter(option => 
+      option.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [safeOptions, searchQuery]);
 
   // Find the selected option
-  const selectedOption = safeOptions.find(option => option.id === currentValue);
-  
-  // Enhanced logging for debugging
+  const selectedOption = React.useMemo(() => 
+    safeOptions.find(option => option.id === currentValue),
+    [safeOptions, currentValue]
+  );
+
+  // Debug logging
   useEffect(() => {
-    console.log(`EntitySelector ${fieldName} mounted with:`, {
+    console.log(`EntitySelector ${fieldName}:`, {
       optionsLength: safeOptions.length,
       currentValue,
       selectedOption: selectedOption || "none",
       isSearchActive: !!searchQuery,
-      filteredOptionsCount: filteredOptions.length,
-      options: safeOptions // Log the actual options array
+      filteredOptionsCount: filteredOptions.length
     });
   }, [fieldName, safeOptions.length, currentValue, selectedOption, searchQuery, filteredOptions.length]);
 
@@ -124,6 +127,11 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
                     value={searchQuery}
                     className="h-9"
                   />
+                  <CommandEmpty>
+                    <div className="py-6 text-center text-sm">
+                      Ничего не найдено
+                    </div>
+                  </CommandEmpty>
                   <CommandGroup>
                     {filteredOptions.map((option) => (
                       <CommandItem

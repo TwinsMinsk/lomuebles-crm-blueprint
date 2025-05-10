@@ -11,13 +11,16 @@ interface PartnerSelectorProps {
   isLoading: boolean;
 }
 
-const PartnerSelector: React.FC<PartnerSelectorProps> = ({ form, partners, isLoading }) => {
+const PartnerSelector: React.FC<PartnerSelectorProps> = ({ form, partners = [], isLoading }) => {
+  // Ensure partners is always an array
+  const safePartners = Array.isArray(partners) ? partners : [];
+  
   return (
     <EntitySelector
       form={form}
       fieldName="associatedPartnerManufacturerId"
       label="Партнер-изготовитель"
-      options={partners}
+      options={safePartners}
       placeholder="Выберите партнера"
       emptyMessage="Партнер не найден."
       isLoading={isLoading}

@@ -14,19 +14,22 @@ const ContactSelector: React.FC<ContactSelectorProps> = ({ form, contacts = [], 
   // Debug logging to confirm data is being passed
   useEffect(() => {
     console.log("ContactSelector rendered with:", {
-      contactsLength: contacts?.length || 0,
-      firstContact: contacts?.[0] || "none",
+      contactsLength: Array.isArray(contacts) ? contacts.length : 0,
+      firstContact: Array.isArray(contacts) && contacts.length > 0 ? contacts[0] : "none",
       isLoading,
       contactsArray: contacts // Log the actual contacts array
     });
   }, [contacts, isLoading]);
+
+  // Ensure contacts is always an array
+  const safeContacts = Array.isArray(contacts) ? contacts : [];
 
   return (
     <EntitySelector
       form={form}
       fieldName="associatedContactId"
       label="Клиент *"
-      options={contacts || []} // Ensure we always pass an array
+      options={safeContacts}
       placeholder="Выберите клиента"
       emptyMessage="Клиент не найден."
       isLoading={isLoading}

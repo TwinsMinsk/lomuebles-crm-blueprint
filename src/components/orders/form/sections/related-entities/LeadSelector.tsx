@@ -11,13 +11,16 @@ interface LeadSelectorProps {
   isLoading: boolean;
 }
 
-const LeadSelector: React.FC<LeadSelectorProps> = ({ form, leads, isLoading }) => {
+const LeadSelector: React.FC<LeadSelectorProps> = ({ form, leads = [], isLoading }) => {
+  // Ensure leads is always an array
+  const safeLeads = Array.isArray(leads) ? leads : [];
+  
   return (
     <EntitySelector
       form={form}
       fieldName="sourceLeadId"
       label="Исходный лид"
-      options={leads}
+      options={safeLeads}
       placeholder="Выберите лид"
       emptyMessage="Лид не найден."
       isLoading={isLoading}

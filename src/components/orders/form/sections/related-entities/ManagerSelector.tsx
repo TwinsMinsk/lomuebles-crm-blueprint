@@ -11,13 +11,16 @@ interface ManagerSelectorProps {
   isLoading: boolean;
 }
 
-const ManagerSelector: React.FC<ManagerSelectorProps> = ({ form, managers, isLoading }) => {
+const ManagerSelector: React.FC<ManagerSelectorProps> = ({ form, managers = [], isLoading }) => {
+  // Ensure managers is always an array
+  const safeManagers = Array.isArray(managers) ? managers : [];
+  
   return (
     <EntitySelector
       form={form}
       fieldName="assignedUserId"
       label="Ответственный менеджер"
-      options={managers}
+      options={safeManagers}
       placeholder="Выберите менеджера"
       emptyMessage="Менеджер не найден."
       isLoading={isLoading}
