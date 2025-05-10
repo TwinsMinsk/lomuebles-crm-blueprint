@@ -35,7 +35,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
 }) => {
   const field = form.watch(fieldName);
   
-  // Double ensure options is an array for safety
+  // Ensure options is always a valid array
   const safeOptions = Array.isArray(options) ? options : [];
 
   return (
