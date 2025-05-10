@@ -22,8 +22,8 @@ const CalendarFilters: React.FC<CalendarFiltersProps> = ({
 }) => {
   // Ensure we have safe non-empty string values for filters
   const safeCurrentFilters = {
-    assignedUserId: currentFilters.assignedUserId || null,
-    taskStatus: currentFilters.taskStatus || null
+    assignedUserId: currentFilters.assignedUserId === "" ? null : currentFilters.assignedUserId,
+    taskStatus: currentFilters.taskStatus === "" ? null : currentFilters.taskStatus
   };
 
   const {

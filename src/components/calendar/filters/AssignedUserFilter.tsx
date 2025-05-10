@@ -60,8 +60,8 @@ const AssignedUserFilter: React.FC<AssignedUserFilterProps> = ({
           <SelectItem value="all">Все исполнители</SelectItem>
           <SelectItem value={user?.id || "current-user"}>Мои задачи</SelectItem>
           {users.map((user) => (
-            <SelectItem key={user.id} value={user.id}>
-              {user.name}
+            <SelectItem key={user.id || "unknown"} value={user.id || "unknown"}>
+              {user.name || "Unnamed user"}
             </SelectItem>
           ))}
         </SelectContent>

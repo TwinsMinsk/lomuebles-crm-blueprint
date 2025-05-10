@@ -19,7 +19,7 @@ export const useCalendarFilters = (
     initialFilters.taskStatus || null
   );
 
-  // Apply filters
+  // Apply filters - ensure no empty string values
   const applyFilters = () => {
     onFilterChange({
       assignedUserId: assignedUserId === "" ? null : assignedUserId,
@@ -44,8 +44,8 @@ export const useCalendarFilters = (
       assignedUserId: assignedUserId === "" ? null : assignedUserId, 
       taskStatus: taskStatus === "" ? null : taskStatus 
     },
-    setAssignedUserId,
-    setTaskStatus,
+    setAssignedUserId: (value: string | null) => setAssignedUserId(value === "" ? null : value),
+    setTaskStatus: (value: string | null) => setTaskStatus(value === "" ? null : value),
     applyFilters,
     resetFilters,
   };
