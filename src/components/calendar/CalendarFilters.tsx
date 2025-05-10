@@ -20,18 +20,24 @@ const CalendarFilters: React.FC<CalendarFiltersProps> = ({
   onFilterChange,
   currentFilters
 }) => {
+  // Ensure we have safe non-empty string values for filters
+  const safeCurrentFilters = {
+    assignedUserId: currentFilters.assignedUserId || null,
+    taskStatus: currentFilters.taskStatus || null
+  };
+
   const {
     filters,
     setAssignedUserId,
     setTaskStatus,
     applyFilters,
     resetFilters,
-  } = useCalendarFilters(currentFilters, onFilterChange);
+  } = useCalendarFilters(safeCurrentFilters, onFilterChange);
 
   // Apply filters on component mount if they differ from current filters
   useEffect(() => {
-    if (currentFilters.assignedUserId !== filters.assignedUserId || 
-        currentFilters.taskStatus !== filters.taskStatus) {
+    if (safeCurrentFilters.assignedUserId !== filters.assignedUserId || 
+        safeCurrentFilters.taskStatus !== filters.taskStatus) {
       applyFilters();
     }
   }, []);

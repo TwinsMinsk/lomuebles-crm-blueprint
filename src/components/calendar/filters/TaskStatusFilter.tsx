@@ -33,7 +33,7 @@ const TaskStatusFilter: React.FC<TaskStatusFilterProps> = ({
         <SelectContent>
           <SelectItem value="all">Все статусы</SelectItem>
           {taskStatusOptions.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
+            <SelectItem key={option.value} value={option.value || "unknown"}>
               {option.label}
             </SelectItem>
           ))}

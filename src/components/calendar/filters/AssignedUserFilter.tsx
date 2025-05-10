@@ -37,8 +37,8 @@ const AssignedUserFilter: React.FC<AssignedUserFilterProps> = ({
       }
 
       return data.map((user) => ({
-        id: user.id,
-        name: user.full_name || user.id,
+        id: user.id || "unknown-id", // Ensure no empty string IDs
+        name: user.full_name || `User ${user.id || "unknown"}`, // Ensure no empty string names
       }));
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -58,7 +58,7 @@ const AssignedUserFilter: React.FC<AssignedUserFilterProps> = ({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Все исполнители</SelectItem>
-          <SelectItem value={user?.id || ""}>Мои задачи</SelectItem>
+          <SelectItem value={user?.id || "current-user"}>Мои задачи</SelectItem>
           {users.map((user) => (
             <SelectItem key={user.id} value={user.id}>
               {user.name}

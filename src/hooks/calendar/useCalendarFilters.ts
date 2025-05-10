@@ -12,14 +12,18 @@ export const useCalendarFilters = (
   onFilterChange: (filters: CalendarFiltersType) => void
 ) => {
   const { user } = useAuth();
-  const [assignedUserId, setAssignedUserId] = useState<string | null>(initialFilters.assignedUserId);
-  const [taskStatus, setTaskStatus] = useState<string | null>(initialFilters.taskStatus);
+  const [assignedUserId, setAssignedUserId] = useState<string | null>(
+    initialFilters.assignedUserId || (user?.id ? user.id : null)
+  );
+  const [taskStatus, setTaskStatus] = useState<string | null>(
+    initialFilters.taskStatus || null
+  );
 
   // Apply filters
   const applyFilters = () => {
     onFilterChange({
-      assignedUserId,
-      taskStatus,
+      assignedUserId: assignedUserId === "" ? null : assignedUserId,
+      taskStatus: taskStatus === "" ? null : taskStatus,
     });
   };
 
@@ -36,7 +40,10 @@ export const useCalendarFilters = (
   };
 
   return {
-    filters: { assignedUserId, taskStatus },
+    filters: { 
+      assignedUserId: assignedUserId === "" ? null : assignedUserId, 
+      taskStatus: taskStatus === "" ? null : taskStatus 
+    },
     setAssignedUserId,
     setTaskStatus,
     applyFilters,

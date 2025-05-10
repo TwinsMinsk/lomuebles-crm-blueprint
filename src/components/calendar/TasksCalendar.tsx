@@ -26,16 +26,22 @@ const TasksCalendar: React.FC = () => {
   // Convert tasks to calendar events
   const events = convertTasksToEvents(tasks);
 
+  // Make sure filters are properly initialized
+  const safeFilters = {
+    assignedUserId: filters?.assignedUserId || null,
+    taskStatus: filters?.taskStatus || null
+  };
+
   return (
     <div className="space-y-4">
       <div className="bg-white p-4 rounded-lg shadow">
         <CalendarFilters 
           onFilterChange={handleFilterChange} 
-          currentFilters={filters}
+          currentFilters={safeFilters}
         />
         
         <CalendarViewSelector
-          currentView={currentView}
+          currentView={currentView || "dayGridMonth"}
           onViewChange={handleViewChange}
         />
         
