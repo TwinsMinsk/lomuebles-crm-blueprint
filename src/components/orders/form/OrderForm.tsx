@@ -30,12 +30,18 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   
+  // Ensure defaultValues has the correct format for attachedFilesOrderDocs
+  const formattedDefaultValues = {
+    ...defaultValues,
+    attachedFilesOrderDocs: defaultValues?.attachedFilesOrderDocs || []
+  };
+  
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderFormSchema),
     defaultValues: {
       orderType: "Готовая мебель (Tilda)",
       clientLanguage: "ES",
-      ...defaultValues
+      ...formattedDefaultValues
     },
     mode: "onChange"
   });
@@ -111,7 +117,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         payment_status: data.paymentStatus || null,
         delivery_address_full: data.deliveryAddressFull || null,
         notes_history: data.notesHistory || null,
-        closing_date: data.closingDate || null
+        closing_date: data.closingDate || null,
+        attached_files_order_docs: data.attachedFilesOrderDocs || []
       };
       
       // Set status based on order type

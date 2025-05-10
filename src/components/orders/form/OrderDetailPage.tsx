@@ -38,24 +38,24 @@ const OrderDetailPage: React.FC = () => {
           // Transform the data to match our form schema
           setOrder({
             orderNumber: data.order_number,
-            orderName: data.order_name,
+            orderName: data.order_name || "",
             orderType: data.order_type,
-            statusReadyMade: data.status_ready_made,
-            statusCustomMade: data.status_custom_made,
+            statusReadyMade: data.status_ready_made || null,
+            statusCustomMade: data.status_custom_made || null,
             clientLanguage: data.client_language,
             associatedContactId: data.associated_contact_id,
-            associatedCompanyId: data.associated_company_id,
-            sourceLeadId: data.source_lead_id,
-            assignedUserId: data.assigned_user_id,
-            associatedPartnerManufacturerId: data.associated_partner_manufacturer_id,
-            finalAmount: data.final_amount,
-            paymentStatus: data.payment_status,
-            deliveryAddressFull: data.delivery_address_full,
-            notesHistory: data.notes_history,
-            attachedFilesOrderDocs: data.attached_files_order_docs,
-            creatorUserId: data.creator_user_id,
-            creationDate: data.creation_date,
-            closingDate: data.closing_date
+            associatedCompanyId: data.associated_company_id || null,
+            sourceLeadId: data.source_lead_id || null,
+            assignedUserId: data.assigned_user_id || null,
+            associatedPartnerManufacturerId: data.associated_partner_manufacturer_id || null,
+            finalAmount: data.final_amount || null,
+            paymentStatus: data.payment_status || null,
+            deliveryAddressFull: data.delivery_address_full || "",
+            notesHistory: data.notes_history || "",
+            attachedFilesOrderDocs: data.attached_files_order_docs || [],
+            creatorUserId: data.creator_user_id || null,
+            creationDate: data.creation_date || null,
+            closingDate: data.closing_date || null
           });
         }
       } catch (err: any) {
