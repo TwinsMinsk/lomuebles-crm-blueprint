@@ -53,6 +53,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   // Find the selected option
   const selectedOption = safeOptions.find(option => option.id === currentValue);
   
+  // For debugging
   console.log(`EntitySelector for ${String(fieldName)}:`, { 
     currentValue, 
     optionsLength: safeOptions.length,
@@ -109,54 +110,56 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
                 safeOptions.length === 0 ? "Нет доступных данных" : 
                 `Нажмите для выбора ${label.toLowerCase()}`}
               </TooltipContent>
-              <Popover open={open} onOpenChange={setOpen}>
-                <PopoverContent className="w-[300px] p-0 max-h-[300px] overflow-auto" align="start">
-                  {isLoading ? (
-                    <div className="py-6 text-center">
-                      <Loader2 className="w-4 h-4 animate-spin mx-auto mb-2" />
-                      <span className="text-sm text-muted-foreground">Загрузка данных...</span>
-                    </div>
-                  ) : filteredOptions.length > 0 ? (
-                    <Command>
-                      <CommandInput 
-                        placeholder={`Поиск ${placeholder.toLowerCase()}...`} 
-                        onValueChange={setSearchQuery}
-                        value={searchQuery}
-                        className="h-9"
-                      />
-                      <CommandGroup>
-                        {filteredOptions.map((option) => (
-                          <CommandItem
-                            key={String(option.id)}
-                            value={String(option.name)}
-                            onSelect={() => {
-                              form.setValue(fieldName as any, option.id);
-                              setSearchQuery("");
-                              setOpen(false);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                option.id === formField.value
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {option.name || `#${option.id}`}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  ) : (
-                    <div className="py-6 text-center text-sm">
-                      {emptyMessage}
-                    </div>
-                  )}
-                </PopoverContent>
-              </Popover>
             </Tooltip>
           </TooltipProvider>
+          
+          {/* Important: Move the Popover outside of the tooltip to fix potential iteration issues */}
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverContent className="w-[300px] p-0 max-h-[300px] overflow-auto" align="start">
+              {isLoading ? (
+                <div className="py-6 text-center">
+                  <Loader2 className="w-4 h-4 animate-spin mx-auto mb-2" />
+                  <span className="text-sm text-muted-foreground">Загрузка данных...</span>
+                </div>
+              ) : filteredOptions.length > 0 ? (
+                <Command shouldFilter={false}> {/* Important: Disable built-in filtering */}
+                  <CommandInput 
+                    placeholder={`Поиск ${placeholder.toLowerCase()}...`} 
+                    onValueChange={setSearchQuery}
+                    value={searchQuery}
+                    className="h-9"
+                  />
+                  <CommandGroup>
+                    {filteredOptions.map((option) => (
+                      <CommandItem
+                        key={String(option.id)}
+                        value={String(option.name)}
+                        onSelect={() => {
+                          form.setValue(fieldName as any, option.id);
+                          setSearchQuery("");
+                          setOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            option.id === formField.value
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                        {option.name || `#${option.id}`}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              ) : (
+                <div className="py-6 text-center text-sm">
+                  {emptyMessage}
+                </div>
+              )}
+            </PopoverContent>
+          </Popover>
           <FormMessage />
         </FormItem>
       )}

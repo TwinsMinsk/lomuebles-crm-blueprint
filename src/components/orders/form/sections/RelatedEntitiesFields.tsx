@@ -30,11 +30,11 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
   // Add some console logs for debugging
   React.useEffect(() => {
     console.log("RelatedEntitiesFields data:", { 
-      contacts, 
-      companies, 
-      leads, 
-      managers, 
-      partners, 
+      contacts: Array.isArray(contacts) ? contacts.length : "not an array", 
+      companies: Array.isArray(companies) ? companies.length : "not an array", 
+      leads: Array.isArray(leads) ? leads.length : "not an array", 
+      managers: Array.isArray(managers) ? managers.length : "not an array", 
+      partners: Array.isArray(partners) ? partners.length : "not an array", 
       isLoading, 
       error 
     });
@@ -68,28 +68,28 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
         {/* Associated Contact (required) */}
         <ContactSelector 
           form={form} 
-          contacts={contacts} 
+          contacts={contacts || []} 
           isLoading={isLoading} 
         />
 
         {/* Associated Company (optional) */}
         <CompanySelector 
           form={form} 
-          companies={companies} 
+          companies={companies || []} 
           isLoading={isLoading} 
         />
 
         {/* Source Lead (optional) */}
         <LeadSelector 
           form={form} 
-          leads={leads} 
+          leads={leads || []} 
           isLoading={isLoading} 
         />
 
         {/* Assigned Manager (optional) */}
         <ManagerSelector 
           form={form} 
-          managers={managers}
+          managers={managers || []}
           isLoading={isLoading} 
         />
 
@@ -97,7 +97,7 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
         {orderType === "Мебель на заказ" && (
           <PartnerSelector 
             form={form} 
-            partners={partners} 
+            partners={partners || []} 
             isLoading={isLoading} 
           />
         )}

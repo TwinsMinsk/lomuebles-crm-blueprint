@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface EntityOption {
+export interface EntityOption {
   id: number | string;
   name: string;
 }
@@ -170,12 +170,12 @@ export const useRelatedEntitiesData = (): RelatedEntitiesData => {
           fetchPartners()
         ]);
         
-        // Update state with fetched data (always as arrays)
-        setContacts(contactsData);
-        setCompanies(companiesData);
-        setLeads(leadsData);
-        setManagers(managersData);
-        setPartners(partnersData);
+        // Update state with fetched data - ensuring they're always arrays
+        setContacts(contactsData || []);
+        setCompanies(companiesData || []);
+        setLeads(leadsData || []);
+        setManagers(managersData || []);
+        setPartners(partnersData || []);
         
       } catch (error: any) {
         console.error("Error in fetchRelatedData:", error);
