@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useOrders } from "@/hooks/useOrders";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Custom hook to fetch and manage orders data for task related entities
@@ -8,19 +8,21 @@ import { useOrders } from "@/hooks/useOrders";
 export function useRelatedOrdersData() {
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { fetchOrders } = useOrders();
 
   useEffect(() => {
     const loadOrders = async () => {
       try {
         setIsLoading(true);
-        const fetchedOrders = await fetchOrders({
-          page: 1,
-          pageSize: 100,
-          sortColumn: 'creation_date',
-          sortDirection: 'desc',
-          filters: {}
-        });
+        
+        // Fetch orders directly from Supabase instead of using the useOrders hook
+        const { data: fetchedOrders, error } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100);
+        
+        if (error) throw error;
+        
         setOrders(Array.isArray(fetchedOrders) ? fetchedOrders : []);
       } catch (error) {
         console.error("Failed to load orders:", error);
@@ -31,7 +33,7 @@ export function useRelatedOrdersData() {
     };
     
     loadOrders();
-  }, [fetchOrders]);
+  }, []);
 
   return { orders, isLoading };
 }

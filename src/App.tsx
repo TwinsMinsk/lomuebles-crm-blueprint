@@ -18,6 +18,7 @@ const Tasks = React.lazy(() => import('./pages/Tasks'));
 const Leads = React.lazy(() => import('./pages/Leads'));
 const Contacts = React.lazy(() => import('./pages/Contacts'));
 const Companies = React.lazy(() => import('./pages/Companies'));
+const Orders = React.lazy(() => import('./pages/Orders'));
 const Products = React.lazy(() => import('./pages/Products'));
 const Suppliers = React.lazy(() => import('./pages/Suppliers')); 
 const Partners = React.lazy(() => import('./pages/Partners')); 
@@ -66,7 +67,7 @@ function App() {
                   <Route path="leads" element={<Leads />} />
                   <Route path="contacts" element={<Contacts />} />
                   <Route path="companies" element={<Companies />} />
-                  {/* Orders routes removed */}
+                  <Route path="orders" element={<Orders />} />
                   <Route path="products" element={<Products />} />
                   <Route path="suppliers" element={<Suppliers />} />
                   <Route path="partners" element={<Partners />} />

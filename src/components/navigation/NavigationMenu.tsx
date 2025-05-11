@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -10,7 +11,7 @@ import {
   Truck,
   Settings,
   UserCog,
-  LogOut
+  Package
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -28,6 +29,7 @@ const menuItems: MenuItem[] = [
   { label: "Лиды", path: "/leads", icon: Users },
   { label: "Контакты", path: "/contacts", icon: Users },
   { label: "Компании", path: "/companies", icon: Building },
+  { label: "Заказы", path: "/orders", icon: Package },
   { label: "Задачи", path: "/tasks", icon: ListChecks },
   { label: "Календарь", path: "/calendar", icon: Calendar },
   { label: "Товары CRM", path: "/products", icon: ShoppingCart },
