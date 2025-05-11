@@ -20,6 +20,7 @@ export const SimplifiedRelatedEntities: React.FC<SimplifiedRelatedEntitiesProps>
     error 
   } = useSimplifiedRelatedEntities();
 
+  // Add debug logs
   console.log("SimplifiedRelatedEntities rendered with:", {
     contactsLength: contacts?.length || 0,
     managersLength: managers?.length || 0,

@@ -1,5 +1,4 @@
 
-import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -15,7 +14,7 @@ export interface SimplifiedRelatedEntitiesData {
   error: string | null;
 }
 
-export const useSimplifiedRelatedEntities = () => {
+export const useSimplifiedRelatedEntities = (): SimplifiedRelatedEntitiesData => {
   // Fetch contacts with proper error handling
   const contactsQuery = useQuery({
     queryKey: ['orderContacts'],
@@ -39,7 +38,8 @@ export const useSimplifiedRelatedEntities = () => {
       }
     },
     retry: 2,
-    staleTime: 5 * 60 * 1000 // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    initialData: [] // Set initial data to empty array
   });
 
   // Fetch managers (users) with proper error handling
@@ -65,7 +65,8 @@ export const useSimplifiedRelatedEntities = () => {
       }
     },
     retry: 2,
-    staleTime: 5 * 60 * 1000 // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    initialData: [] // Set initial data to empty array
   });
 
   // Combine all errors into a single message
@@ -73,10 +74,18 @@ export const useSimplifiedRelatedEntities = () => {
     ? `${contactsQuery.error?.message || ''} ${managersQuery.error?.message || ''}`.trim()
     : null;
 
+  // Debug log to track data availability
+  console.log("useSimplifiedRelatedEntities", {
+    contactsData: contactsQuery.data,
+    managersData: managersQuery.data,
+    isLoading: contactsQuery.isLoading || managersQuery.isLoading,
+    error: errorMessage
+  });
+
   // Always ensure we return arrays, even when data is loading or errors occur
   return {
-    contacts: contactsQuery.data || [],
-    managers: managersQuery.data || [],
+    contacts: Array.isArray(contactsQuery.data) ? contactsQuery.data : [],
+    managers: Array.isArray(managersQuery.data) ? managersQuery.data : [],
     isLoading: contactsQuery.isLoading || managersQuery.isLoading,
     error: errorMessage
   };

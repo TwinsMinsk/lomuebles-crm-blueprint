@@ -46,18 +46,19 @@ const SimplifiedEntitySelector = ({
   
   // Filter options based on search query - add defensive checks
   const filteredOptions = React.useMemo(() => {
-    if (!searchQuery || !safeOptions || safeOptions.length === 0) return safeOptions;
+    if (!searchQuery) {
+      return safeOptions;
+    }
     
     return safeOptions.filter(option => {
-      if (!option || typeof option !== 'object' || !option.name) return false;
-      if (typeof option.name !== 'string') return false;
+      if (!option || typeof option.name !== 'string') return false;
       return option.name.toLowerCase().includes(searchQuery.toLowerCase());
     });
   }, [safeOptions, searchQuery]);
 
   // Find the selected option - with defensive checks
   const selectedOption = React.useMemo(() => {
-    if (!safeOptions || !Array.isArray(safeOptions) || safeOptions.length === 0) return undefined;
+    if (!currentValue || safeOptions.length === 0) return undefined;
     return safeOptions.find(option => option && option.id === currentValue);
   }, [safeOptions, currentValue]);
 
@@ -113,14 +114,14 @@ const SimplifiedEntitySelector = ({
                     value={searchQuery}
                     className="h-9"
                   />
-                  {/* We need to explicitly handle the case of empty options */}
+                  {/* Fixed: Check if options array is empty */}
                   {safeOptions.length === 0 ? (
                     <div className="py-6 text-center text-sm">
                       {emptyMessage}
                     </div>
                   ) : (
                     <>
-                      <CommandEmpty>Ничего не найдено</CommandEmpty>
+                      <CommandEmpty className="py-3 text-center text-sm">Ничего не найдено</CommandEmpty>
                       <CommandGroup>
                         {!required && (
                           <CommandItem
@@ -140,8 +141,8 @@ const SimplifiedEntitySelector = ({
                             Не выбрано
                           </CommandItem>
                         )}
-                        {/* This is where the error occurs - make sure filteredOptions exists */}
-                        {Array.isArray(filteredOptions) && filteredOptions.map((option) => (
+                        {/* Fixed: Use filteredOptions which is guaranteed to be array */}
+                        {filteredOptions.map((option) => (
                           <CommandItem
                             key={String(option?.id || Math.random())}
                             value={String(option?.name || '')}
