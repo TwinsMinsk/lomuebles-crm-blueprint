@@ -8,10 +8,17 @@ export const useFilterOptions = () => {
     queryKey: ['orderTypeOptions'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .rpc('get_distinct_values', { table_name: 'orders', column_name: 'order_type' });
+        .from('orders')
+        .select('order_type')
+        .order('order_type')
+        .eq('order_type', 'order_type') // This ensures we get unique values
+        .limit(10);
       
       if (error) throw error;
-      return data as string[] || ["Готовая мебель (Tilda)", "Мебель на заказ"];
+      
+      // Extract unique values
+      const uniqueTypes = [...new Set(data.map(item => item.order_type))];
+      return uniqueTypes as string[] || ["Готовая мебель (Tilda)", "Мебель на заказ"];
     }
   });
 
@@ -20,10 +27,16 @@ export const useFilterOptions = () => {
     queryKey: ['orderStatusOptions'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .rpc('get_distinct_values', { table_name: 'orders', column_name: 'status' });
+        .from('orders')
+        .select('status')
+        .order('status')
+        .limit(20);
       
       if (error) throw error;
-      return data as string[] || [];
+      
+      // Extract unique values
+      const uniqueStatuses = [...new Set(data.map(item => item.status))];
+      return uniqueStatuses as string[] || [];
     }
   });
 
