@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -6,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Order } from "@/types/order";
 import { useAddOrder } from "@/hooks/orders/useAddOrder";
 import { useUpdateOrder } from "@/hooks/orders/useUpdateOrder";
-import { useUsers } from "@/hooks/useUsers";
+import { useUsers } from "@/hooks/users";
 import { useContacts } from "@/hooks/useContacts";
 import { useCompanies } from "@/hooks/useCompanies";
 import { useLeads } from "@/hooks/useLeads";
@@ -32,6 +33,11 @@ import {
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+
+// Define order status constants
+const ORDER_TYPES = ["Готовая мебель (Tilda)", "Мебель на заказ"];
+const READY_MADE_STATUSES = ["Новый", "Ожидает подтверждения", "Ожидает оплаты", "Оплачен", "Передан на сборку", "Готов к отгрузке", "В доставке", "Выполнен", "Отменен"];
+const CUSTOM_MADE_STATUSES = ["Новый запрос", "Предварительная оценка", "Согласование ТЗ/Дизайна", "Ожидает замера", "Замер выполнен", "Проектирование", "Согласование проекта", "Ожидает предоплаты", "В производстве", "Готов к монтажу", "Монтаж", "Завершен", "Отменен"];
 
 // Define the order form schema
 const orderFormSchema = z.object({
@@ -110,10 +116,24 @@ export default function OrderForm({ order, onSuccess }: OrderFormProps) {
   const [statusOptions, setStatusOptions] = useState<string[]>([]);
   
   useEffect(() => {
-    // Filter statuses based on order type if needed
-    // For now, we're using all statuses regardless of type
-    setStatusOptions(statuses || []);
-  }, [selectedOrderType, statuses]);
+    // Set status options based on order type
+    if (selectedOrderType === "Готовая мебель (Tilda)") {
+      setStatusOptions(READY_MADE_STATUSES);
+    } else {
+      setStatusOptions(CUSTOM_MADE_STATUSES);
+    }
+    
+    // Reset status field when order type changes
+    const currentStatus = form.getValues("status");
+    const newStatusOptions = selectedOrderType === "Готовая мебель (Tilda)" 
+      ? READY_MADE_STATUSES 
+      : CUSTOM_MADE_STATUSES;
+    
+    // If current status is not in the new options list, reset to first item
+    if (!newStatusOptions.includes(currentStatus)) {
+      form.setValue("status", newStatusOptions[0]);
+    }
+  }, [selectedOrderType, form]);
   
   // Contacts data for selection
   const { contacts, loading: contactsLoading } = useContacts({
@@ -207,7 +227,7 @@ export default function OrderForm({ order, onSuccess }: OrderFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {orderTypes.map((type) => (
+                    {ORDER_TYPES.map((type) => (
                       <SelectItem key={type} value={type}>
                         {type}
                       </SelectItem>
@@ -228,7 +248,7 @@ export default function OrderForm({ order, onSuccess }: OrderFormProps) {
                 <FormLabel>Статус</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                   disabled={isSubmitting || isLoadingOptions}
                 >
                   <FormControl>
@@ -488,7 +508,7 @@ export default function OrderForm({ order, onSuccess }: OrderFormProps) {
             name="final_amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Итогов��я сумма</FormLabel>
+                <FormLabel>Итоговая сумма</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 

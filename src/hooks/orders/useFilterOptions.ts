@@ -1,49 +1,23 @@
 
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
+
+// Define order type and status constants
+const ORDER_TYPES = ["Готовая мебель (Tilda)", "Мебель на заказ"];
+const READY_MADE_STATUSES = ["Новый", "Ожидает подтверждения", "Ожидает оплаты", "Оплачен", "Передан на сборку", "Готов к отгрузке", "В доставке", "Выполнен", "Отменен"];
+const CUSTOM_MADE_STATUSES = ["Новый запрос", "Предварительная оценка", "Согласование ТЗ/Дизайна", "Ожидает замера", "Замер выполнен", "Проектирование", "Согласование проекта", "Ожидает предоплаты", "В производстве", "Готов к монтажу", "Монтаж", "Завершен", "Отменен"];
+
+// Combine status options for filtering
+const ALL_STATUSES = [...new Set([...READY_MADE_STATUSES, ...CUSTOM_MADE_STATUSES])];
 
 export const useFilterOptions = () => {
-  // Fetch order types
-  const orderTypesQuery = useQuery({
-    queryKey: ['orderTypeOptions'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('order_type')
-        .order('order_type')
-        .eq('order_type', 'order_type') // This ensures we get unique values
-        .limit(10);
-      
-      if (error) throw error;
-      
-      // Extract unique values
-      const uniqueTypes = [...new Set(data.map(item => item.order_type))];
-      return uniqueTypes as string[] || ["Готовая мебель (Tilda)", "Мебель на заказ"];
-    }
-  });
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch status options
-  const statusesQuery = useQuery({
-    queryKey: ['orderStatusOptions'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('status')
-        .order('status')
-        .limit(20);
-      
-      if (error) throw error;
-      
-      // Extract unique values
-      const uniqueStatuses = [...new Set(data.map(item => item.status))];
-      return uniqueStatuses as string[] || [];
-    }
-  });
-
+  // Return predefined options
   return {
-    orderTypes: orderTypesQuery.data || ["Готовая мебель (Tilda)", "Мебель на заказ"],
-    statuses: statusesQuery.data || [],
-    isLoading: orderTypesQuery.isLoading || statusesQuery.isLoading,
-    error: orderTypesQuery.error || statusesQuery.error
+    orderTypes: ORDER_TYPES,
+    statuses: ALL_STATUSES,
+    readyMadeStatuses: READY_MADE_STATUSES,
+    customMadeStatuses: CUSTOM_MADE_STATUSES,
+    isLoading
   };
 };
