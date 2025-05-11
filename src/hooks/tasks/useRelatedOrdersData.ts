@@ -4,32 +4,48 @@ import { supabase } from "@/integrations/supabase/client";
 import { Order } from "@/types/order";
 
 /**
- * Custom hook to fetch and manage orders data for task related entities
+ * Hook to fetch orders data for related entities selection
+ * Used in tasks and other forms that need to reference orders
  */
-export function useRelatedOrdersData() {
+export const useRelatedOrdersData = (searchTerm: string = "", limit: number = 20) => {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const loadOrders = async () => {
+    const fetchOrders = async () => {
+      setIsLoading(true);
+      setError(null);
+
       try {
-        setIsLoading(true);
-        
-        // Fetch orders directly from Supabase
-        const { data: fetchedOrders, error } = await supabase
+        // Base query to orders table
+        let query = supabase
           .from('orders')
-          .select('*, contacts(full_name), companies(company_name)')
-          .order('created_at', { ascending: false })
-          .limit(100);
-        
-        if (error) throw error;
-        
-        // Map the data to match the Order type
-        const processedData = (fetchedOrders || []).map(order => ({
+          .select(`
+            *,
+            contacts:client_contact_id(contact_id, full_name),
+            profiles:assigned_user_id(id, full_name)
+          `)
+          .limit(limit);
+
+        // Apply search filter if provided
+        if (searchTerm) {
+          query = query.or(
+            `order_number.ilike.%${searchTerm}%,order_name.ilike.%${searchTerm}%`
+          );
+        }
+
+        // Execute the query
+        const { data, error: fetchError } = await query.order('created_at', { ascending: false });
+
+        if (fetchError) throw fetchError;
+
+        // Transform data to match our Order type
+        const transformedOrders = (data || []).map(order => ({
           id: order.id,
           created_at: order.created_at,
           order_number: order.order_number,
-          order_name: order.order_name || null,
+          order_name: order.order_name,
           order_type: order.order_type as "Готовая мебель (Tilda)" | "Мебель на заказ",
           status: order.status,
           client_contact_id: order.client_contact_id,
@@ -41,25 +57,25 @@ export function useRelatedOrdersData() {
           payment_status: order.payment_status,
           delivery_address_full: order.delivery_address_full,
           notes_history: order.notes_history,
-          attached_files_order_docs: order.attached_files_order_docs,
+          attached_files_order_docs: order.attached_files_order_docs as any[] | null,
           closing_date: order.closing_date,
           creator_user_id: order.creator_user_id,
           client_language: order.client_language as "ES" | "EN" | "RU",
-          contact_name: order.contacts?.full_name || null,
-          company_name: order.companies?.company_name || null,
+          contact_name: order.contacts?.full_name,
+          assigned_user_name: order.profiles?.full_name
         }));
-        
-        setOrders(processedData);
-      } catch (error) {
-        console.error("Failed to load orders:", error);
-        setOrders([]);
+
+        setOrders(transformedOrders);
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+        setError(err instanceof Error ? err : new Error('Unknown error occurred'));
       } finally {
         setIsLoading(false);
       }
     };
-    
-    loadOrders();
-  }, []);
 
-  return { orders, isLoading };
-}
+    fetchOrders();
+  }, [searchTerm, limit]);
+
+  return { orders, isLoading, error };
+};

@@ -7,7 +7,7 @@ import { Order } from "@/types/order";
 export const addOrder = async (orderData: Partial<Order>) => {
   const { data, error } = await supabase
     .from('orders')
-    .insert([orderData])
+    .insert(orderData)
     .select();
   
   if (error) throw error;
@@ -17,7 +17,7 @@ export const addOrder = async (orderData: Partial<Order>) => {
 export const useAddOrder = () => {
   const queryClient = useQueryClient();
   
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: addOrder,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
@@ -27,4 +27,10 @@ export const useAddOrder = () => {
       toast.error(`Ошибка создания заказа: ${err.message}`);
     }
   });
+
+  return {
+    addOrder: mutation.mutate,
+    isLoading: mutation.isPending,
+    error: mutation.error
+  };
 };
