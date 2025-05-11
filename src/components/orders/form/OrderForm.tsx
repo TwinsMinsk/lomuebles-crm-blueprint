@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -161,9 +160,13 @@ export default function OrderForm({ order, onSuccess }: OrderFormProps) {
         });
         toast.success("Заказ успешно обновлен");
       } else {
-        // Create new order
+        // Create new order - ensure required fields are present
         await addOrder({
           ...values,
+          client_contact_id: values.client_contact_id as number, // Cast to ensure it's not undefined
+          client_language: values.client_language,
+          order_type: values.order_type,
+          status: values.status,
           creator_user_id: user.id,
         });
         toast.success("Заказ успешно создан");

@@ -1,52 +1,43 @@
 
-import React from "react";
-import { useFormContext } from "react-hook-form";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 import { useContacts } from "@/hooks/useContacts";
+import EntitySelector from "./EntitySelector";
 
-const ContactSelector: React.FC = () => {
-  const { control } = useFormContext();
-  const { contacts = [] } = useContacts({
+interface ContactSelectorProps {
+  value: number | undefined;
+  onChange: (value: number | undefined) => void;
+}
+
+export const ContactSelector = ({ value, onChange }: ContactSelectorProps) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const { contacts, loading: isLoading } = useContacts({
     page: 1,
-    pageSize: 100,
-    sortColumn: 'creation_date',
-    sortDirection: 'desc'
+    pageSize: 50,
+    sortColumn: "full_name",
+    sortDirection: "asc"
   });
 
+  // Format contact data for display in entity selector
+  const formattedContacts = contacts.map((contact) => ({
+    id: contact.contact_id,
+    name: contact.full_name || `Контакт #${contact.contact_id}`,
+    description: contact.primary_phone || contact.primary_email || '',
+    imageUrl: null,
+    subtitle: contact.company_name || 'Без компании'
+  }));
+
   return (
-    <FormField
-      control={control}
-      name="related_contact_id"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Связанный контакт</FormLabel>
-          <Select
-            onValueChange={(value) => field.onChange(value === "none" ? null : parseInt(value))}
-            value={field.value?.toString() || "none"}
-          >
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Выберите контакт" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              <SelectItem value="none">Нет</SelectItem>
-              {contacts && contacts.length > 0 ? contacts.map((contact) => (
-                <SelectItem 
-                  key={contact.contact_id} 
-                  value={String(contact.contact_id)}
-                >
-                  {contact.full_name || `Контакт #${contact.contact_id}`}
-                </SelectItem>
-              )) : (
-                <SelectItem value="no-contacts-available">Нет доступных контактов</SelectItem>
-              )}
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )}
+    <EntitySelector
+      value={value}
+      onChange={onChange}
+      options={formattedContacts}
+      isLoading={isLoading}
+      error={null}
+      searchTerm={searchTerm}
+      onSearchChange={setSearchTerm}
+      placeholder="Поиск контакта..."
+      emptyMessage="Контакты не найдены"
+      entityLabel="контакт"
     />
   );
 };

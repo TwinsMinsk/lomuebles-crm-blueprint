@@ -41,7 +41,7 @@ export const useRelatedOrdersData = (searchTerm: string = "", limit: number = 20
         if (fetchError) throw fetchError;
 
         // Transform data to match our Order type
-        const transformedOrders = (data || []).map(order => ({
+        const transformedOrders = (data || []).map((order: any) => ({
           id: order.id,
           created_at: order.created_at,
           order_number: order.order_number,

@@ -1,52 +1,38 @@
 
-import React from "react";
-import { useFormContext } from "react-hook-form";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 import { useLeads } from "@/hooks/useLeads";
+import EntitySelector from "./EntitySelector";
 
-const LeadSelector: React.FC = () => {
-  const { control } = useFormContext();
-  const { leads = [] } = useLeads({
-    page: 1,
-    pageSize: 100,
-    sortColumn: 'creation_date',
-    sortDirection: 'desc'
-  });
+interface LeadSelectorProps {
+  value: number | undefined;
+  onChange: (value: number | undefined) => void;
+}
+
+export const LeadSelector = ({ value, onChange }: LeadSelectorProps) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const { leads, loading: isLoading } = useLeads();
+
+  // Format lead data for the entity selector
+  const formattedLeads = leads.map((lead) => ({
+    id: lead.lead_id,
+    name: lead.name || `Лид #${lead.lead_id}`,
+    description: `${lead.lead_status || 'Новый'} - ${lead.lead_source || 'Неизвестно'}`,
+    imageUrl: null,
+    subtitle: lead.email || lead.phone || 'Нет контактной информации'
+  }));
 
   return (
-    <FormField
-      control={control}
-      name="related_lead_id"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Связанный лид</FormLabel>
-          <Select
-            onValueChange={(value) => field.onChange(value === "none" ? null : parseInt(value))}
-            value={field.value?.toString() || "none"}
-          >
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Выберите лид" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              <SelectItem value="none">Нет</SelectItem>
-              {leads && leads.length > 0 ? leads.map((lead) => (
-                <SelectItem 
-                  key={lead.lead_id} 
-                  value={String(lead.lead_id)}
-                >
-                  {lead.name || `Лид #${lead.lead_id}`}
-                </SelectItem>
-              )) : (
-                <SelectItem value="no-leads-available">Нет доступных лидов</SelectItem>
-              )}
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )}
+    <EntitySelector
+      value={value}
+      onChange={onChange}
+      options={formattedLeads}
+      isLoading={isLoading}
+      error={null}
+      searchTerm={searchTerm}
+      onSearchChange={setSearchTerm}
+      placeholder="Поиск лида..."
+      emptyMessage="Лиды не найдены"
+      entityLabel="лид"
     />
   );
 };

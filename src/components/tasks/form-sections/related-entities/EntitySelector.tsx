@@ -1,167 +1,113 @@
 
-import React, { useState } from "react";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
-import { cn } from "@/lib/utils";
-import { UseFormReturn } from "react-hook-form";
-import { TaskFormValues } from "../../schema/taskFormSchema";
+import React from "react";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
 
 export interface EntityOption {
   id: number | string;
   name: string;
+  description?: string;
+  imageUrl?: string | null;
+  subtitle?: string;
 }
 
-interface EntitySelectorProps {
-  form: UseFormReturn<TaskFormValues>;
-  fieldName: keyof TaskFormValues;
-  label: string;
+export interface EntitySelectorProps {
+  value: number | string | undefined;
+  onChange: (value: number | undefined) => void;
   options: EntityOption[];
+  isLoading: boolean;
+  error: string | null;
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
   placeholder: string;
   emptyMessage: string;
-  isLoading: boolean;
+  entityLabel: string;
 }
 
 const EntitySelector: React.FC<EntitySelectorProps> = ({
-  form,
-  fieldName,
-  label,
-  options = [],
+  value,
+  onChange,
+  options,
+  isLoading,
+  error,
+  searchTerm,
+  onSearchChange,
   placeholder,
   emptyMessage,
-  isLoading
+  entityLabel
 }) => {
-  const [open, setOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  
-  // Get the current value from form
-  const currentValue = form.watch(fieldName);
-  
-  // Ensure options is always an array and never undefined
-  const safeOptions = Array.isArray(options) ? options : [];
-  
-  // Filter options based on search query
-  const filteredOptions = React.useMemo(() => {
-    if (!searchQuery) return safeOptions;
-    return safeOptions.filter(option => {
-      // Safely check if name exists and has toLowerCase method
-      if (!option?.name) return false;
-      return option.name.toLowerCase?.().includes(searchQuery.toLowerCase());
-    });
-  }, [safeOptions, searchQuery]);
-
-  // Find the selected option
-  const selectedOption = React.useMemo(() => 
-    safeOptions.find(option => option.id === currentValue),
-    [safeOptions, currentValue]
-  );
+  const selectedOption = options.find(option => option.id === value);
 
   return (
-    <FormField
-      control={form.control}
-      name={fieldName as any}
-      render={({ field: formField }) => (
-        <FormItem className="flex flex-col">
-          <FormLabel>{label}</FormLabel>
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <FormControl>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  className={cn(
-                    "justify-between w-full",
-                    !formField.value && "text-muted-foreground"
-                  )}
-                  disabled={isLoading}
-                  onClick={() => setOpen(!open)}
-                  type="button"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center">
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      <span>Загрузка...</span>
-                    </div>
-                  ) : formField.value ? (
-                    selectedOption?.name || placeholder
-                  ) : (
-                    placeholder
-                  )}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </FormControl>
-            </PopoverTrigger>
-            <PopoverContent className="w-[300px] p-0 max-h-[300px] overflow-auto" align="start">
-              {isLoading ? (
-                <div className="py-6 text-center">
-                  <Loader2 className="w-4 h-4 animate-spin mx-auto mb-2" />
-                  <span className="text-sm text-muted-foreground">Загрузка данных...</span>
-                </div>
-              ) : safeOptions.length > 0 ? (
-                <Command shouldFilter={false}>
-                  <CommandInput 
-                    placeholder={`Поиск ${placeholder.toLowerCase()}...`} 
-                    onValueChange={setSearchQuery}
-                    value={searchQuery}
-                    className="h-9"
-                  />
-                  <CommandGroup>
-                    <CommandItem
-                      value="none"
-                      onSelect={() => {
-                        form.setValue(fieldName as any, null);
-                        setSearchQuery("");
-                        setOpen(false);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          formField.value === null ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      Не выбрано
-                    </CommandItem>
-                    {filteredOptions.length === 0 ? (
-                      <CommandItem value="no-results" disabled>
-                        Ничего не найдено
-                      </CommandItem>
-                    ) : (
-                      filteredOptions.map((option) => (
-                        <CommandItem
-                          key={String(option.id)}
-                          value={String(option.name || '')}
-                          onSelect={() => {
-                            form.setValue(fieldName as any, option.id);
-                            setSearchQuery("");
-                            setOpen(false);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              option.id === formField.value ? "opacity-100" : "opacity-0"
-                            )}
-                          />
-                          {option.name || `#${option.id}`}
-                        </CommandItem>
-                      ))
-                    )}
-                  </CommandGroup>
-                </Command>
-              ) : (
-                <div className="py-6 text-center text-sm">
-                  {emptyMessage}
-                </div>
+    <div className="space-y-2">
+      <label className="text-sm font-medium">{entityLabel}</label>
+      {selectedOption ? (
+        <div className="flex flex-col space-y-2">
+          <div className="flex items-center p-2 rounded border">
+            <div className="flex-1">
+              <div className="font-medium">{selectedOption.name}</div>
+              {selectedOption.subtitle && (
+                <div className="text-sm text-muted-foreground">{selectedOption.subtitle}</div>
               )}
-            </PopoverContent>
-          </Popover>
-          <FormMessage />
-        </FormItem>
+            </div>
+            <button
+              type="button"
+              onClick={() => onChange(undefined)}
+              className="text-xs text-muted-foreground hover:text-destructive"
+            >
+              Очистить
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={placeholder}
+              value={searchTerm}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+
+          <div className="border rounded-md max-h-48 overflow-y-auto">
+            {isLoading ? (
+              <div className="flex items-center justify-center p-4">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <span className="text-sm">Загрузка...</span>
+              </div>
+            ) : error ? (
+              <div className="p-4 text-sm text-destructive">
+                Ошибка: {error}
+              </div>
+            ) : options.length === 0 ? (
+              <div className="p-4 text-sm text-muted-foreground">
+                {emptyMessage}
+              </div>
+            ) : (
+              <ul className="py-1">
+                {options.map((option) => (
+                  <li
+                    key={option.id}
+                    className="px-2 py-1.5 hover:bg-accent cursor-pointer"
+                    onClick={() => onChange(Number(option.id))}
+                  >
+                    <div className="font-medium">{option.name}</div>
+                    {option.description && (
+                      <div className="text-xs text-muted-foreground">
+                        {option.description}
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
       )}
-    />
+    </div>
   );
 };
 

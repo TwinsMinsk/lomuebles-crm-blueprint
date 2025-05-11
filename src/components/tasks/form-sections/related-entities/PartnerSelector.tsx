@@ -1,47 +1,38 @@
 
-import React from "react";
-import { useFormContext } from "react-hook-form";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 import { usePartners } from "@/hooks/usePartners";
+import EntitySelector from "./EntitySelector";
 
-const PartnerSelector: React.FC = () => {
-  const { control } = useFormContext();
-  const { partners = [] } = usePartners();
+interface PartnerSelectorProps {
+  value: number | undefined;
+  onChange: (value: number | undefined) => void;
+}
+
+export const PartnerSelector = ({ value, onChange }: PartnerSelectorProps) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const { partners, loading: isLoading } = usePartners(1, 50, "company_name", "asc");
+  
+  // Format partner data for display in entity selector
+  const formattedPartners = partners.map((partner) => ({
+    id: partner.partner_manufacturer_id,
+    name: partner.company_name || `Партнер #${partner.partner_manufacturer_id}`,
+    description: partner.specialization || '',
+    imageUrl: null,
+    subtitle: partner.contact_person || 'Без контактного лица'
+  }));
 
   return (
-    <FormField
-      control={control}
-      name="related_partner_manufacturer_id"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Связанный партнер</FormLabel>
-          <Select
-            onValueChange={(value) => field.onChange(value === "none" ? null : parseInt(value))}
-            value={field.value?.toString() || "none"}
-          >
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Выберите партнера" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              <SelectItem value="none">Нет</SelectItem>
-              {partners && partners.length > 0 ? partners.map((partner) => (
-                <SelectItem 
-                  key={partner.partner_manufacturer_id} 
-                  value={String(partner.partner_manufacturer_id)}
-                >
-                  {partner.company_name || `Партнер #${partner.partner_manufacturer_id}`}
-                </SelectItem>
-              )) : (
-                <SelectItem value="no-partners-available">Нет доступных партнеров</SelectItem>
-              )}
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )}
+    <EntitySelector
+      value={value}
+      onChange={onChange}
+      options={formattedPartners}
+      isLoading={isLoading}
+      error={null}
+      searchTerm={searchTerm}
+      onSearchChange={setSearchTerm}
+      placeholder="Поиск партнера..."
+      emptyMessage="Партнеры не найдены"
+      entityLabel="партнер"
     />
   );
 };
