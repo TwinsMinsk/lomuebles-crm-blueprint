@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   // Get the current value from form
   const currentValue = form.watch(fieldName);
   
-  // Ensure options is ALWAYS an array
+  // Ensure options is ALWAYS an array and never undefined
   const safeOptions = Array.isArray(options) ? options : [];
   
   // Filter options based on search query
@@ -50,7 +50,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
     if (!searchQuery) return safeOptions;
     return safeOptions.filter(option => {
       // Safely check if name exists and has toLowerCase method
-      if (!option.name) return false;
+      if (!option?.name) return false;
       return option.name.toLowerCase?.().includes(searchQuery.toLowerCase());
     });
   }, [safeOptions, searchQuery]);
@@ -60,17 +60,6 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
     safeOptions.find(option => option.id === currentValue),
     [safeOptions, currentValue]
   );
-
-  // Debug logging
-  useEffect(() => {
-    console.log(`EntitySelector ${String(fieldName)}:`, {
-      optionsLength: safeOptions.length,
-      currentValue,
-      selectedOption: selectedOption || "none",
-      isSearchActive: !!searchQuery,
-      filteredOptionsCount: filteredOptions.length
-    });
-  }, [fieldName, safeOptions.length, currentValue, selectedOption, searchQuery, filteredOptions.length]);
 
   // Add a display label with required indicator
   const displayLabel = required ? `${label} *` : label;
@@ -134,36 +123,32 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
                     value={searchQuery}
                     className="h-9"
                   />
-                  {filteredOptions.length === 0 ? (
-                    <CommandEmpty>
-                      <div className="py-6 text-center text-sm">
+                  <CommandGroup>
+                    {/* Add "None" option for non-required fields */}
+                    {!required && (
+                      <CommandItem
+                        value="none"
+                        onSelect={() => {
+                          form.setValue(fieldName as any, null);
+                          setSearchQuery("");
+                          setOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            formField.value === null ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        Не выбрано
+                      </CommandItem>
+                    )}
+                    {filteredOptions.length === 0 ? (
+                      <CommandItem value="no-results" disabled>
                         Ничего не найдено
-                      </div>
-                    </CommandEmpty>
-                  ) : (
-                    <CommandGroup>
-                      {/* Add "None" option for non-required fields */}
-                      {!required && (
-                        <CommandItem
-                          value="none"
-                          onSelect={() => {
-                            form.setValue(fieldName as any, null);
-                            setSearchQuery("");
-                            setOpen(false);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              formField.value === null
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          Не выбрано
-                        </CommandItem>
-                      )}
-                      {filteredOptions.map((option) => (
+                      </CommandItem>
+                    ) : (
+                      filteredOptions.map((option) => (
                         <CommandItem
                           key={String(option.id)}
                           value={String(option.name || '')}
@@ -176,16 +161,14 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
                           <Check
                             className={cn(
                               "mr-2 h-4 w-4",
-                              option.id === formField.value
-                                ? "opacity-100"
-                                : "opacity-0"
+                              option.id === formField.value ? "opacity-100" : "opacity-0"
                             )}
                           />
                           {option.name || `#${option.id}`}
                         </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  )}
+                      ))
+                    )}
+                  </CommandGroup>
                 </Command>
               ) : (
                 <div className="py-6 text-center text-sm">

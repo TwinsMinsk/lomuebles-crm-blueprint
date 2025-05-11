@@ -39,7 +39,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   // Get the current value from form
   const currentValue = form.watch(fieldName);
   
-  // Ensure options is always an array
+  // Ensure options is always an array and never undefined
   const safeOptions = Array.isArray(options) ? options : [];
   
   // Filter options based on search query
@@ -47,7 +47,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
     if (!searchQuery) return safeOptions;
     return safeOptions.filter(option => {
       // Safely check if name exists and has toLowerCase method
-      if (!option.name) return false;
+      if (!option?.name) return false;
       return option.name.toLowerCase?.().includes(searchQuery.toLowerCase());
     });
   }, [safeOptions, searchQuery]);
@@ -107,33 +107,29 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
                     value={searchQuery}
                     className="h-9"
                   />
-                  {filteredOptions.length === 0 ? (
-                    <CommandEmpty>
-                      <div className="py-6 text-center text-sm">
+                  <CommandGroup>
+                    <CommandItem
+                      value="none"
+                      onSelect={() => {
+                        form.setValue(fieldName as any, null);
+                        setSearchQuery("");
+                        setOpen(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          formField.value === null ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      Не выбрано
+                    </CommandItem>
+                    {filteredOptions.length === 0 ? (
+                      <CommandItem value="no-results" disabled>
                         Ничего не найдено
-                      </div>
-                    </CommandEmpty>
-                  ) : (
-                    <CommandGroup>
-                      <CommandItem
-                        value="none"
-                        onSelect={() => {
-                          form.setValue(fieldName as any, null);
-                          setSearchQuery("");
-                          setOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            formField.value === null
-                              ? "opacity-100"
-                              : "opacity-0"
-                          )}
-                        />
-                        Не выбрано
                       </CommandItem>
-                      {filteredOptions.map((option) => (
+                    ) : (
+                      filteredOptions.map((option) => (
                         <CommandItem
                           key={String(option.id)}
                           value={String(option.name || '')}
@@ -146,16 +142,14 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
                           <Check
                             className={cn(
                               "mr-2 h-4 w-4",
-                              option.id === formField.value
-                                ? "opacity-100"
-                                : "opacity-0"
+                              option.id === formField.value ? "opacity-100" : "opacity-0"
                             )}
                           />
                           {option.name || `#${option.id}`}
                         </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  )}
+                      ))
+                    )}
+                  </CommandGroup>
                 </Command>
               ) : (
                 <div className="py-6 text-center text-sm">
