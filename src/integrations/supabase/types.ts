@@ -431,6 +431,115 @@ export type Database = {
           },
         ]
       }
+      orders: {
+        Row: {
+          assigned_user_id: string | null
+          attached_files_order_docs: Json | null
+          client_company_id: number | null
+          client_contact_id: number
+          client_language: string
+          closing_date: string | null
+          created_at: string
+          creator_user_id: string
+          delivery_address_full: string | null
+          final_amount: number | null
+          id: number
+          notes_history: string | null
+          order_name: string | null
+          order_number: string
+          order_type: string
+          partner_manufacturer_id: number | null
+          payment_status: string | null
+          source_lead_id: number | null
+          status: string
+        }
+        Insert: {
+          assigned_user_id?: string | null
+          attached_files_order_docs?: Json | null
+          client_company_id?: number | null
+          client_contact_id: number
+          client_language: string
+          closing_date?: string | null
+          created_at?: string
+          creator_user_id: string
+          delivery_address_full?: string | null
+          final_amount?: number | null
+          id?: number
+          notes_history?: string | null
+          order_name?: string | null
+          order_number: string
+          order_type: string
+          partner_manufacturer_id?: number | null
+          payment_status?: string | null
+          source_lead_id?: number | null
+          status: string
+        }
+        Update: {
+          assigned_user_id?: string | null
+          attached_files_order_docs?: Json | null
+          client_company_id?: number | null
+          client_contact_id?: number
+          client_language?: string
+          closing_date?: string | null
+          created_at?: string
+          creator_user_id?: string
+          delivery_address_full?: string | null
+          final_amount?: number | null
+          id?: number
+          notes_history?: string | null
+          order_name?: string | null
+          order_number?: string
+          order_type?: string
+          partner_manufacturer_id?: number | null
+          payment_status?: string | null
+          source_lead_id?: number | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_assigned_user_id_fkey"
+            columns: ["assigned_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_client_company_id_fkey"
+            columns: ["client_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "orders_client_contact_id_fkey"
+            columns: ["client_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "orders_creator_user_id_fkey"
+            columns: ["creator_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_partner_manufacturer_id_fkey"
+            columns: ["partner_manufacturer_id"]
+            isOneToOne: false
+            referencedRelation: "partners_manufacturers"
+            referencedColumns: ["partner_manufacturer_id"]
+          },
+          {
+            foreignKeyName: "orders_source_lead_id_fkey"
+            columns: ["source_lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["lead_id"]
+          },
+        ]
+      }
       partners_manufacturers: {
         Row: {
           attached_files_partner_docs: Json | null
@@ -723,6 +832,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_new_order_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_order_number: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -730,6 +843,10 @@ export type Database = {
       get_user_role: {
         Args: { user_id: string }
         Returns: string
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
     }
     Enums: {

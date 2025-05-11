@@ -1,11 +1,9 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
   Building,
-  Package,
   ListChecks,
   Calendar,
   ShoppingCart,
@@ -30,7 +28,6 @@ const menuItems: MenuItem[] = [
   { label: "Лиды", path: "/leads", icon: Users },
   { label: "Контакты", path: "/contacts", icon: Users },
   { label: "Компании", path: "/companies", icon: Building },
-  { label: "Заказы", path: "/orders", icon: Package },
   { label: "Задачи", path: "/tasks", icon: ListChecks },
   { label: "Календарь", path: "/calendar", icon: Calendar },
   { label: "Товары CRM", path: "/products", icon: ShoppingCart },
