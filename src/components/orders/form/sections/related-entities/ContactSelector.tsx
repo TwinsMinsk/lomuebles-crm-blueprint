@@ -17,7 +17,6 @@ const ContactSelector: React.FC<ContactSelectorProps> = ({ form, contacts = [], 
       contactsLength: Array.isArray(contacts) ? contacts.length : 0,
       firstContact: Array.isArray(contacts) && contacts.length > 0 ? contacts[0] : "none",
       isLoading,
-      contactsArray: contacts // Log the actual contacts array
     });
   }, [contacts, isLoading]);
 
