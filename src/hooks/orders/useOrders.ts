@@ -71,34 +71,32 @@ export const fetchOrderById = async (id: number): Promise<Order> => {
   
   if (error) throw error;
   
-  // Safe access for potentially null relation data
-  const contactName = data.contacts?.full_name;
-  const companyName = data.companies?.company_name;
-  const assignedUserName = data.profiles?.full_name;
+  // Cast the data to any to safely access properties without TypeScript errors
+  const orderData: any = data;
   
   return {
-    id: data.id,
-    created_at: data.created_at,
-    order_number: data.order_number,
-    order_name: data.order_name,
-    order_type: data.order_type as "Готовая мебель (Tilda)" | "Мебель на заказ",
-    status: data.status,
-    client_contact_id: data.client_contact_id,
-    client_company_id: data.client_company_id,
-    source_lead_id: data.source_lead_id,
-    assigned_user_id: data.assigned_user_id,
-    partner_manufacturer_id: data.partner_manufacturer_id,
-    final_amount: data.final_amount,
-    payment_status: data.payment_status,
-    delivery_address_full: data.delivery_address_full,
-    notes_history: data.notes_history,
-    attached_files_order_docs: data.attached_files_order_docs as any[] | null,
-    closing_date: data.closing_date,
-    creator_user_id: data.creator_user_id,
-    client_language: data.client_language as "ES" | "EN" | "RU",
-    contact_name: contactName,
-    company_name: companyName,
-    assigned_user_name: assignedUserName
+    id: orderData.id,
+    created_at: orderData.created_at,
+    order_number: orderData.order_number,
+    order_name: orderData.order_name,
+    order_type: orderData.order_type as "Готовая мебель (Tilda)" | "Мебель на заказ",
+    status: orderData.status,
+    client_contact_id: orderData.client_contact_id,
+    client_company_id: orderData.client_company_id,
+    source_lead_id: orderData.source_lead_id,
+    assigned_user_id: orderData.assigned_user_id,
+    partner_manufacturer_id: orderData.partner_manufacturer_id,
+    final_amount: orderData.final_amount,
+    payment_status: orderData.payment_status,
+    delivery_address_full: orderData.delivery_address_full,
+    notes_history: orderData.notes_history,
+    attached_files_order_docs: orderData.attached_files_order_docs as any[] | null,
+    closing_date: orderData.closing_date,
+    creator_user_id: orderData.creator_user_id,
+    client_language: orderData.client_language as "ES" | "EN" | "RU",
+    contact_name: orderData.contacts?.full_name,
+    company_name: orderData.companies?.company_name,
+    assigned_user_name: orderData.profiles?.full_name
   };
 };
 
