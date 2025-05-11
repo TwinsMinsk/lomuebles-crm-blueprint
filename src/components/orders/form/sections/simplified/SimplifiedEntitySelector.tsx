@@ -29,7 +29,7 @@ const SimplifiedEntitySelector = ({
   form,
   fieldName,
   label,
-  options = [],
+  options,
   placeholder,
   emptyMessage,
   isLoading,
@@ -44,15 +44,22 @@ const SimplifiedEntitySelector = ({
   // Ensure options is ALWAYS an array even if undefined or null is passed
   const safeOptions = Array.isArray(options) ? options : [];
   
-  // Filter options based on search query
-  const filteredOptions = safeOptions.filter(option => {
-    if (!searchQuery) return true;
-    if (!option || !option.name) return false;
-    return option.name.toLowerCase().includes(searchQuery.toLowerCase());
-  });
+  // Filter options based on search query - add defensive checks
+  const filteredOptions = React.useMemo(() => {
+    if (!searchQuery || !safeOptions || safeOptions.length === 0) return safeOptions;
+    
+    return safeOptions.filter(option => {
+      if (!option || typeof option !== 'object' || !option.name) return false;
+      if (typeof option.name !== 'string') return false;
+      return option.name.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+  }, [safeOptions, searchQuery]);
 
-  // Find the selected option
-  const selectedOption = safeOptions.find(option => option && option.id === currentValue);
+  // Find the selected option - with defensive checks
+  const selectedOption = React.useMemo(() => {
+    if (!safeOptions || !Array.isArray(safeOptions) || safeOptions.length === 0) return undefined;
+    return safeOptions.find(option => option && option.id === currentValue);
+  }, [safeOptions, currentValue]);
 
   // Add a display label with required indicator
   const displayLabel = required ? `${label} *` : label;
@@ -106,46 +113,58 @@ const SimplifiedEntitySelector = ({
                     value={searchQuery}
                     className="h-9"
                   />
-                  <CommandEmpty>Ничего не найдено</CommandEmpty>
-                  <CommandGroup>
-                    {!required && (
-                      <CommandItem
-                        value="none"
-                        onSelect={() => {
-                          form.setValue(fieldName as any, null);
-                          setSearchQuery("");
-                          setOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            formField.value === null ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        Не выбрано
-                      </CommandItem>
-                    )}
-                    {filteredOptions.map((option) => (
-                      <CommandItem
-                        key={String(option.id)}
-                        value={String(option.name || '')}
-                        onSelect={() => {
-                          form.setValue(fieldName as any, option.id);
-                          setSearchQuery("");
-                          setOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            option.id === formField.value ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        {option.name || `#${option.id}`}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
+                  {/* We need to explicitly handle the case of empty options */}
+                  {safeOptions.length === 0 ? (
+                    <div className="py-6 text-center text-sm">
+                      {emptyMessage}
+                    </div>
+                  ) : (
+                    <>
+                      <CommandEmpty>Ничего не найдено</CommandEmpty>
+                      <CommandGroup>
+                        {!required && (
+                          <CommandItem
+                            value="none"
+                            onSelect={() => {
+                              form.setValue(fieldName as any, null);
+                              setSearchQuery("");
+                              setOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                formField.value === null ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            Не выбрано
+                          </CommandItem>
+                        )}
+                        {/* This is where the error occurs - make sure filteredOptions exists */}
+                        {Array.isArray(filteredOptions) && filteredOptions.map((option) => (
+                          <CommandItem
+                            key={String(option?.id || Math.random())}
+                            value={String(option?.name || '')}
+                            onSelect={() => {
+                              if (option?.id !== undefined) {
+                                form.setValue(fieldName as any, option.id);
+                              }
+                              setSearchQuery("");
+                              setOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                option?.id === formField.value ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {option?.name || `#${option?.id || 'unknown'}`}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </>
+                  )}
                 </Command>
               )}
             </PopoverContent>

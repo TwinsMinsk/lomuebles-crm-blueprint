@@ -20,6 +20,13 @@ export const SimplifiedRelatedEntities: React.FC<SimplifiedRelatedEntitiesProps>
     error 
   } = useSimplifiedRelatedEntities();
 
+  console.log("SimplifiedRelatedEntities rendered with:", {
+    contactsLength: contacts?.length || 0,
+    managersLength: managers?.length || 0,
+    isLoading,
+    error
+  });
+
   // Show loading state
   if (isLoading) {
     return (
@@ -29,6 +36,10 @@ export const SimplifiedRelatedEntities: React.FC<SimplifiedRelatedEntitiesProps>
       </div>
     );
   }
+
+  // Ensure we have arrays even if the query returned undefined
+  const safeContacts = Array.isArray(contacts) ? contacts : [];
+  const safeManagers = Array.isArray(managers) ? managers : [];
 
   return (
     <div className="space-y-4">
@@ -51,7 +62,7 @@ export const SimplifiedRelatedEntities: React.FC<SimplifiedRelatedEntitiesProps>
           form={form} 
           fieldName="associatedContactId"
           label="Клиент"
-          options={contacts} 
+          options={safeContacts} 
           placeholder="Выберите клиента"
           emptyMessage="Клиент не найден. Сначала создайте контакт."
           isLoading={isLoading}
@@ -63,7 +74,7 @@ export const SimplifiedRelatedEntities: React.FC<SimplifiedRelatedEntitiesProps>
           form={form} 
           fieldName="assignedUserId"
           label="Ответственный менеджер"
-          options={managers}
+          options={safeManagers}
           placeholder="Выберите менеджера"
           emptyMessage="Менеджер не найден."
           isLoading={isLoading} 
