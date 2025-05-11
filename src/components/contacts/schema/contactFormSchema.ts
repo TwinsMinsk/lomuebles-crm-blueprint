@@ -23,12 +23,16 @@ export const formSchema = z.object({
   delivery_address_postal_code: z.string().optional(),
   delivery_address_country: z.string().optional().default("Spain"),
   associated_company_id: z
-    .string()
+    .number()
     .nullable()
-    .transform((val) => (val === "" || val === "null" ? null : Number(val))),
+    .or(
+      z.string()
+        .transform((val) => (val === "" || val === "null" ? null : Number(val)))
+    ),
   owner_user_id: z
     .string()
     .nullable()
+    .or(z.literal(""))
     .transform((val) => (val === "" || val === "null" ? null : val)),
   notes: z.string().optional(),
 });

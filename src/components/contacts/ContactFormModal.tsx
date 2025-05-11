@@ -1,7 +1,7 @@
 
 import React from "react";
 import { ContactWithRelations } from "./ContactTableRow";
-import { useContactForm } from "./hooks/useContactForm";
+import { useContactForm } from "@/hooks/contacts/useContactForm";
 import { Loader2 } from "lucide-react";
 
 import {
