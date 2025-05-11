@@ -130,7 +130,7 @@ const SimplifiedEntitySelector = ({
                   <span className="text-sm text-muted-foreground">Загрузка данных...</span>
                 </div>
               ) : (
-                <Command>
+                <Command shouldFilter={false}>
                   <CommandInput 
                     placeholder={`Поиск ${placeholder.toLowerCase()}...`} 
                     onValueChange={setSearchQuery}
@@ -155,6 +155,7 @@ const SimplifiedEntitySelector = ({
                           {/* Add "None" option for non-required fields */}
                           {!required && (
                             <CommandItem
+                              key="none-option"
                               value="none"
                               onSelect={() => {
                                 form.setValue(fieldName as any, null);
@@ -175,7 +176,7 @@ const SimplifiedEntitySelector = ({
                           {/* Display filtered options */}
                           {filteredOptions.map((option) => (
                             <CommandItem
-                              key={String(option?.id || Math.random())}
+                              key={`option-${String(option?.id || Math.random())}`}
                               value={String(option?.name || '')}
                               onSelect={() => {
                                 if (option?.id !== undefined) {
