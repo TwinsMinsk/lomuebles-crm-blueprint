@@ -130,7 +130,7 @@ const SimplifiedEntitySelector = ({
                   <span className="text-sm text-muted-foreground">Загрузка данных...</span>
                 </div>
               ) : (
-                <Command shouldFilter={false}>
+                <Command>
                   <CommandInput 
                     placeholder={`Поиск ${placeholder.toLowerCase()}...`} 
                     onValueChange={setSearchQuery}

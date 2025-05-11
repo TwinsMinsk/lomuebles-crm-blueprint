@@ -119,4 +119,3 @@ export const SimplifiedRelatedEntities: React.FC<SimplifiedRelatedEntitiesProps>
     </div>
   );
 };
-
