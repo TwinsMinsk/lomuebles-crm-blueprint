@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 // Define order type and status constants
 const ORDER_TYPES = ["Готовая мебель (Tilda)", "Мебель на заказ"];

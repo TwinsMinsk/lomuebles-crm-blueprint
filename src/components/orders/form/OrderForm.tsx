@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Order } from "@/types/order";
 import { useAddOrder } from "@/hooks/orders/useAddOrder";
 import { useUpdateOrder } from "@/hooks/orders/useUpdateOrder";
-import { useUsers } from "@/hooks/users";
+import { useUsers } from "@/hooks/useUsers"; // Fixed import path
 import { useContacts } from "@/hooks/useContacts";
 import { useCompanies } from "@/hooks/useCompanies";
 import { useLeads } from "@/hooks/useLeads";
