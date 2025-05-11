@@ -19,7 +19,7 @@ export const CustomRequestSelector = ({ value, onChange }: CustomRequestSelector
     name: request.request_name || `Запрос #${request.custom_request_id}`,
     description: `${formatDate(request.creation_date)} - ${request.request_status || 'Новый'}`,
     imageUrl: null,
-    subtitle: request.contact_name || 'Без контакта'
+    subtitle: request.client_description ? `${request.client_description.substring(0, 30)}...` : 'Без описания'
   }));
 
   return (

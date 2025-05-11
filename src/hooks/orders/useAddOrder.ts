@@ -4,7 +4,27 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Order } from "@/types/order";
 
-export const addOrder = async (orderData: Partial<Order> & { client_contact_id: number, client_language: string, order_type: string, status: string }) => {
+// Define the type for orderData that matches Supabase's requirements
+type OrderInput = {
+  client_contact_id: number;
+  client_language: string; 
+  order_type: string;
+  status: string;
+  creator_user_id: string;
+  client_company_id?: number | null;
+  source_lead_id?: number | null;
+  assigned_user_id?: string | null;
+  partner_manufacturer_id?: number | null;
+  final_amount?: number | null;
+  payment_status?: string | null;
+  delivery_address_full?: string | null;
+  notes_history?: string | null;
+  attached_files_order_docs?: any[] | null;
+  closing_date?: string | null;
+  order_name?: string | null;
+};
+
+export const addOrder = async (orderData: OrderInput) => {
   const { data, error } = await supabase
     .from('orders')
     .insert(orderData)

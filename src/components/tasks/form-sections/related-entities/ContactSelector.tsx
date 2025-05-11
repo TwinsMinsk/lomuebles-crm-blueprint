@@ -23,7 +23,7 @@ export const ContactSelector = ({ value, onChange }: ContactSelectorProps) => {
     name: contact.full_name || `Контакт #${contact.contact_id}`,
     description: contact.primary_phone || contact.primary_email || '',
     imageUrl: null,
-    subtitle: contact.company_name || 'Без компании'
+    subtitle: contact.companies?.company_name || 'Без компании'
   }));
 
   return (

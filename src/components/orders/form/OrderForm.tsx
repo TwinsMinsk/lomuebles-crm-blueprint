@@ -164,10 +164,10 @@ export default function OrderForm({ order, onSuccess }: OrderFormProps) {
         await addOrder({
           ...values,
           client_contact_id: values.client_contact_id as number, // Cast to ensure it's not undefined
-          client_language: values.client_language,
+          client_language: values.client_language as "ES" | "EN" | "RU",
           order_type: values.order_type,
           status: values.status,
-          creator_user_id: user.id,
+          creator_user_id: user.id
         });
         toast.success("Заказ успешно создан");
         
@@ -488,7 +488,7 @@ export default function OrderForm({ order, onSuccess }: OrderFormProps) {
             name="final_amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Итоговая сумма</FormLabel>
+                <FormLabel>Итогов��я сумма</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 

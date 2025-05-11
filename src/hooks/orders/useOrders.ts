@@ -22,7 +22,7 @@ export const fetchOrders = async (): Promise<Order[]> => {
   if (error) throw error;
   
   // Transform data to match our Order type
-  return (data || []).map((order: any) => ({
+  return (data || []).map((order: OrderWithRelations) => ({
     id: order.id,
     created_at: order.created_at,
     order_number: order.order_number,
@@ -42,8 +42,8 @@ export const fetchOrders = async (): Promise<Order[]> => {
     closing_date: order.closing_date,
     creator_user_id: order.creator_user_id,
     client_language: order.client_language as "ES" | "EN" | "RU",
-    contact_name: order.contacts?.full_name,
-    assigned_user_name: order.profiles?.full_name
+    contact_name: order.contacts?.full_name || undefined,
+    assigned_user_name: order.profiles?.full_name || undefined
   }));
 };
 
