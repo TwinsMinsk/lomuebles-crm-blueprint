@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Order } from "@/types/order";
 import { Database } from "@/integrations/supabase/types";
 
-type OrderWithRelations = Database['public']['Tables']['orders']['Row'] & {
+// Define a type for the raw data returned from Supabase
+type OrderRawData = Database['public']['Tables']['orders']['Row'] & {
   contacts?: { full_name: string } | null;
   profiles?: { full_name: string } | null;
 };
@@ -21,8 +22,8 @@ export const fetchOrders = async (): Promise<Order[]> => {
   
   if (error) throw error;
   
-  // Transform data to match our Order type
-  return (data || []).map((order: OrderWithRelations) => ({
+  // Transform data to match our Order type, safely handling potential null values
+  return (data || []).map((order: any) => ({
     id: order.id,
     created_at: order.created_at,
     order_number: order.order_number,
@@ -70,6 +71,11 @@ export const fetchOrderById = async (id: number): Promise<Order> => {
   
   if (error) throw error;
   
+  // Safe access for potentially null relation data
+  const contactName = data.contacts?.full_name;
+  const companyName = data.companies?.company_name;
+  const assignedUserName = data.profiles?.full_name;
+  
   return {
     id: data.id,
     created_at: data.created_at,
@@ -90,9 +96,9 @@ export const fetchOrderById = async (id: number): Promise<Order> => {
     closing_date: data.closing_date,
     creator_user_id: data.creator_user_id,
     client_language: data.client_language as "ES" | "EN" | "RU",
-    contact_name: data.contacts?.full_name,
-    company_name: data.companies?.company_name,
-    assigned_user_name: data.profiles?.full_name
+    contact_name: contactName,
+    company_name: companyName,
+    assigned_user_name: assignedUserName
   };
 };
 

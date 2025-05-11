@@ -40,7 +40,7 @@ export const useRelatedOrdersData = (searchTerm: string = "", limit: number = 20
 
         if (fetchError) throw fetchError;
 
-        // Transform data to match our Order type
+        // Transform data to match our Order type, with safe access to potentially null relation data
         const transformedOrders = (data || []).map((order: any) => ({
           id: order.id,
           created_at: order.created_at,
@@ -61,8 +61,8 @@ export const useRelatedOrdersData = (searchTerm: string = "", limit: number = 20
           closing_date: order.closing_date,
           creator_user_id: order.creator_user_id,
           client_language: order.client_language as "ES" | "EN" | "RU",
-          contact_name: order.contacts?.full_name,
-          assigned_user_name: order.profiles?.full_name
+          contact_name: order.contacts?.full_name || undefined,
+          assigned_user_name: order.profiles?.full_name || undefined
         }));
 
         setOrders(transformedOrders);
