@@ -33,6 +33,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
+import { Loader2, RefreshCw } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 // Define the user role type from our database schema
 type UserRole = Database["public"]["Enums"]["user_role"];
@@ -61,16 +63,29 @@ const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { session, userRole } = useAuth();
 
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.from("profiles").select("*").order("registration_date", { ascending: false });
+      console.log("Fetching all users, current user role:", userRole);
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .order("registration_date", { ascending: false });
 
       if (error) {
+        console.error("Supabase error fetching users:", error);
         throw error;
       }
 
+      console.log("Retrieved users data:", data);
+      
+      if (!data || data.length === 0) {
+        console.warn("No user profiles found in database");
+      }
+      
       setUsers(data || []);
     } catch (error: any) {
       console.error("Error fetching users:", error);
@@ -85,17 +100,22 @@ const UserManagement = () => {
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (session) {
+      fetchUsers();
+    }
+  }, [session]);
 
   const handleRoleChange = async (userId: string, newRole: UserRole) => {
     try {
+      console.log(`Changing role for user ${userId} to ${newRole}`);
+      
       const { error } = await supabase
         .from("profiles")
         .update({ role: newRole })
         .eq("id", userId);
 
       if (error) {
+        console.error("Supabase error updating user role:", error);
         throw error;
       }
 
@@ -119,12 +139,15 @@ const UserManagement = () => {
 
   const toggleUserActiveState = async (userId: string, currentState: boolean) => {
     try {
+      console.log(`Toggling active state for user ${userId} from ${currentState} to ${!currentState}`);
+      
       const { error } = await supabase
         .from("profiles")
         .update({ is_active: !currentState })
         .eq("id", userId);
 
       if (error) {
+        console.error("Supabase error toggling user active state:", error);
         throw error;
       }
 
@@ -148,15 +171,49 @@ const UserManagement = () => {
     }
   };
 
+  const handleRefresh = () => {
+    fetchUsers();
+    toast({
+      title: "Обновление",
+      description: "Список пользователей обновляется"
+    });
+  };
+
+  if (!session) {
+    return (
+      <Container>
+        <Card>
+          <CardContent className="p-8 text-center">
+            <p>Для управления пользователями необходимо авторизоваться</p>
+          </CardContent>
+        </Card>
+      </Container>
+    );
+  }
+
   return (
     <Container>
       <Card className="shadow-sm">
-        <CardHeader className="bg-slate-50">
+        <CardHeader className="bg-slate-50 flex flex-row justify-between items-center">
           <CardTitle>Управление пользователями</CardTitle>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            Обновить
+          </Button>
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
             <div className="flex justify-center items-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin mr-3" />
               <p>Загрузка пользователей...</p>
             </div>
           ) : (
