@@ -4,7 +4,9 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import OrdersTable from "@/components/orders/OrdersTable";
-import { Plus } from "lucide-react";
+import OrdersKanbanBoard from "@/components/orders/kanban/OrdersKanbanBoard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, List, Kanban } from "lucide-react";
 
 const OrdersPage: React.FC = () => {
   return (
@@ -19,14 +21,42 @@ const OrdersPage: React.FC = () => {
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Список заказов</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <OrdersTable />
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="table">
+        <div className="flex justify-between items-center mb-4">
+          <TabsList>
+            <TabsTrigger value="table">
+              <List className="h-4 w-4 mr-1" />
+              Таблица
+            </TabsTrigger>
+            <TabsTrigger value="kanban">
+              <Kanban className="h-4 w-4 mr-1" />
+              Kanban
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="table">
+          <Card>
+            <CardHeader>
+              <CardTitle>Список заказов</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <OrdersTable />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="kanban">
+          <Card>
+            <CardHeader>
+              <CardTitle>Kanban-доска заказов</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <OrdersKanbanBoard />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
