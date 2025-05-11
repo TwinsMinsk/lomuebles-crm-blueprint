@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useRelatedOrdersData } from "@/hooks/tasks/useRelatedOrdersData";
-import { EntitySelector } from "./EntitySelector";
+import EntitySelector from "./EntitySelector";
 import { formatDate } from "@/utils/formatters";
 import { Order } from "@/types/order";
 
@@ -38,3 +38,5 @@ export const OrderSelector = ({ value, onChange }: OrderSelectorProps) => {
     />
   );
 };
+
+export default OrderSelector;

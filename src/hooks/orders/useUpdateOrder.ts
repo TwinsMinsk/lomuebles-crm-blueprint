@@ -18,7 +18,7 @@ export const updateOrder = async ({ orderId, orderData }: { orderId: number, ord
 export const useUpdateOrder = () => {
   const queryClient = useQueryClient();
   
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: updateOrder,
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
@@ -29,4 +29,10 @@ export const useUpdateOrder = () => {
       toast.error(`Ошибка обновления заказа: ${err.message}`);
     }
   });
+
+  return {
+    updateOrder: mutation.mutate,
+    isLoading: mutation.isPending,
+    error: mutation.error
+  };
 };

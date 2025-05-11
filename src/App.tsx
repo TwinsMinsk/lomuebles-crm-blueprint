@@ -18,11 +18,15 @@ const Tasks = React.lazy(() => import('./pages/Tasks'));
 const Leads = React.lazy(() => import('./pages/Leads'));
 const Contacts = React.lazy(() => import('./pages/Contacts'));
 const Companies = React.lazy(() => import('./pages/Companies'));
-const Orders = React.lazy(() => import('./pages/Orders'));
 const Products = React.lazy(() => import('./pages/Products'));
 const Suppliers = React.lazy(() => import('./pages/Suppliers')); 
 const Partners = React.lazy(() => import('./pages/Partners')); 
 const Settings = React.lazy(() => import('./pages/Settings'));
+
+// Order routes
+const OrdersPage = React.lazy(() => import('./pages/orders/OrdersPage'));
+const NewOrderPage = React.lazy(() => import('./pages/orders/NewOrderPage'));
+const OrderDetailPage = React.lazy(() => import('./pages/orders/OrderDetailPage'));
 
 // Auth routes
 const Login = React.lazy(() => import('./pages/auth/Login'));
@@ -67,7 +71,12 @@ function App() {
                   <Route path="leads" element={<Leads />} />
                   <Route path="contacts" element={<Contacts />} />
                   <Route path="companies" element={<Companies />} />
-                  <Route path="orders" element={<Orders />} />
+                  
+                  {/* Orders routes */}
+                  <Route path="orders" element={<OrdersPage />} />
+                  <Route path="orders/new" element={<NewOrderPage />} />
+                  <Route path="orders/:id" element={<OrderDetailPage />} />
+                  
                   <Route path="products" element={<Products />} />
                   <Route path="suppliers" element={<Suppliers />} />
                   <Route path="partners" element={<Partners />} />

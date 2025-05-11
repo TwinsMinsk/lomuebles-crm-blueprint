@@ -12,12 +12,13 @@ export const usePartnersState = () => {
     specialization: null,
   });
 
-  const { partners, isLoading, error, refetch } = usePartners({
+  const { partners, loading, error, refetch } = usePartners(
     page,
     limit,
-    searchQuery: filters.search,
-    specialization: filters.specialization,
-  });
+    "company_name",
+    "asc",
+    filters.search
+  );
 
   const totalCount = partners?.length || 0;
   const totalPages = Math.ceil(totalCount / limit);
@@ -27,7 +28,7 @@ export const usePartnersState = () => {
 
   return {
     partners: paginatedPartners,
-    loading: isLoading,
+    loading,
     error,
     totalCount,
     totalPages,
