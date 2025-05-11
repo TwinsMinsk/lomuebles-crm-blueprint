@@ -4,7 +4,7 @@ import { UseFormReturn } from "react-hook-form";
 import { OrderFormValues } from "./orderFormSchema";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BasicOrderInfoFields } from "./sections/BasicOrderInfoFields";
-import { RelatedEntitiesFields } from "./sections/RelatedEntitiesFields";
+import { SimplifiedRelatedEntities } from "./sections/SimplifiedRelatedEntities";
 import { FinancialInfoFields } from "./sections/FinancialInfoFields";
 import { AdditionalInfoFields } from "./sections/AdditionalInfoFields";
 import { OrderItemsSection } from "./sections/OrderItemsSection";
@@ -35,10 +35,10 @@ export const OrderFormSections: React.FC<OrderFormSectionsProps> = ({
       <Card>
         <CardHeader>
           <CardTitle>Связанные сущности</CardTitle>
-          <CardDescription>Укажите клиента, компанию и другие связанные данные</CardDescription>
+          <CardDescription>Укажите клиента и ответственного менеджера</CardDescription>
         </CardHeader>
         <CardContent>
-          <RelatedEntitiesFields form={form} orderType={orderType} />
+          <SimplifiedRelatedEntities form={form} />
         </CardContent>
       </Card>
       
