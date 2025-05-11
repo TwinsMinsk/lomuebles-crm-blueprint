@@ -5,8 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import { formSchema, ContactFormValues } from "../components/contacts/schema/contactFormSchema";
-import { ContactWithRelations } from "../components/contacts/ContactTableRow";
+import { formSchema, ContactFormValues } from "@/components/contacts/schema/contactFormSchema";
+import { ContactWithRelations } from "@/components/contacts/ContactTableRow";
 
 interface Company {
   company_id: number;
@@ -136,7 +136,6 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
       }
       
       // Create a typed object that matches the expected Supabase database structure
-      // Removed creator_user_id field which doesn't exist in the contacts table
       const contactData = {
         full_name: values.full_name,
         primary_phone: values.primary_phone,
@@ -151,7 +150,7 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
         delivery_address_country: values.delivery_address_country,
         associated_company_id: values.associated_company_id,
         owner_user_id: values.owner_user_id,
-        notes: values.notes,
+        notes: values.notes
       };
       
       let result;
