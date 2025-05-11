@@ -35,7 +35,7 @@ export const SimplifiedRelatedEntities: React.FC<SimplifiedRelatedEntitiesProps>
   // Show not authenticated warning if no session
   if (!session) {
     return (
-      <Alert variant="warning" className="mb-4">
+      <Alert variant="destructive" className="mb-4">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           Для доступа к связанным данным необходима авторизация.
@@ -51,7 +51,7 @@ export const SimplifiedRelatedEntities: React.FC<SimplifiedRelatedEntitiesProps>
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-8">
-        <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         <p className="text-lg font-medium">Загрузка связанных данных...</p>
       </div>
     );
@@ -81,8 +81,8 @@ export const SimplifiedRelatedEntities: React.FC<SimplifiedRelatedEntitiesProps>
       
       {/* Show warning if we have no data but no errors */}
       {!error && hasNoData && (
-        <Alert variant="warning" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
+        <Alert variant="default" className="mb-4 bg-yellow-50 border-yellow-200">
+          <AlertCircle className="h-4 w-4 text-yellow-500" />
           <AlertDescription>
             Не найдены доступные контакты или менеджеры.
             <div className="mt-2 text-sm">
@@ -119,3 +119,4 @@ export const SimplifiedRelatedEntities: React.FC<SimplifiedRelatedEntitiesProps>
     </div>
   );
 };
+

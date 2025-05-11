@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,7 +32,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
-import { Loader2, RefreshCw, UserCog, ShieldAlert } from "lucide-react";
+import { Loader2, RefreshCw, UserCog, ShieldAlert, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
