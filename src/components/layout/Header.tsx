@@ -62,7 +62,7 @@ const Header = () => {
               </DropdownMenu>
             ) : (
               <Button variant="outline" asChild>
-                <Link to="/auth/login">Войти</Link>
+                <Link to="/login">Войти</Link>
               </Button>
             )}
           </div>
