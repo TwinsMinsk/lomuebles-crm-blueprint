@@ -59,10 +59,7 @@ export const useSimplifiedRelatedEntities = (): SimplifiedRelatedEntitiesData =>
         })) : [];
       } catch (err) {
         console.error("Error in contactsQuery:", err);
-        toast.error("Не удалось загрузить контакты", {
-          description: "Проверьте соединение и права доступа"
-        });
-        return []; // Return empty array on error, not undefined
+        throw err; // Let React Query handle the error
       }
     },
     retry: 2,
@@ -103,10 +100,7 @@ export const useSimplifiedRelatedEntities = (): SimplifiedRelatedEntitiesData =>
         })) : [];
       } catch (err) {
         console.error("Error in managersQuery:", err);
-        toast.error("Не удалось загрузить менеджеров", {
-          description: "Проверьте соединение и права доступа"
-        });
-        return []; // Return empty array on error, not undefined
+        throw err; // Let React Query handle the error
       }
     },
     retry: 2,
@@ -115,10 +109,21 @@ export const useSimplifiedRelatedEntities = (): SimplifiedRelatedEntitiesData =>
     enabled: !!session // Only run when user is authenticated
   });
 
-  // Combine all errors into a single message
-  const errorMessage = contactsQuery.error || managersQuery.error 
-    ? `${contactsQuery.error?.message || ''} ${managersQuery.error?.message || ''}`.trim()
-    : null;
+  // Handle errors from React Query
+  const contactsError = contactsQuery.error ? `${(contactsQuery.error as Error).message}` : null;
+  const managersError = managersQuery.error ? `${(managersQuery.error as Error).message}` : null;
+  
+  // Combine errors or return null if no errors
+  const errorMessage = contactsError || managersError ? `${contactsError || ''} ${managersError || ''}`.trim() : null;
+
+  // Show toast for errors
+  useEffect(() => {
+    if (contactsError || managersError) {
+      toast.error("Ошибка загрузки данных", {
+        description: "Не удалось загрузить связанные сущности"
+      });
+    }
+  }, [contactsError, managersError]);
 
   // Debug log to track data availability
   console.log("useSimplifiedRelatedEntities results:", {
@@ -135,8 +140,8 @@ export const useSimplifiedRelatedEntities = (): SimplifiedRelatedEntitiesData =>
 
   // Always ensure we return arrays, even when data is loading or errors occur
   return {
-    contacts: Array.isArray(contactsQuery.data) ? contactsQuery.data : [],
-    managers: Array.isArray(managersQuery.data) ? managersQuery.data : [],
+    contacts: contactsQuery.data || [],
+    managers: managersQuery.data || [],
     isLoading: contactsQuery.isLoading || managersQuery.isLoading,
     error: errorMessage
   };

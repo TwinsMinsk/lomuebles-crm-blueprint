@@ -4,9 +4,9 @@ import { UseFormReturn } from "react-hook-form";
 import { OrderFormValues } from "../orderFormSchema";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
-import SimplifiedEntitySelector from "./simplified/SimplifiedEntitySelector";
 import { useSimplifiedRelatedEntities } from "@/hooks/orders/useSimplifiedRelatedEntities";
 import { useAuth } from "@/context/AuthContext";
+import SimpleEntitySelect from "./related-entities/SimpleEntitySelect";
 
 interface SimplifiedRelatedEntitiesProps {
   form: UseFormReturn<OrderFormValues>;
@@ -94,7 +94,7 @@ export const SimplifiedRelatedEntities: React.FC<SimplifiedRelatedEntitiesProps>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Associated Contact (required) */}
-        <SimplifiedEntitySelector 
+        <SimpleEntitySelect 
           form={form} 
           fieldName="associatedContactId"
           label="Клиент"
@@ -106,7 +106,7 @@ export const SimplifiedRelatedEntities: React.FC<SimplifiedRelatedEntitiesProps>
         />
 
         {/* Assigned Manager (optional) */}
-        <SimplifiedEntitySelector 
+        <SimpleEntitySelect 
           form={form} 
           fieldName="assignedUserId"
           label="Ответственный менеджер"
