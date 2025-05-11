@@ -7,7 +7,10 @@ import { useRelatedOrdersData } from "@/hooks/tasks/useRelatedOrdersData";
 
 const OrderSelector: React.FC = () => {
   const { control } = useFormContext();
-  const { orders } = useRelatedOrdersData();
+  const { orders, isLoading } = useRelatedOrdersData();
+
+  // Ensure orders is always an array
+  const safeOrders = Array.isArray(orders) ? orders : [];
 
   return (
     <FormField
@@ -19,23 +22,28 @@ const OrderSelector: React.FC = () => {
           <Select
             onValueChange={(value) => field.onChange(value === "none" ? null : parseInt(value))}
             value={field.value?.toString() || "none"}
+            disabled={isLoading}
           >
             <FormControl>
               <SelectTrigger>
-                <SelectValue placeholder="Выберите заказ" />
+                <SelectValue placeholder={isLoading ? "Загрузка..." : "Выберите заказ"} />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
               <SelectItem value="none">Нет</SelectItem>
-              {orders && orders.length > 0 ? orders.map((order) => (
-                <SelectItem 
-                  key={order.deal_order_id} 
-                  value={String(order.deal_order_id)}
-                >
-                  {order.order_number || `Заказ #${order.deal_order_id}`}
+              {!isLoading && safeOrders.length > 0 ? (
+                safeOrders.map((order) => (
+                  <SelectItem 
+                    key={order.deal_order_id} 
+                    value={String(order.deal_order_id)}
+                  >
+                    {order.order_number || `Заказ #${order.deal_order_id}`}
+                  </SelectItem>
+                ))
+              ) : (
+                <SelectItem value="no-orders-available" disabled>
+                  {isLoading ? "Загрузка..." : "Нет доступных заказов"}
                 </SelectItem>
-              )) : (
-                <SelectItem value="no-orders-available">Нет доступных заказов</SelectItem>
               )}
             </SelectContent>
           </Select>

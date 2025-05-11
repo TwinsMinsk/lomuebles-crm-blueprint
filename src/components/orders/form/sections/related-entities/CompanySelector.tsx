@@ -2,8 +2,7 @@
 import React from "react";
 import { UseFormReturn } from "react-hook-form";
 import { OrderFormValues } from "../../orderFormSchema";
-import EntitySelector from "./EntitySelector";
-import { EntityOption } from "./EntitySelector";
+import EntitySelector, { EntityOption } from "./EntitySelector";
 
 interface CompanySelectorProps {
   form: UseFormReturn<OrderFormValues>;
@@ -12,15 +11,12 @@ interface CompanySelectorProps {
 }
 
 const CompanySelector: React.FC<CompanySelectorProps> = ({ form, companies = [], isLoading }) => {
-  // Ensure companies is always an array
-  const safeCompanies = Array.isArray(companies) ? companies : [];
-  
   return (
     <EntitySelector
       form={form}
       fieldName="associatedCompanyId"
       label="Компания клиента"
-      options={safeCompanies}
+      options={companies}
       placeholder="Выберите компанию"
       emptyMessage="Компания не найдена."
       isLoading={isLoading}

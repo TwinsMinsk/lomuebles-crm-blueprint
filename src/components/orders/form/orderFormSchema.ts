@@ -30,7 +30,7 @@ export const orderFormSchema = z.object({
   // Additional information
   deliveryAddressFull: z.string().optional(),
   notesHistory: z.string().optional(),
-  attachedFilesOrderDocs: z.array(z.any()).optional().nullable(),
+  attachedFilesOrderDocs: z.array(z.any()).optional().default([]),
   closingDate: z.string().optional().nullable(),
   
   // These will be set automatically, not from form
@@ -39,3 +39,54 @@ export const orderFormSchema = z.object({
 });
 
 export type OrderFormValues = z.infer<typeof orderFormSchema>;
+
+// Ready-made order statuses
+export const statusReadyMadeOptions = [
+  "Новый",
+  "Ожидает подтверждения",
+  "Ожидает оплаты",
+  "Оплачен",
+  "Передан на сборку",
+  "Готов к отгрузке",
+  "В доставке",
+  "Выполнен",
+  "Отменен"
+];
+
+// Custom-made order statuses
+export const statusCustomMadeOptions = [
+  "Новый запрос",
+  "Предварительная оценка",
+  "Согласование ТЗ/Дизайна",
+  "Ожидает замера",
+  "Замер выполнен",
+  "Проектирование",
+  "Согласование проекта",
+  "Ожидает предоплаты",
+  "В производстве",
+  "Готов к монтажу",
+  "Монтаж",
+  "Завершен",
+  "Отменен"
+];
+
+// Payment statuses
+export const paymentStatusOptions = [
+  "Не оплачен",
+  "Частично оплачен",
+  "Оплачен полностью",
+  "Возврат"
+];
+
+// Order types
+export const orderTypeOptions = [
+  "Готовая мебель (Tilda)",
+  "Мебель на заказ"
+];
+
+// Client language options
+export const clientLanguageOptions = [
+  "ES",
+  "EN",
+  "RU"
+];

@@ -2,8 +2,7 @@
 import React from "react";
 import { UseFormReturn } from "react-hook-form";
 import { OrderFormValues } from "../../orderFormSchema";
-import EntitySelector from "./EntitySelector";
-import { EntityOption } from "./EntitySelector";
+import EntitySelector, { EntityOption } from "./EntitySelector";
 
 interface ManagerSelectorProps {
   form: UseFormReturn<OrderFormValues>;
@@ -12,15 +11,12 @@ interface ManagerSelectorProps {
 }
 
 const ManagerSelector: React.FC<ManagerSelectorProps> = ({ form, managers = [], isLoading }) => {
-  // Ensure managers is always an array
-  const safeManagers = Array.isArray(managers) ? managers : [];
-  
   return (
     <EntitySelector
       form={form}
       fieldName="assignedUserId"
       label="Ответственный менеджер"
-      options={safeManagers}
+      options={managers}
       placeholder="Выберите менеджера"
       emptyMessage="Менеджер не найден."
       isLoading={isLoading}

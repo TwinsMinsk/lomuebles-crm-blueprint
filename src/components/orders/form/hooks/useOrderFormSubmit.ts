@@ -8,9 +8,10 @@ import { toast } from "sonner";
 interface UseOrderFormSubmitProps {
   orderId?: number;
   isEdit: boolean;
+  onError?: (error: Error) => void;
 }
 
-export const useOrderFormSubmit = ({ orderId, isEdit }: UseOrderFormSubmitProps) => {
+export const useOrderFormSubmit = ({ orderId, isEdit, onError }: UseOrderFormSubmitProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   
@@ -22,6 +23,11 @@ export const useOrderFormSubmit = ({ orderId, isEdit }: UseOrderFormSubmitProps)
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Пользователь не аутентифицирован");
       
+      // Validate required fields
+      if (!data.associatedContactId) {
+        throw new Error("Выбор клиента обязателен");
+      }
+
       // Prepare data for saving
       const orderData: any = {
         order_name: data.orderName,
@@ -38,6 +44,9 @@ export const useOrderFormSubmit = ({ orderId, isEdit }: UseOrderFormSubmitProps)
         closing_date: data.closingDate || null,
         attached_files_order_docs: data.attachedFilesOrderDocs || []
       };
+      
+      // Log order data for debugging
+      console.log("Submitting order data:", orderData);
       
       // Set status based on order type
       if (data.orderType === "Готовая мебель (Tilda)") {
@@ -64,31 +73,43 @@ export const useOrderFormSubmit = ({ orderId, isEdit }: UseOrderFormSubmitProps)
       
       if (isEdit && orderId) {
         // Update existing order
-        const { data, error } = await supabase
+        result = await supabase
           .from("deals_orders")
           .update(orderData)
           .eq("deal_order_id", orderId)
           .select();
           
-        if (error) throw error;
-        result = data[0];
+        if (result.error) throw new Error(`Ошибка обновления заказа: ${result.error.message}`);
+        
         toast.success("Заказ успешно обновлен");
       } else {
         // Create new order
-        const { data, error } = await supabase
+        result = await supabase
           .from("deals_orders")
           .insert(orderData)
           .select();
           
-        if (error) throw error;
-        result = data[0];
+        if (result.error) throw new Error(`Ошибка создания заказа: ${result.error.message}`);
+        
         toast.success("Заказ успешно создан");
       }
       
+      // Navigate back to orders list
       navigate("/orders");
+      
     } catch (error: any) {
       console.error("Error saving order:", error);
-      toast.error(`Ошибка при сохранении заказа: ${error.message}`);
+      
+      toast.error(`Ошибка сохранения заказа: ${error.message}`);
+      
+      // Pass error to callback if provided
+      if (onError) {
+        onError(error);
+      }
+      
+      // Re-throw the error to be handled by the form
+      throw error;
+      
     } finally {
       setIsLoading(false);
     }

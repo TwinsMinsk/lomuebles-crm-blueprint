@@ -23,6 +23,7 @@ interface EntitySelectorProps {
   placeholder: string;
   emptyMessage: string;
   isLoading: boolean;
+  required?: boolean;
 }
 
 const EntitySelector: React.FC<EntitySelectorProps> = ({
@@ -32,7 +33,8 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   options = [],
   placeholder,
   emptyMessage,
-  isLoading
+  isLoading,
+  required = false
 }) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -47,7 +49,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
   const filteredOptions = React.useMemo(() => {
     if (!searchQuery) return safeOptions;
     return safeOptions.filter(option => 
-      option.name.toLowerCase().includes(searchQuery.toLowerCase())
+      option.name?.toLowerCase?.().includes(searchQuery.toLowerCase())
     );
   }, [safeOptions, searchQuery]);
 
@@ -59,7 +61,7 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
 
   // Debug logging
   useEffect(() => {
-    console.log(`EntitySelector ${fieldName}:`, {
+    console.log(`EntitySelector ${String(fieldName)}:`, {
       optionsLength: safeOptions.length,
       currentValue,
       selectedOption: selectedOption || "none",
@@ -68,13 +70,16 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
     });
   }, [fieldName, safeOptions.length, currentValue, selectedOption, searchQuery, filteredOptions.length]);
 
+  // Add a display label with required indicator
+  const displayLabel = required ? `${label} *` : label;
+
   return (
     <FormField
       control={form.control}
       name={fieldName as any}
       render={({ field: formField }) => (
         <FormItem className="flex flex-col">
-          <FormLabel>{label}</FormLabel>
+          <FormLabel>{displayLabel}</FormLabel>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -133,6 +138,27 @@ const EntitySelector: React.FC<EntitySelectorProps> = ({
                     </div>
                   </CommandEmpty>
                   <CommandGroup>
+                    {/* Add "None" option for non-required fields */}
+                    {!required && (
+                      <CommandItem
+                        value="none"
+                        onSelect={() => {
+                          form.setValue(fieldName as any, null);
+                          setSearchQuery("");
+                          setOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            formField.value === null
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                        Не выбрано
+                      </CommandItem>
+                    )}
                     {filteredOptions.map((option) => (
                       <CommandItem
                         key={String(option.id)}

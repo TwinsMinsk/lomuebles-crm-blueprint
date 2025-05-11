@@ -7,10 +7,12 @@ import PageHeader from "@/components/common/PageHeader";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OrderFormValues } from "./orderFormSchema";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 
 const OrderDetailPage: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
-  const isEditMode = orderId !== "new";
+  const isEditMode = orderId !== "new" && orderId !== undefined;
   const navigate = useNavigate();
   
   // Parse orderId from string to number for database operations
@@ -67,6 +69,7 @@ const OrderDetailPage: React.FC = () => {
       } catch (err: any) {
         console.error("Error fetching order:", err);
         setError(err.message);
+        toast.error(`Ошибка загрузки заказа: ${err.message}`);
       } finally {
         setIsLoading(false);
       }
@@ -77,8 +80,9 @@ const OrderDetailPage: React.FC = () => {
   
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="flex flex-col items-center justify-center h-[50vh]">
+        <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+        <p className="text-lg font-medium">Загрузка данных заказа...</p>
       </div>
     );
   }
@@ -86,16 +90,18 @@ const OrderDetailPage: React.FC = () => {
   if (error) {
     return (
       <div className="container mx-auto py-8">
-        <div className="bg-destructive/10 p-4 rounded-md mb-4">
-          <p className="text-destructive">Ошибка при загрузке заказа: {error}</p>
-          <Button 
-            variant="outline" 
-            className="mt-2" 
-            onClick={() => navigate("/orders")}
-          >
-            Вернуться к заказам
-          </Button>
-        </div>
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription className="flex flex-col">
+            <span className="font-bold mb-2">Ошибка при загрузке заказа:</span> {error}
+            <Button 
+              variant="outline" 
+              className="mt-4 self-start" 
+              onClick={() => navigate("/orders")}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" /> Вернуться к заказам
+            </Button>
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }

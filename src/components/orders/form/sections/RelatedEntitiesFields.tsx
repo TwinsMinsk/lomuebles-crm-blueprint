@@ -1,15 +1,11 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { UseFormReturn } from "react-hook-form";
 import { OrderFormValues } from "../orderFormSchema";
-import { useRelatedEntitiesData } from "../hooks/useRelatedEntitiesData";
-import ContactSelector from "./related-entities/ContactSelector";
-import CompanySelector from "./related-entities/CompanySelector";
-import LeadSelector from "./related-entities/LeadSelector";
-import ManagerSelector from "./related-entities/ManagerSelector";
-import PartnerSelector from "./related-entities/PartnerSelector";
+import { useOrderRelatedEntities } from "@/hooks/orders/useOrderRelatedEntities";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
+import EntitySelector from "./related-entities/EntitySelector";
 
 interface RelatedEntitiesFieldsProps {
   form: UseFormReturn<OrderFormValues>;
@@ -17,6 +13,7 @@ interface RelatedEntitiesFieldsProps {
 }
 
 export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ form, orderType }) => {
+  // Use our new hook for related entities data
   const { 
     contacts, 
     companies, 
@@ -25,21 +22,9 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
     partners, 
     isLoading,
     error 
-  } = useRelatedEntitiesData();
+  } = useOrderRelatedEntities();
 
-  // Enhanced logging for debugging
-  useEffect(() => {
-    console.log("RelatedEntitiesFields data loaded:", { 
-      contacts: Array.isArray(contacts) ? contacts.length : 0, 
-      companies: Array.isArray(companies) ? companies.length : 0, 
-      leads: Array.isArray(leads) ? leads.length : 0, 
-      managers: Array.isArray(managers) ? managers.length : 0, 
-      partners: Array.isArray(partners) ? partners.length : 0,
-      isLoading,
-      error: error ? error : "No error"
-    });
-  }, [contacts, companies, leads, managers, partners, isLoading, error]);
-
+  // Show loading state
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-8">
@@ -48,13 +33,6 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
       </div>
     );
   }
-
-  // Ensure all data arrays are valid arrays
-  const safeContacts = Array.isArray(contacts) ? contacts : [];
-  const safeCompanies = Array.isArray(companies) ? companies : [];
-  const safeLeads = Array.isArray(leads) ? leads : [];
-  const safeManagers = Array.isArray(managers) ? managers : [];
-  const safePartners = Array.isArray(partners) ? partners : [];
 
   return (
     <div className="space-y-4">
@@ -65,7 +43,7 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
           <AlertDescription>
             {error}
             <div className="mt-2 text-sm">
-              Пожалуйста, убедитесь, что у вас есть доступ к данным. Возможно, требуется авторизация.
+              Пожалуйста, убедитесь, что у вас есть доступ к данным или попробуйте обновить страницу.
             </div>
           </AlertDescription>
         </Alert>
@@ -73,39 +51,60 @@ export const RelatedEntitiesFields: React.FC<RelatedEntitiesFieldsProps> = ({ fo
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Associated Contact (required) */}
-        <ContactSelector 
+        <EntitySelector 
           form={form} 
-          contacts={safeContacts} 
-          isLoading={isLoading} 
+          fieldName="associatedContactId"
+          label="Клиент"
+          options={contacts} 
+          placeholder="Выберите клиента"
+          emptyMessage="Клиент не найден. Сначала создайте контакт."
+          isLoading={isLoading}
+          required={true}
         />
 
         {/* Associated Company (optional) */}
-        <CompanySelector 
+        <EntitySelector 
           form={form} 
-          companies={safeCompanies} 
+          fieldName="associatedCompanyId"
+          label="Компания клиента"
+          options={companies} 
+          placeholder="Выберите компанию"
+          emptyMessage="Компания не найдена."
           isLoading={isLoading} 
         />
 
         {/* Source Lead (optional) */}
-        <LeadSelector 
+        <EntitySelector 
           form={form} 
-          leads={safeLeads} 
+          fieldName="sourceLeadId"
+          label="Исходный лид"
+          options={leads} 
+          placeholder="Выберите лид"
+          emptyMessage="Лид не найден."
           isLoading={isLoading} 
         />
 
         {/* Assigned Manager (optional) */}
-        <ManagerSelector 
+        <EntitySelector 
           form={form} 
-          managers={safeManagers}
+          fieldName="assignedUserId"
+          label="Ответственный менеджер"
+          options={managers}
+          placeholder="Выберите менеджера"
+          emptyMessage="Менеджер не найден."
           isLoading={isLoading} 
         />
 
         {/* Partner/Manufacturer - only visible when orderType is "Мебель на заказ" */}
         {orderType === "Мебель на заказ" && (
-          <PartnerSelector 
-            form={form} 
-            partners={safePartners} 
-            isLoading={isLoading} 
+          <EntitySelector 
+            form={form}
+            fieldName="associatedPartnerManufacturerId"
+            label="Партнер-изготовитель"
+            options={partners}
+            placeholder="Выберите партнера"
+            emptyMessage="Партнер не найден."
+            isLoading={isLoading}
           />
         )}
       </div>

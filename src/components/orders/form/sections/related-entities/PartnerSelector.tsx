@@ -2,8 +2,7 @@
 import React from "react";
 import { UseFormReturn } from "react-hook-form";
 import { OrderFormValues } from "../../orderFormSchema";
-import EntitySelector from "./EntitySelector";
-import { EntityOption } from "./EntitySelector";
+import EntitySelector, { EntityOption } from "./EntitySelector";
 
 interface PartnerSelectorProps {
   form: UseFormReturn<OrderFormValues>;
@@ -12,15 +11,12 @@ interface PartnerSelectorProps {
 }
 
 const PartnerSelector: React.FC<PartnerSelectorProps> = ({ form, partners = [], isLoading }) => {
-  // Ensure partners is always an array
-  const safePartners = Array.isArray(partners) ? partners : [];
-  
   return (
     <EntitySelector
       form={form}
       fieldName="associatedPartnerManufacturerId"
       label="Партнер-изготовитель"
-      options={safePartners}
+      options={partners}
       placeholder="Выберите партнера"
       emptyMessage="Партнер не найден."
       isLoading={isLoading}
