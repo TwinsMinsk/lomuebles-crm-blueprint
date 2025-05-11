@@ -7,11 +7,13 @@ import { useOrders } from "@/hooks/useOrders";
  */
 export function useRelatedOrdersData() {
   const [orders, setOrders] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { fetchOrders } = useOrders();
 
   useEffect(() => {
     const loadOrders = async () => {
       try {
+        setIsLoading(true);
         const fetchedOrders = await fetchOrders({
           page: 1,
           pageSize: 100,
@@ -23,11 +25,13 @@ export function useRelatedOrdersData() {
       } catch (error) {
         console.error("Failed to load orders:", error);
         setOrders([]);
+      } finally {
+        setIsLoading(false);
       }
     };
     
     loadOrders();
   }, [fetchOrders]);
 
-  return { orders };
+  return { orders, isLoading };
 }
