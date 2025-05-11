@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Order } from "@/types/order";
 
-export const addOrder = async (orderData: Partial<Order>) => {
+export const addOrder = async (orderData: Partial<Order> & { client_contact_id: number, client_language: string, order_type: string, status: string }) => {
   const { data, error } = await supabase
     .from('orders')
     .insert(orderData)

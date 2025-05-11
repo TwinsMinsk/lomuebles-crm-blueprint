@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useRelatedOrdersData } from "@/hooks/tasks/useRelatedOrdersData";
 import EntitySelector from "./EntitySelector";
 import { formatDate } from "@/utils/formatters";
-import { Order } from "@/types/order";
 
 interface OrderSelectorProps {
   value: number | undefined;
@@ -17,7 +16,7 @@ export const OrderSelector = ({ value, onChange }: OrderSelectorProps) => {
   // Format order data for display in entity selector
   const formattedOrders = orders.map((order) => ({
     id: order.id,
-    title: order.order_name || `Заказ ${order.order_number}`,
+    name: order.order_name || `Заказ ${order.order_number}`, // Changed title to name to match EntityOption type
     description: `${formatDate(order.created_at)} - ${order.status}`,
     imageUrl: null,
     subtitle: order.contact_name || 'Без контакта'

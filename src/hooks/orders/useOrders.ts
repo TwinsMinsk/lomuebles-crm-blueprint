@@ -22,7 +22,7 @@ export const fetchOrders = async (): Promise<Order[]> => {
   if (error) throw error;
   
   // Transform data to match our Order type
-  return (data || []).map((order: OrderWithRelations) => ({
+  return (data || []).map((order: any) => ({
     id: order.id,
     created_at: order.created_at,
     order_number: order.order_number,
@@ -59,11 +59,11 @@ export const fetchOrderById = async (id: number): Promise<Order> => {
     .from('orders')
     .select(`
       *,
-      contacts:client_contact_id(*),
-      companies:client_company_id(*),
-      leads:source_lead_id(*),
-      profiles:assigned_user_id(*),
-      partners:partner_manufacturer_id(*)
+      contacts:client_contact_id(contact_id, full_name),
+      companies:client_company_id(company_id, company_name),
+      leads:source_lead_id(lead_id, name),
+      profiles:assigned_user_id(id, full_name),
+      partners:partner_manufacturer_id(partner_manufacturer_id, company_name)
     `)
     .eq('id', id)
     .single();
