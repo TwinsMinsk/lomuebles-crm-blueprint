@@ -39,19 +39,20 @@ const OrderDetailPage: React.FC = () => {
         if (data) {
           console.log("Fetched order data:", data);
           // Transform the data to match our form schema
-          // Ensure arrays are properly initialized even if data is null/undefined
+          // Ensure attachedFilesOrderDocs is always initialized as an array
           const attachedFiles = Array.isArray(data.attached_files_order_docs) 
             ? data.attached_files_order_docs 
             : [];
             
+          // Map the data safely, ensuring all fields are properly initialized
           setOrder({
-            orderNumber: data.order_number,
+            orderNumber: data.order_number || "",
             orderName: data.order_name || "",
-            orderType: data.order_type,
+            orderType: data.order_type || "Готовая мебель (Tilda)",
             statusReadyMade: data.status_ready_made || null,
             statusCustomMade: data.status_custom_made || null,
-            clientLanguage: data.client_language,
-            associatedContactId: data.associated_contact_id,
+            clientLanguage: data.client_language || "ES",
+            associatedContactId: data.associated_contact_id || null,
             associatedCompanyId: data.associated_company_id || null,
             sourceLeadId: data.source_lead_id || null,
             assignedUserId: data.assigned_user_id || null,
@@ -78,6 +79,17 @@ const OrderDetailPage: React.FC = () => {
     fetchOrder();
   }, [orderId, isEditMode, orderIdNumber]);
   
+  // Add debug logs to help identify possible undefined values
+  console.log("Order Detail Page state:", { 
+    orderId, 
+    isEditMode, 
+    order,
+    hasAttachedFiles: order?.attachedFilesOrderDocs ? true : false,
+    attachedFilesType: order?.attachedFilesOrderDocs ? typeof order.attachedFilesOrderDocs : 'undefined',
+    isLoading, 
+    error 
+  });
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh]">
@@ -106,6 +118,14 @@ const OrderDetailPage: React.FC = () => {
     );
   }
 
+  // Ensure we have proper default values for new orders
+  const defaultOrderValues = isEditMode ? order : {
+    orderType: "Готовая мебель (Tilda)",
+    clientLanguage: "ES",
+    // Explicitly initialize as empty array to avoid "not iterable" errors
+    attachedFilesOrderDocs: [],
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <PageHeader
@@ -120,7 +140,7 @@ const OrderDetailPage: React.FC = () => {
       
       <OrderForm 
         orderId={orderIdNumber} 
-        defaultValues={order || undefined}
+        defaultValues={defaultOrderValues}
         isEdit={isEditMode} 
       />
     </div>

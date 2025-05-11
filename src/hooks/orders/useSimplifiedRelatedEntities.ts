@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
+import { useEffect } from "react";
 
 export interface EntityOption {
   id: number | string;
@@ -19,12 +20,25 @@ export interface SimplifiedRelatedEntitiesData {
 export const useSimplifiedRelatedEntities = (): SimplifiedRelatedEntitiesData => {
   const { session } = useAuth();
   
+  useEffect(() => {
+    // Log authentication status to help debugging
+    console.log("SimplifiedRelatedEntities hook - Auth status:", {
+      isAuthenticated: !!session,
+      userId: session?.user?.id || null
+    });
+  }, [session]);
+  
   // Fetch contacts with proper error handling
   const contactsQuery = useQuery({
     queryKey: ['orderContacts'],
     queryFn: async () => {
       try {
         console.log("Fetching contacts, auth status:", !!session);
+        
+        if (!session) {
+          console.warn("No active session, cannot fetch contacts");
+          return [];
+        }
         
         const { data, error } = await supabase
           .from('contacts')
@@ -64,9 +78,15 @@ export const useSimplifiedRelatedEntities = (): SimplifiedRelatedEntitiesData =>
       try {
         console.log("Fetching managers, auth status:", !!session);
         
+        if (!session) {
+          console.warn("No active session, cannot fetch managers");
+          return [];
+        }
+        
         const { data, error } = await supabase
           .from('profiles')
-          .select('id, full_name, email')
+          .select('id, full_name, email, is_active')
+          .eq('is_active', true) // Only fetch active managers
           .order('full_name');
         
         if (error) {
@@ -104,8 +124,10 @@ export const useSimplifiedRelatedEntities = (): SimplifiedRelatedEntitiesData =>
   console.log("useSimplifiedRelatedEntities results:", {
     contactsData: contactsQuery.data,
     contactsLength: contactsQuery.data?.length || 0,
+    contactsStatus: contactsQuery.status,
     managersData: managersQuery.data,
     managersLength: managersQuery.data?.length || 0,
+    managersStatus: managersQuery.status,
     isLoading: contactsQuery.isLoading || managersQuery.isLoading,
     error: errorMessage,
     authStatus: !!session

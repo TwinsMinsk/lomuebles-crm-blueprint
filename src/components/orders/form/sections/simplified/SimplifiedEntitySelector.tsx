@@ -41,25 +41,48 @@ const SimplifiedEntitySelector = ({
   // Get the current value from form
   const currentValue = form.watch(fieldName);
   
-  // Ensure options is ALWAYS an array even if undefined or null is passed
+  // ENSURE options is ALWAYS an array even if undefined or null is passed
   const safeOptions = Array.isArray(options) ? options : [];
   
-  // Filter options based on search query - add defensive checks
+  // Add debug log for options
+  console.log(`SimplifiedEntitySelector for ${fieldName}:`, {
+    receivedOptions: options,
+    isArray: Array.isArray(options),
+    optionsLength: safeOptions.length,
+    currentValue,
+    searchQuery
+  });
+  
+  // Filter options based on search query - with extra defensive checks
   const filteredOptions = React.useMemo(() => {
-    if (!searchQuery) {
+    // If no search query, return all options
+    if (!searchQuery || !searchQuery.trim()) {
       return safeOptions;
     }
     
+    const lowercaseQuery = searchQuery.toLowerCase();
+    
+    // Filter with defensive checks
     return safeOptions.filter(option => {
+      // Ensure option exists and has a name property that's a string
       if (!option || typeof option.name !== 'string') return false;
-      return option.name.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      // Case insensitive comparison 
+      return option.name.toLowerCase().includes(lowercaseQuery);
     });
   }, [safeOptions, searchQuery]);
 
   // Find the selected option - with defensive checks
   const selectedOption = React.useMemo(() => {
     if (!currentValue || safeOptions.length === 0) return undefined;
-    return safeOptions.find(option => option && option.id === currentValue);
+    
+    return safeOptions.find(option => {
+      // Ensure option exists and has an id
+      if (!option || option.id === undefined) return false;
+      
+      // Check for equality, handling both number and string IDs
+      return option.id === currentValue;
+    });
   }, [safeOptions, currentValue]);
 
   // Add a display label with required indicator
@@ -107,63 +130,72 @@ const SimplifiedEntitySelector = ({
                   <span className="text-sm text-muted-foreground">Загрузка данных...</span>
                 </div>
               ) : (
-                <Command>
+                <Command shouldFilter={false}>
                   <CommandInput 
                     placeholder={`Поиск ${placeholder.toLowerCase()}...`} 
                     onValueChange={setSearchQuery}
                     value={searchQuery}
                     className="h-9"
                   />
-                  {/* Fixed: Check if options array is empty */}
+                  
+                  {/* Check if options array is empty or undefined */}
                   {safeOptions.length === 0 ? (
                     <div className="py-6 text-center text-sm">
                       {emptyMessage}
                     </div>
                   ) : (
                     <>
-                      <CommandEmpty className="py-3 text-center text-sm">Ничего не найдено</CommandEmpty>
-                      <CommandGroup>
-                        {!required && (
-                          <CommandItem
-                            value="none"
-                            onSelect={() => {
-                              form.setValue(fieldName as any, null);
-                              setSearchQuery("");
-                              setOpen(false);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                formField.value === null ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            Не выбрано
-                          </CommandItem>
-                        )}
-                        {/* Fixed: Use filteredOptions which is guaranteed to be array */}
-                        {filteredOptions.map((option) => (
-                          <CommandItem
-                            key={String(option?.id || Math.random())}
-                            value={String(option?.name || '')}
-                            onSelect={() => {
-                              if (option?.id !== undefined) {
-                                form.setValue(fieldName as any, option.id);
-                              }
-                              setSearchQuery("");
-                              setOpen(false);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                option?.id === formField.value ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            {option?.name || `#${option?.id || 'unknown'}`}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
+                      {/* If there are options but none match the search */}
+                      {filteredOptions.length === 0 ? (
+                        <CommandEmpty className="py-3 text-center text-sm">
+                          Ничего не найдено
+                        </CommandEmpty>
+                      ) : (
+                        <CommandGroup>
+                          {/* Add "None" option for non-required fields */}
+                          {!required && (
+                            <CommandItem
+                              value="none"
+                              onSelect={() => {
+                                form.setValue(fieldName as any, null);
+                                setSearchQuery("");
+                                setOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  formField.value === null ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              Не выбрано
+                            </CommandItem>
+                          )}
+                          
+                          {/* Display filtered options */}
+                          {filteredOptions.map((option) => (
+                            <CommandItem
+                              key={String(option?.id || Math.random())}
+                              value={String(option?.name || '')}
+                              onSelect={() => {
+                                if (option?.id !== undefined) {
+                                  form.setValue(fieldName as any, option.id);
+                                }
+                                setSearchQuery("");
+                                setOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  option?.id === formField.value ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {option?.name || `#${option?.id || 'unknown'}`}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      )}
                     </>
                   )}
                 </Command>

@@ -33,8 +33,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, UserCog, ShieldAlert } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Define the user role type from our database schema
 type UserRole = Database["public"]["Enums"]["user_role"];
@@ -49,27 +50,40 @@ interface User {
 }
 
 const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("ru-RU", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("ru-RU", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return "Неверная дата";
+  }
 };
 
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const { session, userRole } = useAuth();
 
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
+      setError(null);
+      
       console.log("Fetching all users, current user role:", userRole);
       
+      if (!session) {
+        throw new Error("Необходима авторизация для просмотра пользователей");
+      }
+      
+      // Explicitly get all profiles without filtering
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -89,6 +103,7 @@ const UserManagement = () => {
       setUsers(data || []);
     } catch (error: any) {
       console.error("Error fetching users:", error);
+      setError(error.message || "Не удалось загрузить список пользователей");
       toast({
         title: "Ошибка загрузки пользователей",
         description: error.message || "Не удалось загрузить список пользователей",
@@ -102,6 +117,9 @@ const UserManagement = () => {
   useEffect(() => {
     if (session) {
       fetchUsers();
+    } else {
+      setIsLoading(false);
+      setError("Необходима авторизация");
     }
   }, [session]);
 
@@ -183,8 +201,31 @@ const UserManagement = () => {
     return (
       <Container>
         <Card>
+          <CardHeader className="bg-slate-50">
+            <CardTitle>Управление пользователями</CardTitle>
+          </CardHeader>
           <CardContent className="p-8 text-center">
-            <p>Для управления пользователями необходимо авторизоваться</p>
+            <ShieldAlert className="h-12 w-12 text-amber-500 mx-auto mb-4" />
+            <p className="text-lg font-medium mb-2">Требуется авторизация</p>
+            <p>Для управления пользователями необходимо авторизоваться в системе</p>
+          </CardContent>
+        </Card>
+      </Container>
+    );
+  }
+
+  // For roles other than admin, show limited access
+  if (userRole !== "Главный Администратор" && userRole !== "Администратор") {
+    return (
+      <Container>
+        <Card>
+          <CardHeader className="bg-slate-50">
+            <CardTitle>Управление пользователями</CardTitle>
+          </CardHeader>
+          <CardContent className="p-8 text-center">
+            <UserCog className="h-12 w-12 text-amber-500 mx-auto mb-4" />
+            <p className="text-lg font-medium mb-2">Ограниченный доступ</p>
+            <p>Только администраторы имеют доступ к управлению пользователями</p>
           </CardContent>
         </Card>
       </Container>
@@ -211,6 +252,15 @@ const UserManagement = () => {
           </Button>
         </CardHeader>
         <CardContent className="p-0">
+          {error && (
+            <Alert variant="destructive" className="m-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {isLoading ? (
             <div className="flex justify-center items-center p-8">
               <Loader2 className="h-8 w-8 animate-spin mr-3" />
@@ -230,77 +280,78 @@ const UserManagement = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.email}</TableCell>
-                      <TableCell>{user.full_name || "—"}</TableCell>
-                      <TableCell>
-                        <Select
-                          defaultValue={user.role}
-                          onValueChange={(value) => handleRoleChange(user.id, value as UserRole)}
-                        >
-                          <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Выберите роль" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Главный Администратор">
-                              Главный Администратор
-                            </SelectItem>
-                            <SelectItem value="Администратор">Администратор</SelectItem>
-                            <SelectItem value="Менеджер">Менеджер</SelectItem>
-                            <SelectItem value="Замерщик">Замерщик</SelectItem>
-                            <SelectItem value="Дизайнер">Дизайнер</SelectItem>
-                            <SelectItem value="Монтажник">Монтажник</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>{formatDate(user.registration_date)}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={user.is_active ? "outline" : "destructive"}
-                          className={user.is_active ? "bg-green-50 text-green-600 hover:bg-green-50" : ""}
-                        >
-                          {user.is_active ? "Активен" : "Неактивен"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant={user.is_active ? "destructive" : "outline"}
-                              size="sm"
-                            >
-                              {user.is_active ? "Деактивировать" : "Активировать"}
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                {user.is_active
-                                  ? "Деактивировать пользователя"
-                                  : "Активировать пользователя"}
-                              </AlertDialogTitle>
-                              <AlertDialogDescription>
-                                {user.is_active
-                                  ? "Вы уверены, что хотите деактивировать этого пользователя? Пользователь потеряет доступ к системе."
-                                  : "Вы уверены, что хотите активировать этого пользователя? Пользователь получит доступ к системе."}
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Отмена</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => toggleUserActiveState(user.id, user.is_active)}
-                                className={user.is_active ? "bg-red-500 hover:bg-red-600" : ""}
+                  {users && users.length > 0 ? (
+                    users.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">{user.email}</TableCell>
+                        <TableCell>{user.full_name || "—"}</TableCell>
+                        <TableCell>
+                          <Select
+                            defaultValue={user.role}
+                            onValueChange={(value) => handleRoleChange(user.id, value as UserRole)}
+                          >
+                            <SelectTrigger className="w-[180px]">
+                              <SelectValue placeholder="Выберите роль" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Главный Администратор">
+                                Главный Администратор
+                              </SelectItem>
+                              <SelectItem value="Администратор">Администратор</SelectItem>
+                              <SelectItem value="Менеджер">Менеджер</SelectItem>
+                              <SelectItem value="Замерщик">Замерщик</SelectItem>
+                              <SelectItem value="Дизайнер">Дизайнер</SelectItem>
+                              <SelectItem value="Монтажник">Монтажник</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>{user.registration_date ? formatDate(user.registration_date) : "—"}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={user.is_active ? "outline" : "destructive"}
+                            className={user.is_active ? "bg-green-50 text-green-600 hover:bg-green-50" : ""}
+                          >
+                            {user.is_active ? "Активен" : "Неактивен"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant={user.is_active ? "destructive" : "outline"}
+                                size="sm"
                               >
                                 {user.is_active ? "Деактивировать" : "Активировать"}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {users.length === 0 && (
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  {user.is_active
+                                    ? "Деактивировать пользователя"
+                                    : "Активировать пользователя"}
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  {user.is_active
+                                    ? "Вы уверены, что хотите деактивировать этого пользователя? Пользователь потеряет доступ к системе."
+                                    : "Вы уверены, что хотите активировать этого пользователя? Пользователь получит доступ к системе."}
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Отмена</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => toggleUserActiveState(user.id, user.is_active)}
+                                  className={user.is_active ? "bg-red-500 hover:bg-red-600" : ""}
+                                >
+                                  {user.is_active ? "Деактивировать" : "Активировать"}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-8">
                         Пользователи не найдены

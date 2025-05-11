@@ -6,12 +6,15 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
 import SimplifiedEntitySelector from "./simplified/SimplifiedEntitySelector";
 import { useSimplifiedRelatedEntities } from "@/hooks/orders/useSimplifiedRelatedEntities";
+import { useAuth } from "@/context/AuthContext";
 
 interface SimplifiedRelatedEntitiesProps {
   form: UseFormReturn<OrderFormValues>;
 }
 
 export const SimplifiedRelatedEntities: React.FC<SimplifiedRelatedEntitiesProps> = ({ form }) => {
+  const { session } = useAuth();
+  
   // Use our simplified hook for related entities data
   const { 
     contacts, 
@@ -25,8 +28,24 @@ export const SimplifiedRelatedEntities: React.FC<SimplifiedRelatedEntitiesProps>
     contactsLength: contacts?.length || 0,
     managersLength: managers?.length || 0,
     isLoading,
-    error
+    error,
+    isAuthenticated: !!session
   });
+
+  // Show not authenticated warning if no session
+  if (!session) {
+    return (
+      <Alert variant="warning" className="mb-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Для доступа к связанным данным необходима авторизация.
+          <div className="mt-2 text-sm">
+            Пожалуйста, войдите в систему для полного доступа к функциональности.
+          </div>
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   // Show loading state
   if (isLoading) {
@@ -42,6 +61,9 @@ export const SimplifiedRelatedEntities: React.FC<SimplifiedRelatedEntitiesProps>
   const safeContacts = Array.isArray(contacts) ? contacts : [];
   const safeManagers = Array.isArray(managers) ? managers : [];
 
+  // Check if we have data after loading
+  const hasNoData = safeContacts.length === 0 && safeManagers.length === 0;
+
   return (
     <div className="space-y-4">
       {/* Show error message if any */}
@@ -52,6 +74,19 @@ export const SimplifiedRelatedEntities: React.FC<SimplifiedRelatedEntitiesProps>
             {error}
             <div className="mt-2 text-sm">
               Пожалуйста, убедитесь, что у вас есть доступ к данным или попробуйте обновить страницу.
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {/* Show warning if we have no data but no errors */}
+      {!error && hasNoData && (
+        <Alert variant="warning" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Не найдены доступные контакты или менеджеры.
+            <div className="mt-2 text-sm">
+              Возможно, вам нужно сначала создать контакты в системе.
             </div>
           </AlertDescription>
         </Alert>
