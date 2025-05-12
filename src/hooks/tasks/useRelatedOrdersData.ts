@@ -2,18 +2,25 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Order } from "@/types/order";
+import { useAuth } from "@/context/AuthContext";
 
 /**
  * Hook to fetch orders data for related entities selection
  * Used in tasks and other forms that need to reference orders
+ * Implements role-based filtering:
+ * - Admin users see all orders
+ * - Other users see only orders where they are assigned or creator
  */
 export const useRelatedOrdersData = (searchTerm: string = "", limit: number = 20) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
+  const { user, userRole } = useAuth();
 
   useEffect(() => {
     const fetchOrders = async () => {
+      if (!user) return; // Don't fetch if no user
+
       setIsLoading(true);
       setError(null);
 
@@ -25,8 +32,13 @@ export const useRelatedOrdersData = (searchTerm: string = "", limit: number = 20
             *,
             contacts:associated_contact_id(contact_id, full_name),
             profiles:assigned_user_id(id, full_name)
-          `)
-          .limit(limit);
+          `);
+
+        // Apply role-based filtering
+        // Admins see all orders, other users see only their own
+        if (userRole !== 'Главный Администратор' && userRole !== 'Администратор') {
+          query = query.or(`assigned_user_id.eq.${user.id},creator_user_id.eq.${user.id}`);
+        }
 
         // Apply search filter if provided
         if (searchTerm) {
@@ -35,10 +47,15 @@ export const useRelatedOrdersData = (searchTerm: string = "", limit: number = 20
           );
         }
 
+        // Apply limit and order by creation date
+        query = query.order('creation_date', { ascending: false }).limit(limit);
+
         // Execute the query
-        const { data, error: fetchError } = await query.order('creation_date', { ascending: false });
+        const { data, error: fetchError } = await query;
 
         if (fetchError) throw fetchError;
+
+        console.log("Orders fetched based on role:", userRole, "Count:", data?.length || 0);
 
         // Transform data to match our Order type, with safe access to potentially null relation data
         const transformedOrders = (data || []).map((order: any) => ({
@@ -75,7 +92,7 @@ export const useRelatedOrdersData = (searchTerm: string = "", limit: number = 20
     };
 
     fetchOrders();
-  }, [searchTerm, limit]);
+  }, [searchTerm, limit, user, userRole]);
 
   return { orders, isLoading, error };
 };

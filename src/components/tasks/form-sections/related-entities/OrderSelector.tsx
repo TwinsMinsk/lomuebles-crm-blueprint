@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRelatedOrdersData } from "@/hooks/tasks/useRelatedOrdersData";
 import EntitySelector from "./EntitySelector";
 import { formatDate } from "@/utils/formatters";
+import { useAuth } from "@/context/AuthContext";
 
 interface OrderSelectorProps {
   value: number | undefined;
@@ -11,6 +12,7 @@ interface OrderSelectorProps {
 
 export const OrderSelector = ({ value, onChange }: OrderSelectorProps) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const { user } = useAuth();
   const { orders, isLoading, error } = useRelatedOrdersData(searchTerm);
 
   // Format order data for display in entity selector
@@ -32,7 +34,7 @@ export const OrderSelector = ({ value, onChange }: OrderSelectorProps) => {
       searchTerm={searchTerm}
       onSearchChange={setSearchTerm}
       placeholder="Поиск заказа..."
-      emptyMessage="Заказы не найдены"
+      emptyMessage={user ? "Заказы не найдены" : "Авторизуйтесь для просмотра заказов"}
       entityLabel="заказ"
     />
   );

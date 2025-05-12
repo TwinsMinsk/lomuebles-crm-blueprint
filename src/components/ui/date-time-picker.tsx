@@ -165,13 +165,6 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
                     // Prevent auto focus behavior from closing the parent popover
                     e.preventDefault();
                   }}
-                  onInteractOutside={(e) => {
-                    // Only prevent if it's within our time popover
-                    if (e.target instanceof Node && 
-                        document.querySelector('[role="dialog"]')?.contains(e.target)) {
-                      e.preventDefault();
-                    }
-                  }}
                 >
                   {hourOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
@@ -217,13 +210,6 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
                   onCloseAutoFocus={(e) => {
                     // Prevent auto focus behavior from closing the parent popover
                     e.preventDefault();
-                  }}
-                  onInteractOutside={(e) => {
-                    // Only prevent if it's within our time popover
-                    if (e.target instanceof Node && 
-                        document.querySelector('[role="dialog"]')?.contains(e.target)) {
-                      e.preventDefault();
-                    }
                   }}
                 >
                   {minuteOptions.map((option) => (
