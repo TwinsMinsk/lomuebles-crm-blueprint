@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useOrders } from "@/hooks/orders/useOrders";
 import { useDeleteOrder } from "@/hooks/orders/useDeleteOrder";
 import { Link } from "react-router-dom";
@@ -14,12 +14,15 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Loader2, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import OrderViewPopup from "./OrderViewPopup";
 
 const OrdersTable: React.FC = () => {
   const { data: orders, isLoading, error } = useOrders();
   const { mutate: deleteOrder, isPending: isDeleting } = useDeleteOrder();
+  const [selectedOrderIdForView, setSelectedOrderIdForView] = useState<number | null>(null);
 
   if (isLoading) {
     return (
@@ -82,7 +85,18 @@ const OrdersTable: React.FC = () => {
         </TableHeader>
         <TableBody>
           {orders.map((order) => (
-            <TableRow key={order.id}>
+            <TableRow 
+              key={order.id}
+              className="cursor-pointer hover:bg-muted/60"
+              onClick={(e) => {
+                // Prevent opening popup if clicking on action buttons
+                if ((e.target as HTMLElement).closest('button') || 
+                    (e.target as HTMLElement).closest('a')) {
+                  return;
+                }
+                setSelectedOrderIdForView(order.id);
+              }}
+            >
               <TableCell className="font-medium">{order.order_number}</TableCell>
               <TableCell>{order.order_name || "-"}</TableCell>
               <TableCell>{order.order_type}</TableCell>
@@ -91,7 +105,7 @@ const OrdersTable: React.FC = () => {
               <TableCell>{order.assigned_user_name || "-"}</TableCell>
               <TableCell className="text-right">{formatCurrency(order.final_amount)}</TableCell>
               <TableCell>{formatDate(order.created_at)}</TableCell>
-              <TableCell className="text-right space-x-2">
+              <TableCell className="text-right space-x-2" onClick={(e) => e.stopPropagation()}>
                 <Button
                   variant="outline"
                   size="sm"
@@ -133,6 +147,15 @@ const OrdersTable: React.FC = () => {
           ))}
         </TableBody>
       </Table>
+
+      <Dialog 
+        open={!!selectedOrderIdForView} 
+        onOpenChange={(isOpen) => !isOpen && setSelectedOrderIdForView(null)}
+      >
+        <DialogContent className="sm:max-w-[650px]">
+          <OrderViewPopup orderId={selectedOrderIdForView} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
