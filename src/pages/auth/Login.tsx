@@ -114,7 +114,7 @@ const Login = () => {
               <div className="text-center mt-4">
                 <p className="text-sm text-gray-600">
                   Нет учетной записи?{" "}
-                  <Link to="/auth/register" className="text-blue-600 hover:text-blue-800">
+                  <Link to="/register" className="text-blue-600 hover:text-blue-800">
                     Зарегистрироваться
                   </Link>
                 </p>
