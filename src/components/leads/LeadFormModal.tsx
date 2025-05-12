@@ -2,6 +2,7 @@
 import React from "react";
 import { LeadWithProfile } from "./LeadTableRow";
 import { useLeadForm } from "./hooks/useLeadForm";
+import { FileUploadSection } from "@/components/common/FileUploadSection";
 
 import {
   Dialog,
@@ -33,7 +34,7 @@ const LeadFormModal: React.FC<LeadFormModalProps> = ({
   lead,
   onSuccess,
 }) => {
-  const { form, users, loading, onSubmit } = useLeadForm({ 
+  const { form, users, loading, onSubmit, attachedFiles, setAttachedFiles } = useLeadForm({ 
     lead, 
     onSuccess, 
     onClose 
@@ -65,6 +66,14 @@ const LeadFormModal: React.FC<LeadFormModalProps> = ({
 
               {/* Assignment and Comment */}
               <AssignmentAndCommentFields form={form} users={users} />
+              
+              {/* File Attachments */}
+              <FileUploadSection
+                entityType="leads"
+                entityId={lead?.lead_id}
+                existingFiles={attachedFiles}
+                onFilesChange={setAttachedFiles}
+              />
             </form>
           </Form>
         </ScrollArea>

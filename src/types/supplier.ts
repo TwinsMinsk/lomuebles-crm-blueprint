@@ -10,6 +10,7 @@ export interface Supplier {
   terms: string | null;
   creation_date: string;
   creator_user_id: string | null;
+  attached_files?: any[] | null;
 }
 
 export interface SupplierFilters {

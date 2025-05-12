@@ -1,17 +1,12 @@
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { leadFormSchema, LeadFormValues } from "../schema/leadFormSchema";
 import { LeadWithProfile } from "../LeadTableRow";
-import { formSchema, LeadFormData } from "../schema/leadFormSchema";
-
-interface UserProfile {
-  id: string;
-  full_name: string;
-  role: string;
-}
+import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 interface UseLeadFormProps {
   lead?: LeadWithProfile;
@@ -20,151 +15,96 @@ interface UseLeadFormProps {
 }
 
 export const useLeadForm = ({ lead, onSuccess, onClose }: UseLeadFormProps) => {
-  const { toast } = useToast();
-  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+  const [attachedFiles, setAttachedFiles] = useState<any[]>([]);
 
-  // Set up form with default values
-  const form = useForm<LeadFormData>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<LeadFormValues>({
+    resolver: zodResolver(leadFormSchema),
     defaultValues: {
       name: "",
       phone: "",
       email: "",
-      lead_source: "",
-      client_language: "ES",
-      lead_status: "Новый",
       initial_comment: "",
-      assigned_user_id: "not_assigned",
+      lead_source: "",
+      lead_status: "Новый",
+      client_language: "RU",
+      assigned_user_id: null,
     },
   });
 
-  // When lead changes, update form values
   useEffect(() => {
+    // Fetch users for assignment dropdown
+    const fetchUsers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id, full_name, role")
+          .order("full_name");
+
+        if (error) throw error;
+        setUsers(data || []);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        toast.error("Не удалось загрузить список пользователей");
+      }
+    };
+
+    fetchUsers();
+
+    // Reset form values if editing lead
     if (lead) {
       form.reset({
         name: lead.name || "",
         phone: lead.phone || "",
         email: lead.email || "",
-        lead_source: lead.lead_source || "",
-        client_language: (lead.client_language as "ES" | "EN" | "RU") || "ES",
-        lead_status: lead.lead_status || "Новый",
         initial_comment: lead.initial_comment || "",
-        assigned_user_id: lead.assigned_user_id || "not_assigned",
+        lead_source: lead.lead_source || "",
+        lead_status: lead.lead_status || "Новый",
+        client_language: lead.client_language || "RU",
+        assigned_user_id: lead.assigned_user_id || null,
       });
+      
+      // Initialize attached files
+      if (lead.attached_files) {
+        setAttachedFiles(lead.attached_files);
+      }
     }
   }, [lead, form]);
 
-  // Fetch users that can be assigned to leads (managers and admins)
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name, role")
-        .in("role", ["Менеджер", "Администратор", "Главный Администратор"]);
-
-      if (error) {
-        console.error("Error fetching users:", error);
-        return;
-      }
-
-      if (data) {
-        setUsers(data as UserProfile[]);
-      }
-    };
-
-    fetchUsers();
-  }, []);
-
-  const onSubmit = async (data: LeadFormData) => {
-    setLoading(true);
+  const onSubmit = async (values: LeadFormValues) => {
     try {
-      // Handle not_assigned as null for the database
-      const assignedUserId = data.assigned_user_id === "not_assigned" ? null : data.assigned_user_id;
+      setLoading(true);
+      
+      // Prepare data with attached files
+      const leadData = {
+        ...values,
+        attached_files: attachedFiles.length > 0 ? attachedFiles : null,
+        creator_user_id: user?.id
+      };
 
       if (lead) {
         // Update existing lead
         const { error } = await supabase
           .from("leads")
-          .update({
-            name: data.name,
-            phone: data.phone,
-            email: data.email,
-            lead_source: data.lead_source,
-            client_language: data.client_language,
-            lead_status: data.lead_status,
-            initial_comment: data.initial_comment,
-            assigned_user_id: assignedUserId,
-          })
+          .update(leadData)
           .eq("lead_id", lead.lead_id);
 
-        if (error) {
-          console.error("Error updating lead:", error);
-          toast({
-            title: "Ошибка",
-            description: "Не удалось обновить лид",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        toast({
-          title: "Успех",
-          description: "Лид успешно обновлен",
-        });
+        if (error) throw error;
+        toast.success("Лид успешно обновлен!");
       } else {
         // Create new lead
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
-        if (!user) {
-          toast({
-            title: "Ошибка",
-            description: "Пользователь не авторизован",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        const { error } = await supabase.from("leads").insert({
-          name: data.name,
-          phone: data.phone,
-          email: data.email,
-          lead_source: data.lead_source,
-          client_language: data.client_language,
-          lead_status: data.lead_status,
-          initial_comment: data.initial_comment,
-          assigned_user_id: assignedUserId,
-          creator_user_id: user.id,
-          creation_date: new Date().toISOString(),
-        });
-
-        if (error) {
-          console.error("Error creating lead:", error);
-          toast({
-            title: "Ошибка",
-            description: "Не удалось создать лид",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        toast({
-          title: "Успех",
-          description: "Лид успешно создан",
-        });
+        const { error } = await supabase.from("leads").insert(leadData);
+        if (error) throw error;
+        toast.success("Лид успешно создан!");
       }
 
       onSuccess();
       onClose();
     } catch (error) {
-      console.error("Error submitting lead form:", error);
-      toast({
-        title: "Ошибка",
-        description: "Произошла ошибка при сохранении данных",
-        variant: "destructive",
-      });
+      console.error("Error saving lead:", error);
+      toast.error("Ошибка при сохранении лида");
     } finally {
       setLoading(false);
     }
@@ -175,5 +115,7 @@ export const useLeadForm = ({ lead, onSuccess, onClose }: UseLeadFormProps) => {
     users,
     loading,
     onSubmit,
+    attachedFiles,
+    setAttachedFiles
   };
 };

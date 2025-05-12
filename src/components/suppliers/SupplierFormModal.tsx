@@ -16,6 +16,7 @@ import SupplierBasicInfoFields from "./form-sections/SupplierBasicInfoFields";
 import SupplierContactFields from "./form-sections/SupplierContactFields";
 import SupplierBusinessFields from "./form-sections/SupplierBusinessFields";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { FileUploadSection } from "@/components/common/FileUploadSection";
 
 interface SupplierFormModalProps {
   isOpen: boolean;
@@ -30,7 +31,13 @@ const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
   supplier,
   onSuccess,
 }) => {
-  const { form, loading, onSubmit } = useSupplierForm({
+  const { 
+    form, 
+    loading, 
+    onSubmit, 
+    attachedFiles, 
+    setAttachedFiles 
+  } = useSupplierForm({
     supplier,
     onSuccess,
     onClose,
@@ -62,6 +69,15 @@ const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
 
               {/* Business Information */}
               <SupplierBusinessFields form={form} />
+              
+              {/* File Attachments */}
+              <FileUploadSection
+                entityType="suppliers"
+                entityId={supplier?.supplier_id}
+                existingFiles={attachedFiles}
+                onFilesChange={setAttachedFiles}
+                label="Документы поставщика"
+              />
             </form>
           </Form>
         </ScrollArea>

@@ -35,6 +35,7 @@ export const usePartnerForm = ({
 }: UsePartnerFormProps) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<any[]>([]);
 
   // Initialize form with empty values
   const form = useForm<PartnerFormValues>({
@@ -64,6 +65,15 @@ export const usePartnerForm = ({
         requisites: partner.requisites,
         notes: partner.notes,
       });
+      
+      // Load attached files if they exist
+      if (partner.attached_files_partner_docs) {
+        setAttachedFiles(partner.attached_files_partner_docs);
+      } else {
+        setAttachedFiles([]);
+      }
+    } else {
+      setAttachedFiles([]);
     }
   }, [partner, form]);
 
@@ -71,11 +81,17 @@ export const usePartnerForm = ({
     try {
       setLoading(true);
 
+      // Prepare data with files
+      const partnerData = {
+        ...values,
+        attached_files_partner_docs: attachedFiles.length > 0 ? attachedFiles : null,
+      };
+
       if (partner) {
         // Update existing partner
         const { error } = await supabase
           .from("partners_manufacturers")
-          .update(values)
+          .update(partnerData)
           .eq("partner_manufacturer_id", partner.partner_manufacturer_id);
 
         if (error) throw error;
@@ -83,14 +99,7 @@ export const usePartnerForm = ({
       } else {
         // Create new partner
         const { error } = await supabase.from("partners_manufacturers").insert({
-          company_name: values.company_name,
-          contact_person: values.contact_person,
-          phone: values.phone,
-          email: values.email,
-          specialization: values.specialization,
-          terms: values.terms,
-          requisites: values.requisites,
-          notes: values.notes,
+          ...partnerData,
           creator_user_id: user?.id || null,
         });
 
@@ -99,6 +108,7 @@ export const usePartnerForm = ({
       }
 
       onSuccess();
+      onClose();
     } catch (error) {
       console.error("Error saving partner:", error);
       toast.error("Ошибка при сохранении партнера-изготовителя");
@@ -111,5 +121,7 @@ export const usePartnerForm = ({
     form,
     loading,
     onSubmit,
+    attachedFiles,
+    setAttachedFiles
   };
 };

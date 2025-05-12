@@ -34,6 +34,7 @@ export const useSupplierForm = ({
 }: UseSupplierFormProps) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<any[]>([]);
 
   // Initialize form with empty values
   const form = useForm<SupplierFormValues>({
@@ -61,6 +62,15 @@ export const useSupplierForm = ({
         product_categories: supplier.product_categories,
         terms: supplier.terms,
       });
+      
+      // Load attached files if they exist
+      if (supplier.attached_files) {
+        setAttachedFiles(supplier.attached_files);
+      } else {
+        setAttachedFiles([]);
+      }
+    } else {
+      setAttachedFiles([]);
     }
   }, [supplier, form]);
 
@@ -68,11 +78,17 @@ export const useSupplierForm = ({
     try {
       setLoading(true);
 
+      // Prepare data with files
+      const supplierData = {
+        ...values,
+        attached_files: attachedFiles.length > 0 ? attachedFiles : null,
+      };
+
       if (supplier) {
         // Update existing supplier
         const { error } = await supabase
           .from("suppliers")
-          .update(values)
+          .update(supplierData)
           .eq("supplier_id", supplier.supplier_id);
 
         if (error) throw error;
@@ -80,13 +96,7 @@ export const useSupplierForm = ({
       } else {
         // Create new supplier
         const { error } = await supabase.from("suppliers").insert({
-          supplier_name: values.supplier_name,
-          contact_person: values.contact_person,
-          phone: values.phone,
-          email: values.email,
-          website: values.website,
-          product_categories: values.product_categories,
-          terms: values.terms,
+          ...supplierData,
           creator_user_id: user?.id || null,
         });
 
@@ -95,6 +105,7 @@ export const useSupplierForm = ({
       }
 
       onSuccess();
+      onClose();
     } catch (error) {
       console.error("Error saving supplier:", error);
       toast.error("Ошибка при сохранении поставщика");
@@ -107,5 +118,7 @@ export const useSupplierForm = ({
     form,
     loading,
     onSubmit,
+    attachedFiles,
+    setAttachedFiles
   };
 };

@@ -336,6 +336,7 @@ export type Database = {
       leads: {
         Row: {
           assigned_user_id: string | null
+          attached_files: Json | null
           client_language: string | null
           creation_date: string
           creator_user_id: string | null
@@ -349,6 +350,7 @@ export type Database = {
         }
         Insert: {
           assigned_user_id?: string | null
+          attached_files?: Json | null
           client_language?: string | null
           creation_date?: string
           creator_user_id?: string | null
@@ -362,6 +364,7 @@ export type Database = {
         }
         Update: {
           assigned_user_id?: string | null
+          attached_files?: Json | null
           client_language?: string | null
           creation_date?: string
           creator_user_id?: string | null
@@ -672,6 +675,7 @@ export type Database = {
       }
       suppliers: {
         Row: {
+          attached_files: Json | null
           contact_person: string | null
           creation_date: string
           creator_user_id: string | null
@@ -684,6 +688,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          attached_files?: Json | null
           contact_person?: string | null
           creation_date?: string
           creator_user_id?: string | null
@@ -696,6 +701,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          attached_files?: Json | null
           contact_person?: string | null
           creation_date?: string
           creator_user_id?: string | null

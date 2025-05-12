@@ -16,6 +16,7 @@ import PartnerBasicInfoFields from "./form-sections/PartnerBasicInfoFields";
 import PartnerContactFields from "./form-sections/PartnerContactFields";
 import PartnerBusinessFields from "./form-sections/PartnerBusinessFields";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { FileUploadSection } from "@/components/common/FileUploadSection";
 
 interface PartnerFormModalProps {
   isOpen: boolean;
@@ -30,7 +31,13 @@ const PartnerFormModal: React.FC<PartnerFormModalProps> = ({
   partner,
   onSuccess,
 }) => {
-  const { form, loading, onSubmit } = usePartnerForm({
+  const { 
+    form, 
+    loading, 
+    onSubmit, 
+    attachedFiles, 
+    setAttachedFiles 
+  } = usePartnerForm({
     partner,
     onSuccess,
     onClose,
@@ -62,6 +69,15 @@ const PartnerFormModal: React.FC<PartnerFormModalProps> = ({
 
               {/* Business Information */}
               <PartnerBusinessFields form={form} />
+              
+              {/* File Attachments */}
+              <FileUploadSection
+                entityType="partners"
+                entityId={partner?.partner_manufacturer_id}
+                existingFiles={attachedFiles}
+                onFilesChange={setAttachedFiles}
+                label="Документы партнера"
+              />
             </form>
           </Form>
         </ScrollArea>

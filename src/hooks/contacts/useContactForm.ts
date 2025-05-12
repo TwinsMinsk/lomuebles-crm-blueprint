@@ -29,6 +29,7 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
   const [companies, setCompanies] = useState<Company[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<any[]>([]);
   const { user } = useAuth();
 
   // Initialize form with default values
@@ -102,6 +103,11 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
         owner_user_id: contactToEdit.owner_user_id || null,
         notes: contactToEdit.notes || "",
       });
+      
+      // Load attached files if they exist
+      if (contactToEdit.attached_files_general) {
+        setAttachedFiles(contactToEdit.attached_files_general);
+      }
     } else {
       // Reset form when adding a new contact
       form.reset({
@@ -120,6 +126,7 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
         owner_user_id: user?.id || null,
         notes: "",
       });
+      setAttachedFiles([]);
     }
   }, [contactToEdit, form, user]);
 
@@ -150,7 +157,8 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
         delivery_address_country: values.delivery_address_country,
         associated_company_id: values.associated_company_id,
         owner_user_id: values.owner_user_id,
-        notes: values.notes
+        notes: values.notes,
+        attached_files_general: attachedFiles.length > 0 ? attachedFiles : null
       };
       
       let result;
@@ -210,6 +218,8 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
     companies,
     users,
     loading,
-    onSubmit
+    onSubmit,
+    attachedFiles,
+    setAttachedFiles
   };
 };

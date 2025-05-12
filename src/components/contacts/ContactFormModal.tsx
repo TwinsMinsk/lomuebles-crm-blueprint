@@ -3,6 +3,7 @@ import React from "react";
 import { ContactWithRelations } from "./ContactTableRow";
 import { useContactForm } from "@/hooks/contacts/useContactForm";
 import { Loader2 } from "lucide-react";
+import { FileUploadSection } from "@/components/common/FileUploadSection";
 
 import {
   Dialog,
@@ -33,7 +34,15 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
   contactToEdit,
   onContactSaved,
 }) => {
-  const { form, companies, users, loading, onSubmit } = useContactForm({
+  const { 
+    form, 
+    companies, 
+    users, 
+    loading, 
+    onSubmit,
+    attachedFiles,
+    setAttachedFiles
+  } = useContactForm({
     contactToEdit,
     onContactSaved,
     onClose
@@ -51,10 +60,11 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <Tabs defaultValue="main" className="w-full">
-              <TabsList className="grid grid-cols-3 mb-4">
+              <TabsList className="grid grid-cols-4 mb-4">
                 <TabsTrigger value="main">Основные данные</TabsTrigger>
                 <TabsTrigger value="address">Адрес доставки</TabsTrigger>
                 <TabsTrigger value="additional">Дополнительно</TabsTrigger>
+                <TabsTrigger value="files">Файлы</TabsTrigger>
               </TabsList>
 
               {/* Main Information Tab */}
@@ -73,6 +83,16 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
                   form={form}
                   companies={companies}
                   users={users}
+                />
+              </TabsContent>
+
+              {/* Files Tab */}
+              <TabsContent value="files" className="space-y-4">
+                <FileUploadSection
+                  entityType="contacts"
+                  entityId={contactToEdit?.contact_id}
+                  existingFiles={attachedFiles}
+                  onFilesChange={setAttachedFiles}
                 />
               </TabsContent>
             </Tabs>
