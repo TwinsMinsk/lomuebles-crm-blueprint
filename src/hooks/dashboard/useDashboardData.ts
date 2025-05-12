@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfToday, endOfToday, isBefore } from "date-fns";
@@ -50,18 +49,13 @@ export const fetchActiveOrdersCount = async (userId: string | null, userRole: st
   return count || 0;
 };
 
-// Function to fetch today's tasks count
+// Function to fetch today's tasks count - UPDATED
 export const fetchTodaysTasksCount = async (userId: string | null, userRole: string | null) => {
-  const today = startOfToday();
-  const endOfDayToday = endOfToday();
-  const formattedToday = format(today, 'yyyy-MM-dd');
-  const formattedEndOfDay = format(endOfDayToday, "yyyy-MM-dd'T'HH:mm:ss");
-
   let query = supabase
     .from('tasks')
     .select('*', { count: 'exact', head: true })
-    .gte('due_date', `${formattedToday}`)
-    .lte('due_date', `${formattedEndOfDay}`)
+    .gte('due_date', "date_trunc('day', now())::timestamp")
+    .lt('due_date', "(date_trunc('day', now()) + interval '1 day')::timestamp")
     .not('task_status', 'eq', 'Выполнена')
     .not('task_status', 'eq', 'Отменена');
 
@@ -79,15 +73,12 @@ export const fetchTodaysTasksCount = async (userId: string | null, userRole: str
   return count || 0;
 };
 
-// Function to fetch overdue tasks count
+// Function to fetch overdue tasks count - UPDATED
 export const fetchOverdueTasksCount = async (userId: string | null, userRole: string | null) => {
-  const today = startOfToday();
-  const formattedToday = format(today, 'yyyy-MM-dd');
-
   let query = supabase
     .from('tasks')
     .select('*', { count: 'exact', head: true })
-    .lt('due_date', `${formattedToday}`)
+    .lt('due_date', "date_trunc('day', now())::timestamp")
     .not('task_status', 'eq', 'Выполнена')
     .not('task_status', 'eq', 'Отменена');
 
