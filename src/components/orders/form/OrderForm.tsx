@@ -7,12 +7,13 @@ import { useAuth } from "@/context/AuthContext";
 import { Order } from "@/types/order";
 import { useAddOrder } from "@/hooks/orders/useAddOrder";
 import { useUpdateOrder } from "@/hooks/orders/useUpdateOrder";
-import { useUsers } from "@/hooks/useUsers"; // Fixed import path
+import { useUsers } from "@/hooks/useUsers"; 
 import { useContacts } from "@/hooks/useContacts";
 import { useCompanies } from "@/hooks/useCompanies";
 import { useLeads } from "@/hooks/useLeads";
 import { usePartners } from "@/hooks/usePartners";
 import { useFilterOptions } from "@/hooks/orders/useFilterOptions";
+import { useOrderFilesUpload } from "@/hooks/orders/useOrderFilesUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, X, Paperclip, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 // Define order status constants
@@ -53,6 +54,15 @@ const orderFormSchema = z.object({
   payment_status: z.string().optional().nullable(),
   delivery_address_full: z.string().optional().nullable(),
   notes_history: z.string().optional().nullable(),
+  attached_files_order_docs: z.array(
+    z.object({
+      name: z.string(),
+      url: z.string(),
+      uploaded_at: z.string(),
+      size: z.number().optional(),
+      type: z.string().optional(),
+    })
+  ).optional().nullable(),
   client_language: z.enum(["ES", "EN", "RU"]),
 });
 
@@ -63,15 +73,25 @@ interface OrderFormProps {
   onSuccess?: () => void;
 }
 
+interface FileAttachment {
+  name: string;
+  url: string;
+  uploaded_at: string;
+  size?: number;
+  type?: string;
+}
+
 export default function OrderForm({ order, onSuccess }: OrderFormProps) {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   
   // API hooks
   const { addOrder } = useAddOrder();
   const { updateOrder } = useUpdateOrder();
   const { users, isLoading: isLoadingUsers } = useUsers();
   const { statuses, orderTypes, isLoading: isLoadingOptions } = useFilterOptions();
+  const uploadFileMutation = useOrderFilesUpload();
   
   // Initialize the form
   const form = useForm<OrderFormValues>({
@@ -90,6 +110,7 @@ export default function OrderForm({ order, onSuccess }: OrderFormProps) {
           payment_status: order.payment_status || null,
           delivery_address_full: order.delivery_address_full || "",
           notes_history: order.notes_history || "",
+          attached_files_order_docs: order.attached_files_order_docs || [],
           client_language: order.client_language,
         }
       : {
@@ -105,6 +126,7 @@ export default function OrderForm({ order, onSuccess }: OrderFormProps) {
           payment_status: null,
           delivery_address_full: "",
           notes_history: "",
+          attached_files_order_docs: [],
           client_language: "ES" as const,
         },
   });
@@ -160,6 +182,50 @@ export default function OrderForm({ order, onSuccess }: OrderFormProps) {
     "company_name",
     "asc"
   );
+
+  // Handle file upload
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0 || !user) return;
+    
+    setIsUploading(true);
+    const fileList = Array.from(e.target.files);
+    
+    for (const file of fileList) {
+      try {
+        // Check if orderId exists (editing mode) or use a temporary id for new orders
+        const orderId = order?.id || -1;
+        
+        // Upload the file
+        const result = await uploadFileMutation.mutateAsync({
+          file,
+          orderId,
+          userId: user.id
+        });
+        
+        // Update form state with the new file
+        const currentFiles = form.getValues("attached_files_order_docs") || [];
+        form.setValue("attached_files_order_docs", [...currentFiles, result]);
+        
+      } catch (error) {
+        console.error("Failed to upload file:", error);
+        // Error handling is done by the mutation hook
+      }
+    }
+    
+    // Reset the input value to allow selecting the same file again
+    e.target.value = '';
+    setIsUploading(false);
+  };
+
+  // Handle file removal
+  const handleRemoveFile = (index: number) => {
+    const currentFiles = form.getValues("attached_files_order_docs") || [];
+    if (!currentFiles.length || index >= currentFiles.length) return;
+    
+    const newFiles = [...currentFiles];
+    newFiles.splice(index, 1);
+    form.setValue("attached_files_order_docs", newFiles);
+  };
 
   async function onSubmit(values: OrderFormValues) {
     if (!user) {
@@ -620,6 +686,63 @@ export default function OrderForm({ order, onSuccess }: OrderFormProps) {
             </FormItem>
           )}
         />
+        
+        {/* Attached Files */}
+        <div className="space-y-4">
+          <FormLabel>Прикрепленные файлы</FormLabel>
+          <div className="flex items-center gap-2">
+            <Input
+              type="file"
+              multiple
+              onChange={handleFileUpload}
+              disabled={isSubmitting || isUploading}
+              className="max-w-md"
+            />
+            {isUploading && (
+              <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+            )}
+          </div>
+          <div className="space-y-2">
+            {form.watch("attached_files_order_docs")?.map((file, index) => (
+              <div 
+                key={`${file.name}-${index}`} 
+                className="flex items-center justify-between bg-gray-50 p-2 rounded border"
+              >
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-gray-500" />
+                  <a 
+                    href={file.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline text-sm"
+                  >
+                    {file.name}
+                  </a>
+                  {file.size && (
+                    <span className="text-xs text-gray-500">
+                      ({(file.size / 1024).toFixed(0)} KB)
+                    </span>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleRemoveFile(index)}
+                  disabled={isSubmitting}
+                >
+                  <X className="h-4 w-4 text-gray-500" />
+                </Button>
+              </div>
+            ))}
+            {!form.watch("attached_files_order_docs")?.length && (
+              <div className="text-sm text-gray-500 flex items-center gap-2">
+                <Paperclip className="h-4 w-4" />
+                <span>Нет прикрепленных файлов</span>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Form Actions */}
         <div className="flex justify-end gap-2">
