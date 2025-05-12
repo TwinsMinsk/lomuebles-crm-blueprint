@@ -46,7 +46,6 @@ const AssignmentAndCommentFields: React.FC<AssignmentAndCommentFieldsProps> = ({
             <FormLabel>Ответственный менеджер</FormLabel>
             <Select
               onValueChange={field.onChange}
-              defaultValue={field.value || "not_assigned"}
               value={field.value || "not_assigned"}
             >
               <FormControl>

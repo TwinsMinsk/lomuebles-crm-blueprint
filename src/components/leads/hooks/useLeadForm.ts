@@ -28,16 +28,32 @@ export const useLeadForm = ({ lead, onSuccess, onClose }: UseLeadFormProps) => {
   const form = useForm<LeadFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: lead?.name || "",
-      phone: lead?.phone || "",
-      email: lead?.email || "",
-      lead_source: lead?.lead_source || "",
-      client_language: (lead?.client_language as "ES" | "EN" | "RU") || "ES",
-      lead_status: lead?.lead_status || "Новый",
-      initial_comment: lead?.initial_comment || "",
-      assigned_user_id: lead?.assigned_user_id || "not_assigned",
+      name: "",
+      phone: "",
+      email: "",
+      lead_source: "",
+      client_language: "ES",
+      lead_status: "Новый",
+      initial_comment: "",
+      assigned_user_id: "not_assigned",
     },
   });
+
+  // When lead changes, update form values
+  useEffect(() => {
+    if (lead) {
+      form.reset({
+        name: lead.name || "",
+        phone: lead.phone || "",
+        email: lead.email || "",
+        lead_source: lead.lead_source || "",
+        client_language: (lead.client_language as "ES" | "EN" | "RU") || "ES",
+        lead_status: lead.lead_status || "Новый",
+        initial_comment: lead.initial_comment || "",
+        assigned_user_id: lead.assigned_user_id || "not_assigned",
+      });
+    }
+  }, [lead, form]);
 
   // Fetch users that can be assigned to leads (managers and admins)
   useEffect(() => {
