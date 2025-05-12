@@ -15,9 +15,12 @@ export const OrderSelector = ({ value, onChange }: OrderSelectorProps) => {
   const { user } = useAuth();
   const { orders, isLoading, error } = useRelatedOrdersData(searchTerm);
 
+  // Log to debug the issue with orders not showing up
+  console.log("OrderSelector received orders:", orders.length, orders);
+
   // Format order data for display in entity selector
   const formattedOrders = orders.map((order) => ({
-    id: order.id, // This now correctly gets deal_order_id from deals_orders table
+    id: order.id, // This gets deal_order_id from deals_orders table
     name: order.order_name || `Заказ ${order.order_number}`,
     description: `${formatDate(order.created_at)} - ${order.status}`,
     imageUrl: null,

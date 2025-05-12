@@ -11,7 +11,7 @@ import { useAuth } from "@/context/AuthContext";
  * - Admin users see all orders
  * - Other users see only orders where they are assigned or creator
  */
-export const useRelatedOrdersData = (searchTerm: string = "", limit: number = 20) => {
+export const useRelatedOrdersData = (searchTerm: string = "", limit: number = 100) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
@@ -25,7 +25,9 @@ export const useRelatedOrdersData = (searchTerm: string = "", limit: number = 20
       setError(null);
 
       try {
-        // Base query to deals_orders table (not orders)
+        console.log("Fetching orders for role:", userRole);
+        
+        // Base query to deals_orders table
         let query = supabase
           .from('deals_orders')
           .select(`
@@ -55,7 +57,7 @@ export const useRelatedOrdersData = (searchTerm: string = "", limit: number = 20
 
         if (fetchError) throw fetchError;
 
-        console.log("Orders fetched based on role:", userRole, "Count:", data?.length || 0);
+        console.log("Orders fetched:", data?.length || 0, data);
 
         // Transform data to match our Order type, with safe access to potentially null relation data
         const transformedOrders = (data || []).map((order: any) => ({
