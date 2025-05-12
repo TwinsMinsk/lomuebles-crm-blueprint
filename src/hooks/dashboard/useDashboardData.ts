@@ -359,32 +359,40 @@ export const useDashboardKPIs = () => {
   const newLeadsQuery = useQuery({
     queryKey: ['dashboard', 'newLeads', userId, userRole],
     queryFn: () => fetchNewLeadsCount(userId, userRole),
-    onError: (error) => {
-      console.error('Error in newLeadsQuery:', error);
+    meta: {
+      onError: (error: Error) => {
+        console.error('Error in newLeadsQuery:', error);
+      }
     }
   });
 
   const activeOrdersQuery = useQuery({
     queryKey: ['dashboard', 'activeOrders', userId, userRole],
     queryFn: () => fetchActiveOrdersCount(userId, userRole),
-    onError: (error) => {
-      console.error('Error in activeOrdersQuery:', error);
+    meta: {
+      onError: (error: Error) => {
+        console.error('Error in activeOrdersQuery:', error);
+      }
     }
   });
 
   const todaysTasksQuery = useQuery({
     queryKey: ['dashboard', 'todaysTasks', userId, userRole],
     queryFn: () => fetchTodaysTasksCount(userId, userRole),
-    onError: (error) => {
-      console.error('Error in todaysTasksQuery:', error);
+    meta: {
+      onError: (error: Error) => {
+        console.error('Error in todaysTasksQuery:', error);
+      }
     }
   });
 
   const overdueTasksQuery = useQuery({
     queryKey: ['dashboard', 'overdueTasks', userId, userRole],
     queryFn: () => fetchOverdueTasksCount(userId, userRole),
-    onError: (error) => {
-      console.error('Error in overdueTasksQuery:', error);
+    meta: {
+      onError: (error: Error) => {
+        console.error('Error in overdueTasksQuery:', error);
+      }
     }
   });
 
@@ -415,8 +423,10 @@ export const useMyTasks = () => {
     queryKey: ['dashboard', 'myTasks', userId],
     queryFn: () => fetchMyTasks(userId),
     enabled: !!userId,
-    onError: (error) => {
-      console.error('Error in useMyTasks:', error);
+    meta: {
+      onError: (error: Error) => {
+        console.error('Error in useMyTasks:', error);
+      }
     }
   });
 };
@@ -426,8 +436,10 @@ export const useAllTasks = (filters: any = {}) => {
   return useQuery({
     queryKey: ['dashboard', 'allTasks', filters],
     queryFn: () => fetchAllTasks(filters),
-    onError: (error) => {
-      console.error('Error in useAllTasks:', error);
+    meta: {
+      onError: (error: Error) => {
+        console.error('Error in useAllTasks:', error);
+      }
     }
   });
 };
@@ -437,8 +449,10 @@ export const useRecentLeads = () => {
   return useQuery({
     queryKey: ['dashboard', 'recentLeads'],
     queryFn: fetchRecentLeads,
-    onError: (error) => {
-      console.error('Error in useRecentLeads:', error);
+    meta: {
+      onError: (error: Error) => {
+        console.error('Error in useRecentLeads:', error);
+      }
     }
   });
 };
@@ -448,8 +462,10 @@ export const useRecentOrders = () => {
   return useQuery({
     queryKey: ['dashboard', 'recentOrders'],
     queryFn: fetchRecentOrders,
-    onError: (error) => {
-      console.error('Error in useRecentOrders:', error);
+    meta: {
+      onError: (error: Error) => {
+        console.error('Error in useRecentOrders:', error);
+      }
     }
   });
 };
