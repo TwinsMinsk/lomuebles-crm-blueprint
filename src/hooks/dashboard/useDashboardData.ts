@@ -114,7 +114,7 @@ export const fetchMyTasks = async (userId: string | null) => {
     .select(`
       *,
       profiles!tasks_assigned_task_user_id_fkey(full_name),
-      orders!tasks_related_deal_order_id_fkey(order_number, order_name),
+      orders(order_number, order_name),
       leads!tasks_related_lead_id_fkey(name),
       contacts!tasks_related_contact_id_fkey(full_name)
     `)
@@ -138,7 +138,7 @@ export const fetchMyTasks = async (userId: string | null) => {
       ...task,
       isOverdue,
       relatedEntityName: task.related_deal_order_id 
-        ? `Заказ #${task.orders?.order_number || task.related_deal_order_id}`
+        ? `Заказ #${task.orders?.[0]?.order_number || task.related_deal_order_id}`
         : task.related_lead_id
           ? `Лид: ${task.leads?.name || 'Без имени'}`
           : task.related_contact_id
@@ -157,7 +157,7 @@ export const fetchAllTasks = async (filters: any = {}) => {
     .select(`
       *,
       profiles!tasks_assigned_task_user_id_fkey(id, full_name),
-      orders!tasks_related_deal_order_id_fkey(order_number, order_name),
+      orders(order_number, order_name),
       leads!tasks_related_lead_id_fkey(name),
       contacts!tasks_related_contact_id_fkey(full_name)
     `)
@@ -181,7 +181,7 @@ export const fetchAllTasks = async (filters: any = {}) => {
       isOverdue,
       assignedUserName: task.profiles?.full_name,
       relatedEntityName: task.related_deal_order_id 
-        ? `Заказ #${task.orders?.order_number || task.related_deal_order_id}`
+        ? `Заказ #${task.orders?.[0]?.order_number || task.related_deal_order_id}`
         : task.related_lead_id
           ? `Лид: ${task.leads?.name || 'Без имени'}`
           : task.related_contact_id
