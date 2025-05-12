@@ -109,14 +109,12 @@ export const fetchOverdueTasksCount = async (userId: string | null, userRole: st
 export const fetchMyTasks = async (userId: string | null) => {
   if (!userId) return [];
   
+  // First, get the task data
   const { data, error } = await supabase
     .from('tasks')
     .select(`
       *,
-      profiles!tasks_assigned_task_user_id_fkey(full_name),
-      orders(order_number, order_name),
-      leads!tasks_related_lead_id_fkey(name),
-      contacts!tasks_related_contact_id_fkey(full_name)
+      profiles!tasks_assigned_task_user_id_fkey(full_name)
     `)
     .eq('assigned_task_user_id', userId)
     .not('task_status', 'eq', 'Выполнена')
@@ -128,38 +126,66 @@ export const fetchMyTasks = async (userId: string | null) => {
     throw new Error(`Error fetching my tasks: ${error.message}`);
   }
 
-  // Process the tasks to include related entity information
-  const processedTasks = data.map(task => {
+  // Now process and enhance the tasks with related entity information
+  const enhancedTasks = await Promise.all(data.map(async (task) => {
     const now = new Date();
     const dueDate = task.due_date ? new Date(task.due_date) : null;
     const isOverdue = dueDate ? isBefore(dueDate, now) : false;
     
+    // Default entity information
+    let relatedEntityName = null;
+    
+    // If task is related to an order, fetch order details
+    if (task.related_deal_order_id) {
+      const { data: orderData } = await supabase
+        .from('orders')
+        .select('order_number, order_name')
+        .eq('id', task.related_deal_order_id)
+        .single();
+      
+      relatedEntityName = orderData 
+        ? `Заказ #${orderData.order_number}` 
+        : `Заказ #${task.related_deal_order_id}`;
+    }
+    // If task is related to a lead, fetch lead details
+    else if (task.related_lead_id) {
+      const { data: leadData } = await supabase
+        .from('leads')
+        .select('name')
+        .eq('lead_id', task.related_lead_id)
+        .single();
+      
+      relatedEntityName = `Лид: ${leadData?.name || 'Без имени'}`;
+    }
+    // If task is related to a contact, fetch contact details
+    else if (task.related_contact_id) {
+      const { data: contactData } = await supabase
+        .from('contacts')
+        .select('full_name')
+        .eq('contact_id', task.related_contact_id)
+        .single();
+      
+      relatedEntityName = `Контакт: ${contactData?.full_name || 'Без имени'}`;
+    }
+    
     return {
       ...task,
       isOverdue,
-      relatedEntityName: task.related_deal_order_id 
-        ? `Заказ #${task.orders?.[0]?.order_number || task.related_deal_order_id}`
-        : task.related_lead_id
-          ? `Лид: ${task.leads?.name || 'Без имени'}`
-          : task.related_contact_id
-            ? `Контакт: ${task.contacts?.full_name || 'Без имени'}`
-            : null
+      relatedEntityName
     };
-  });
+  }));
   
-  return processedTasks;
+  return enhancedTasks;
 };
 
 // Function to fetch all tasks (for admin view)
 export const fetchAllTasks = async (filters: any = {}) => {
+  // First, get the task data
   const { data, error } = await supabase
     .from('tasks')
     .select(`
       *,
-      profiles!tasks_assigned_task_user_id_fkey(id, full_name),
-      orders(order_number, order_name),
-      leads!tasks_related_lead_id_fkey(name),
-      contacts!tasks_related_contact_id_fkey(full_name)
+      profiles!tasks_assigned_task_user_id_fkey(id, full_name)
     `)
     .not('task_status', 'eq', 'Выполнена')
     .not('task_status', 'eq', 'Отменена')
@@ -170,27 +196,57 @@ export const fetchAllTasks = async (filters: any = {}) => {
     throw new Error(`Error fetching all tasks: ${error.message}`);
   }
 
-  // Process the tasks to include related entity information
-  const processedTasks = data.map(task => {
+  // Now process and enhance the tasks with related entity information
+  const enhancedTasks = await Promise.all(data.map(async (task) => {
     const now = new Date();
     const dueDate = task.due_date ? new Date(task.due_date) : null;
     const isOverdue = dueDate ? isBefore(dueDate, now) : false;
+    
+    // Default entity information
+    let relatedEntityName = null;
+    
+    // If task is related to an order, fetch order details
+    if (task.related_deal_order_id) {
+      const { data: orderData } = await supabase
+        .from('orders')
+        .select('order_number, order_name')
+        .eq('id', task.related_deal_order_id)
+        .single();
+      
+      relatedEntityName = orderData 
+        ? `Заказ #${orderData.order_number}` 
+        : `Заказ #${task.related_deal_order_id}`;
+    }
+    // If task is related to a lead, fetch lead details
+    else if (task.related_lead_id) {
+      const { data: leadData } = await supabase
+        .from('leads')
+        .select('name')
+        .eq('lead_id', task.related_lead_id)
+        .single();
+      
+      relatedEntityName = `Лид: ${leadData?.name || 'Без имени'}`;
+    }
+    // If task is related to a contact, fetch contact details
+    else if (task.related_contact_id) {
+      const { data: contactData } = await supabase
+        .from('contacts')
+        .select('full_name')
+        .eq('contact_id', task.related_contact_id)
+        .single();
+      
+      relatedEntityName = `Контакт: ${contactData?.full_name || 'Без имени'}`;
+    }
     
     return {
       ...task,
       isOverdue,
       assignedUserName: task.profiles?.full_name,
-      relatedEntityName: task.related_deal_order_id 
-        ? `Заказ #${task.orders?.[0]?.order_number || task.related_deal_order_id}`
-        : task.related_lead_id
-          ? `Лид: ${task.leads?.name || 'Без имени'}`
-          : task.related_contact_id
-            ? `Контакт: ${task.contacts?.full_name || 'Без имени'}`
-            : null
+      relatedEntityName
     };
-  });
+  }));
   
-  return processedTasks;
+  return enhancedTasks;
 };
 
 // Function to fetch recent leads
