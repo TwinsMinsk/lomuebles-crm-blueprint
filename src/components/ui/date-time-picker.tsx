@@ -10,7 +10,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 
 interface DateTimePickerProps {
   value: Date | null | undefined;
@@ -20,32 +26,50 @@ interface DateTimePickerProps {
 
 export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProps) {
   const [date, setDate] = React.useState<Date | null>(value || null);
-  const [timeString, setTimeString] = React.useState<string>(
-    value ? format(value, "HH:mm") : "12:00"
+  const [hours, setHours] = React.useState<string>(
+    value ? format(value, "HH") : "12"
   );
+  const [minutes, setMinutes] = React.useState<string>(
+    value ? format(value, "mm") : "00"
+  );
+
+  // Generate options for hours (00-23)
+  const hourOptions = Array.from({ length: 24 }, (_, i) => {
+    const hourValue = i.toString().padStart(2, "0");
+    return { value: hourValue, label: hourValue };
+  });
+
+  // Generate options for minutes (00-59)
+  const minuteOptions = Array.from({ length: 60 }, (_, i) => {
+    const minuteValue = i.toString().padStart(2, "0");
+    return { value: minuteValue, label: minuteValue };
+  });
 
   // Update the parent component whenever date or time changes
   React.useEffect(() => {
     if (date) {
-      const [hours, minutes] = timeString.split(":").map(Number);
       const newDate = new Date(date);
-      newDate.setHours(hours || 0);
-      newDate.setMinutes(minutes || 0);
+      newDate.setHours(parseInt(hours));
+      newDate.setMinutes(parseInt(minutes));
       onChange(newDate);
     } else {
       onChange(null);
     }
-  }, [date, timeString, onChange]);
+  }, [date, hours, minutes, onChange]);
 
   // Update internal state when value prop changes
   React.useEffect(() => {
     if (value) {
       setDate(value);
-      setTimeString(format(value, "HH:mm"));
+      setHours(format(value, "HH"));
+      setMinutes(format(value, "mm"));
     } else {
       setDate(null);
     }
   }, [value]);
+
+  // Format the time string for display
+  const timeString = `${hours}:${minutes}`;
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
@@ -75,18 +99,68 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
         </PopoverContent>
       </Popover>
       
-      <div className="flex items-center gap-2">
-        <Clock className="h-4 w-4 text-muted-foreground" />
-        <Input
-          type="time"
-          value={timeString}
-          onChange={(e) => setTimeString(e.target.value)}
-          className="w-28"
-          disabled={!date || disabled}
-          placeholder="ЧЧ:ММ"
-          aria-label="Выберите время"
-        />
-      </div>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant={"outline"}
+            className={cn(
+              "w-full sm:w-auto justify-start text-left font-normal",
+              !date && "text-muted-foreground",
+              "min-w-[120px]"
+            )}
+            disabled={!date || disabled}
+          >
+            <Clock className="mr-2 h-4 w-4" />
+            {date ? timeString : <span>Выберите время</span>}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-4" align="start">
+          <div className="flex space-x-2">
+            <div className="flex flex-col space-y-1">
+              <span className="text-xs text-muted-foreground font-medium">
+                Час
+              </span>
+              <Select 
+                value={hours} 
+                onValueChange={setHours}
+                disabled={!date || disabled}
+              >
+                <SelectTrigger className="w-[70px]">
+                  <SelectValue placeholder="Час" />
+                </SelectTrigger>
+                <SelectContent>
+                  {hourOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col space-y-1">
+              <span className="text-xs text-muted-foreground font-medium">
+                Мин
+              </span>
+              <Select 
+                value={minutes} 
+                onValueChange={setMinutes}
+                disabled={!date || disabled}
+              >
+                <SelectTrigger className="w-[70px]">
+                  <SelectValue placeholder="Мин" />
+                </SelectTrigger>
+                <SelectContent>
+                  {minuteOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
