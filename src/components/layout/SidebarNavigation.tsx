@@ -107,7 +107,15 @@ const SidebarNavigation = () => {
             
             return (
               <SidebarMenuItem key={item.path}>
-                <SidebarMenuButton isActive={isActive} asChild tooltip={item.label} className="bg-white">
+                <SidebarMenuButton 
+                  isActive={isActive} 
+                  asChild 
+                  tooltip={item.label} 
+                  className={cn(
+                    "bg-white",
+                    isActive && "bg-light-green text-accent-green"
+                  )}
+                >
                   <Link to={item.path}>
                     <item.icon />
                     <span>{item.label}</span>
@@ -121,5 +129,8 @@ const SidebarNavigation = () => {
     </SidebarGroup>
   );
 };
+
+// Add the import for cn utility
+import { cn } from "@/lib/utils";
 
 export default SidebarNavigation;

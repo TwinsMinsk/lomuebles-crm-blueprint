@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
@@ -63,8 +62,8 @@ const DashboardPage: React.FC = () => {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         {/* New Leads KPI */}
-        <Card>
-          <CardHeader className="bg-slate-50">
+        <Card className="shadow-sm border-t-4 border-t-accent-green">
+          <CardHeader className="bg-light-green">
             <CardTitle className="text-lg flex items-center">
               <Users className="mr-2 h-5 w-5" />
               Новые лиды сегодня
@@ -82,8 +81,8 @@ const DashboardPage: React.FC = () => {
         </Card>
 
         {/* Active Orders KPI */}
-        <Card>
-          <CardHeader className="bg-slate-50">
+        <Card className="shadow-sm border-t-4 border-t-accent-green">
+          <CardHeader className="bg-light-green">
             <CardTitle className="text-lg flex items-center">
               <Package className="mr-2 h-5 w-5" />
               Активные заказы
@@ -101,8 +100,8 @@ const DashboardPage: React.FC = () => {
         </Card>
 
         {/* Today's Tasks KPI */}
-        <Card>
-          <CardHeader className="bg-slate-50">
+        <Card className="shadow-sm border-t-4 border-t-accent-green">
+          <CardHeader className="bg-light-green">
             <CardTitle className="text-lg flex items-center">
               <Calendar className="mr-2 h-5 w-5" />
               Задачи на сегодня
@@ -120,8 +119,8 @@ const DashboardPage: React.FC = () => {
         </Card>
 
         {/* Overdue Tasks KPI */}
-        <Card>
-          <CardHeader className="bg-slate-50">
+        <Card className="shadow-sm border-t-4 border-t-accent-green">
+          <CardHeader className="bg-light-green">
             <CardTitle className="text-lg flex items-center">
               <AlertTriangle className="mr-2 h-5 w-5" />
               Просроченные задачи
@@ -193,13 +192,13 @@ const DashboardPage: React.FC = () => {
     if (isAdmin) return null;
 
     return (
-      <Card className="mb-6">
-        <CardHeader className="bg-slate-50">
+      <Card className="mb-6 shadow-sm border-t-4 border-t-accent-green">
+        <CardHeader className="bg-light-green">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl">Мои Задачи</CardTitle>
             <Link 
               to="/tasks" 
-              className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+              className="text-sm text-accent-green hover:text-accent-green/80 hover:underline"
             >
               Все задачи
             </Link>
@@ -266,13 +265,13 @@ const DashboardPage: React.FC = () => {
     if (!isAdmin) return null;
 
     return (
-      <Card className="mb-6">
-        <CardHeader className="bg-slate-50">
+      <Card className="mb-6 shadow-sm border-t-4 border-t-accent-green">
+        <CardHeader className="bg-light-green">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl">Задачи Команды</CardTitle>
             <Link 
               to="/tasks" 
-              className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+              className="text-sm text-accent-green hover:text-accent-green/80 hover:underline"
             >
               Все задачи
             </Link>
@@ -348,13 +347,13 @@ const DashboardPage: React.FC = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Recent Leads */}
-        <Card>
-          <CardHeader className="bg-slate-50">
+        <Card className="shadow-sm border-t-4 border-t-accent-green">
+          <CardHeader className="bg-light-green">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Последние Лиды</CardTitle>
               <Link 
                 to="/leads" 
-                className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                className="text-sm text-accent-green hover:text-accent-green/80 hover:underline"
               >
                 Все лиды
               </Link>
@@ -396,13 +395,13 @@ const DashboardPage: React.FC = () => {
         </Card>
 
         {/* Recent Orders */}
-        <Card>
-          <CardHeader className="bg-slate-50">
+        <Card className="shadow-sm border-t-4 border-t-accent-green">
+          <CardHeader className="bg-light-green">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Последние Заказы</CardTitle>
               <Link 
                 to="/orders" 
-                className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                className="text-sm text-accent-green hover:text-accent-green/80 hover:underline"
               >
                 Все заказы
               </Link>

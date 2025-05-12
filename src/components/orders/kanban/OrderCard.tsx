@@ -26,8 +26,8 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, index }) => {
             <DialogTrigger asChild>
               <Card 
                 className={`
-                  shadow-sm cursor-pointer
-                  ${snapshot.isDragging ? "shadow-lg ring-2 ring-primary" : ""}
+                  shadow-sm cursor-pointer border-l-4 border-l-accent-green
+                  ${snapshot.isDragging ? "shadow-lg ring-2 ring-accent-green" : ""}
                   hover:shadow-md transition-shadow
                 `}
               >
