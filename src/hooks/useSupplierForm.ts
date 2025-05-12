@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -35,29 +35,34 @@ export const useSupplierForm = ({
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  // Initialize form with supplier data or defaults
+  // Initialize form with empty values
   const form = useForm<SupplierFormValues>({
     resolver: zodResolver(supplierFormSchema),
-    defaultValues: supplier
-      ? {
-          supplier_name: supplier.supplier_name,
-          contact_person: supplier.contact_person,
-          phone: supplier.phone,
-          email: supplier.email,
-          website: supplier.website,
-          product_categories: supplier.product_categories,
-          terms: supplier.terms,
-        }
-      : {
-          supplier_name: "",
-          contact_person: null,
-          phone: null,
-          email: null,
-          website: null,
-          product_categories: null,
-          terms: null,
-        },
+    defaultValues: {
+      supplier_name: "",
+      contact_person: null,
+      phone: null,
+      email: null,
+      website: null,
+      product_categories: null,
+      terms: null,
+    },
   });
+
+  // Update form when supplier changes
+  useEffect(() => {
+    if (supplier) {
+      form.reset({
+        supplier_name: supplier.supplier_name,
+        contact_person: supplier.contact_person,
+        phone: supplier.phone,
+        email: supplier.email,
+        website: supplier.website,
+        product_categories: supplier.product_categories,
+        terms: supplier.terms,
+      });
+    }
+  }, [supplier, form]);
 
   const onSubmit = async (values: SupplierFormValues) => {
     try {

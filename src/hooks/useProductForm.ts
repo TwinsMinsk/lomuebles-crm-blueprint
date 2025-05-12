@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -36,31 +36,36 @@ export const useProductForm = ({
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  // Initialize form with product data or defaults
+  // Initialize form with empty values
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
-    defaultValues: product
-      ? {
-          internal_product_name: product.internal_product_name,
-          internal_sku: product.internal_sku,
-          description: product.description,
-          base_price: product.base_price,
-          category: product.category,
-          is_custom_template: product.is_custom_template,
-          template_image: product.template_image,
-          notes: product.notes,
-        }
-      : {
-          internal_product_name: "",
-          internal_sku: null,
-          description: null,
-          base_price: null,
-          category: null,
-          is_custom_template: true,
-          template_image: null,
-          notes: null,
-        },
+    defaultValues: {
+      internal_product_name: "",
+      internal_sku: null,
+      description: null,
+      base_price: null,
+      category: null,
+      is_custom_template: true,
+      template_image: null,
+      notes: null,
+    },
   });
+
+  // Update form when product changes
+  useEffect(() => {
+    if (product) {
+      form.reset({
+        internal_product_name: product.internal_product_name,
+        internal_sku: product.internal_sku,
+        description: product.description,
+        base_price: product.base_price,
+        category: product.category,
+        is_custom_template: product.is_custom_template,
+        template_image: product.template_image,
+        notes: product.notes,
+      });
+    }
+  }, [product, form]);
 
   const onSubmit = async (values: ProductFormValues) => {
     try {

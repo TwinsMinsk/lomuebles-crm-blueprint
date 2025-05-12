@@ -54,7 +54,6 @@ const ProductBasicInfoFields: React.FC<ProductBasicInfoFieldsProps> = ({ form })
               <FormLabel>Категория</FormLabel>
               <Select
                 onValueChange={field.onChange}
-                defaultValue={field.value || ""}
                 value={field.value || ""}
               >
                 <FormControl>

@@ -21,7 +21,7 @@ const CompanyClassificationFields: React.FC<CompanyClassificationFieldsProps> = 
             <FormLabel>Отрасль</FormLabel>
             <Select
               onValueChange={field.onChange}
-              defaultValue={field.value}
+              value={field.value || ""}
             >
               <FormControl>
                 <SelectTrigger>
@@ -49,7 +49,7 @@ const CompanyClassificationFields: React.FC<CompanyClassificationFieldsProps> = 
             <FormLabel>Ответственный менеджер</FormLabel>
             <Select
               onValueChange={field.onChange}
-              defaultValue={field.value || ""}
+              value={field.value || "no_manager"}
             >
               <FormControl>
                 <SelectTrigger>

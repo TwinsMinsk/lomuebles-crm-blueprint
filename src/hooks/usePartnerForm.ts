@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -36,31 +36,36 @@ export const usePartnerForm = ({
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  // Initialize form with partner data or defaults
+  // Initialize form with empty values
   const form = useForm<PartnerFormValues>({
     resolver: zodResolver(partnerFormSchema),
-    defaultValues: partner
-      ? {
-          company_name: partner.company_name,
-          contact_person: partner.contact_person,
-          phone: partner.phone,
-          email: partner.email,
-          specialization: partner.specialization,
-          terms: partner.terms,
-          requisites: partner.requisites,
-          notes: partner.notes,
-        }
-      : {
-          company_name: "",
-          contact_person: null,
-          phone: null,
-          email: null,
-          specialization: null,
-          terms: null,
-          requisites: null,
-          notes: null,
-        },
+    defaultValues: {
+      company_name: "",
+      contact_person: null,
+      phone: null,
+      email: null,
+      specialization: null,
+      terms: null,
+      requisites: null,
+      notes: null,
+    },
   });
+
+  // Update form when partner changes
+  useEffect(() => {
+    if (partner) {
+      form.reset({
+        company_name: partner.company_name,
+        contact_person: partner.contact_person,
+        phone: partner.phone,
+        email: partner.email,
+        specialization: partner.specialization,
+        terms: partner.terms,
+        requisites: partner.requisites,
+        notes: partner.notes,
+      });
+    }
+  }, [partner, form]);
 
   const onSubmit = async (values: PartnerFormValues) => {
     try {

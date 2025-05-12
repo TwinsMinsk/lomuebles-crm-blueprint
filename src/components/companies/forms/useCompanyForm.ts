@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CompanyFormValues, companyFormSchema } from "./CompanyFormSchema";
@@ -17,20 +17,36 @@ export const useCompanyForm = ({ company, onSuccess, onClose }: UseCompanyFormPr
   const { toast } = useToast();
   const isEditing = !!company;
   
-  // Setup form with default values
+  // Setup form with empty default values
   const form = useForm<CompanyFormValues>({
     resolver: zodResolver(companyFormSchema),
     defaultValues: {
-      company_name: company?.company_name || "",
-      nif_cif: company?.nif_cif || "",
-      phone: company?.phone || "",
-      email: company?.email || "",
-      address: company?.address || "",
-      industry: company?.industry || "",
-      owner_user_id: company?.owner_user_id || null,
-      notes: company?.notes || "",
+      company_name: "",
+      nif_cif: "",
+      phone: "",
+      email: "",
+      address: "",
+      industry: "",
+      owner_user_id: null,
+      notes: "",
     },
   });
+
+  // Reset form when company changes
+  useEffect(() => {
+    if (company) {
+      form.reset({
+        company_name: company.company_name || "",
+        nif_cif: company.nif_cif || "",
+        phone: company.phone || "",
+        email: company.email || "",
+        address: company.address || "",
+        industry: company.industry || "",
+        owner_user_id: company.owner_user_id || null,
+        notes: company.notes || "",
+      });
+    }
+  }, [company, form]);
 
   const onSubmit = async (data: CompanyFormValues) => {
     try {
