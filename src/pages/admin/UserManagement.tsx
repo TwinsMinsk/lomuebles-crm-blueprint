@@ -35,7 +35,7 @@ import { Database } from "@/integrations/supabase/types";
 import { Loader2, RefreshCw, UserCog, ShieldAlert, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useUsers } from "@/hooks/useUsers";
+import { useUsers, User } from "@/hooks/useUsers";
 
 // Define the user role type from our database schema
 type UserRole = Database["public"]["Enums"]["user_role"];
@@ -112,7 +112,7 @@ const UserManagement = () => {
       console.error("Error fetching users:", error);
       setError(error.message || "Не удалось загрузить список пользователей");
       toast({
-        title: "Ошибка загрузки пользователей",
+        title: "��шибка загрузки пользователей",
         description: error.message || "Не удалось загрузить список пользователей",
         variant: "destructive",
       });
