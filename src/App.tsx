@@ -13,6 +13,7 @@ const queryClient = new QueryClient();
 
 // Routes
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const DashboardPage = React.lazy(() => import('./pages/dashboard/DashboardPage'));
 const Calendar = React.lazy(() => import('./pages/Calendar'));
 const Tasks = React.lazy(() => import('./pages/Tasks'));
 const Leads = React.lazy(() => import('./pages/Leads'));
@@ -65,7 +66,8 @@ function App() {
 
                 {/* Routes with Layout */}
                 <Route path="/" element={<Layout />}>
-                  <Route index element={<Dashboard />} />
+                  <Route index element={<Navigate to="/dashboard" />} />
+                  <Route path="dashboard" element={<DashboardPage />} />
                   <Route path="calendar" element={<Calendar />} />
                   <Route path="tasks" element={<Tasks />} />
                   <Route path="leads" element={<Leads />} />
