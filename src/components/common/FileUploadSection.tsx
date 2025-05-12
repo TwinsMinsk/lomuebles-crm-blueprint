@@ -27,8 +27,8 @@ export const FileUploadSection = ({
   const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync: uploadFile } = useEntityFileUpload();
 
-  // Current files list
-  const files = existingFiles || [];
+  // Current files list - ensure it's always an array
+  const files = Array.isArray(existingFiles) ? existingFiles : [];
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length || !user?.id || !entityId) return;

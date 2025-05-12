@@ -3,10 +3,22 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/integrations/supabase/client";
-import { leadFormSchema, LeadFormValues } from "../schema/leadFormSchema";
+import { formSchema } from "../schema/leadFormSchema";
 import { LeadWithProfile } from "../LeadTableRow";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
+
+// Create a type for the form values based on the schema
+export type LeadFormValues = {
+  name: string;
+  phone: string;
+  email: string;
+  initial_comment: string;
+  lead_source: string;
+  lead_status: string;
+  client_language: "ES" | "EN" | "RU";
+  assigned_user_id: string | null;
+};
 
 interface UseLeadFormProps {
   lead?: LeadWithProfile;
@@ -21,7 +33,7 @@ export const useLeadForm = ({ lead, onSuccess, onClose }: UseLeadFormProps) => {
   const [attachedFiles, setAttachedFiles] = useState<any[]>([]);
 
   const form = useForm<LeadFormValues>({
-    resolver: zodResolver(leadFormSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       phone: "",
@@ -62,13 +74,19 @@ export const useLeadForm = ({ lead, onSuccess, onClose }: UseLeadFormProps) => {
         initial_comment: lead.initial_comment || "",
         lead_source: lead.lead_source || "",
         lead_status: lead.lead_status || "Новый",
-        client_language: lead.client_language || "RU",
+        client_language: lead.client_language as "ES" | "EN" | "RU" || "RU",
         assigned_user_id: lead.assigned_user_id || null,
       });
       
       // Initialize attached files
       if (lead.attached_files) {
-        setAttachedFiles(lead.attached_files);
+        // Handle case when attached_files is an array
+        if (Array.isArray(lead.attached_files)) {
+          setAttachedFiles(lead.attached_files);
+        } else {
+          console.warn("Lead attached_files is not an array:", lead.attached_files);
+          setAttachedFiles([]); // Set empty array as fallback
+        }
       }
     }
   }, [lead, form]);

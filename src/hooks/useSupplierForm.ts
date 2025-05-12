@@ -65,7 +65,7 @@ export const useSupplierForm = ({
       
       // Load attached files if they exist
       if (supplier.attached_files) {
-        setAttachedFiles(supplier.attached_files);
+        setAttachedFiles(supplier.attached_files || []);
       } else {
         setAttachedFiles([]);
       }
@@ -94,9 +94,10 @@ export const useSupplierForm = ({
         if (error) throw error;
         toast.success("Поставщик успешно обновлен!");
       } else {
-        // Create new supplier
+        // Create new supplier - make sure supplier_name is explicitly set
         const { error } = await supabase.from("suppliers").insert({
           ...supplierData,
+          supplier_name: values.supplier_name, // Explicitly set supplier_name
           creator_user_id: user?.id || null,
         });
 

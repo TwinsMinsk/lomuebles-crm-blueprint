@@ -11,6 +11,7 @@ export interface Partner {
   notes: string | null;
   creation_date: string;
   creator_user_id: string | null;
+  attached_files_partner_docs?: any[] | null;
 }
 
 export interface PartnerFilters {

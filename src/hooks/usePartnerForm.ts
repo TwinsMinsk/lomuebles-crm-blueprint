@@ -68,7 +68,7 @@ export const usePartnerForm = ({
       
       // Load attached files if they exist
       if (partner.attached_files_partner_docs) {
-        setAttachedFiles(partner.attached_files_partner_docs);
+        setAttachedFiles(partner.attached_files_partner_docs || []);
       } else {
         setAttachedFiles([]);
       }
@@ -97,9 +97,10 @@ export const usePartnerForm = ({
         if (error) throw error;
         toast.success("Партнер-изготовитель успешно обновлен!");
       } else {
-        // Create new partner
+        // Create new partner - make sure company_name is specified
         const { error } = await supabase.from("partners_manufacturers").insert({
           ...partnerData,
+          company_name: values.company_name, // Ensure company_name is explicitly set
           creator_user_id: user?.id || null,
         });
 
