@@ -15,12 +15,16 @@ export const OrderSelector = ({ value, onChange }: OrderSelectorProps) => {
   const { user } = useAuth();
   const { orders, isLoading, error } = useRelatedOrdersData(searchTerm);
 
-  // Log to debug the issue with orders not showing up
-  console.log("OrderSelector received orders:", orders.length, orders);
+  // Enhanced logging for debugging
+  console.log("OrderSelector received orders:", {
+    count: orders.length,
+    orderIds: orders.map(o => o.id),
+    orderNames: orders.map(o => o.order_name || o.order_number)
+  });
 
   // Format order data for display in entity selector
   const formattedOrders = orders.map((order) => ({
-    id: order.id, // This gets deal_order_id from deals_orders table
+    id: order.id, 
     name: order.order_name || `Заказ ${order.order_number}`,
     description: `${formatDate(order.created_at)} - ${order.status}`,
     imageUrl: null,
