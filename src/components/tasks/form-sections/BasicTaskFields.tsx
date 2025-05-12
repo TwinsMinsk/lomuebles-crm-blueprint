@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -142,6 +142,9 @@ const BasicTaskFields: React.FC = () => {
                   onChange={field.onChange}
                 />
               </FormControl>
+              <FormDescription>
+                Выберите дату и время завершения задачи
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

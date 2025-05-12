@@ -19,12 +19,10 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose }) => {
 
   return (
     <Form {...form}>
-      <form id="task-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form id="task-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <BasicTaskFields />
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <AssignmentFields />
-        </div>
+        <AssignmentFields />
         
         <RelatedEntitiesFields />
       </form>

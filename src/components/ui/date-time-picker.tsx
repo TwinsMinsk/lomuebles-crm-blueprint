@@ -1,7 +1,7 @@
 
 import * as React from "react";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -48,14 +48,15 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
   }, [value]);
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
       <Popover>
         <PopoverTrigger asChild>
           <Button
             variant={"outline"}
             className={cn(
-              "w-full justify-start text-left font-normal",
-              !date && "text-muted-foreground"
+              "w-full sm:w-auto justify-start text-left font-normal",
+              !date && "text-muted-foreground",
+              "flex-grow"
             )}
             disabled={disabled}
           >
@@ -73,13 +74,19 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
           />
         </PopoverContent>
       </Popover>
-      <Input
-        type="time"
-        value={timeString}
-        onChange={(e) => setTimeString(e.target.value)}
-        className="w-24"
-        disabled={!date || disabled}
-      />
+      
+      <div className="flex items-center gap-2">
+        <Clock className="h-4 w-4 text-muted-foreground" />
+        <Input
+          type="time"
+          value={timeString}
+          onChange={(e) => setTimeString(e.target.value)}
+          className="w-28"
+          disabled={!date || disabled}
+          placeholder="ЧЧ:ММ"
+          aria-label="Выберите время"
+        />
+      </div>
     </div>
   );
 }
