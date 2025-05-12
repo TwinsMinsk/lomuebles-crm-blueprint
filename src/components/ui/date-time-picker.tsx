@@ -32,6 +32,8 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
   const [minutes, setMinutes] = React.useState<string>(
     value ? format(value, "mm") : "00"
   );
+  
+  const [isTimeOpen, setIsTimeOpen] = React.useState<boolean>(false);
 
   // Generate options for hours (00-23)
   const hourOptions = Array.from({ length: 24 }, (_, i) => {
@@ -71,6 +73,16 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
   // Format the time string for display
   const timeString = `${hours}:${minutes}`;
 
+  // Handler for hour selection that prevents popup from closing
+  const handleHourChange = (value: string) => {
+    setHours(value);
+  };
+
+  // Handler for minute selection that prevents popup from closing
+  const handleMinuteChange = (value: string) => {
+    setMinutes(value);
+  };
+
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
       <Popover>
@@ -99,7 +111,7 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
         </PopoverContent>
       </Popover>
       
-      <Popover>
+      <Popover open={isTimeOpen} onOpenChange={setIsTimeOpen}>
         <PopoverTrigger asChild>
           <Button
             variant={"outline"}
@@ -121,14 +133,46 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
                 Час
               </span>
               <Select 
-                value={hours} 
-                onValueChange={setHours}
+                value={hours}
+                onValueChange={handleHourChange}
                 disabled={!date || disabled}
+                onOpenChange={(open) => {
+                  // Prevent closing the parent popover when opening the select
+                  if (open) {
+                    // Make sure we retain focus in the popover
+                    setTimeout(() => {
+                      document.querySelector('[data-state="open"]')?.addEventListener(
+                        'click',
+                        (e) => e.stopPropagation(),
+                        { once: true }
+                      );
+                    }, 0);
+                  }
+                }}
               >
-                <SelectTrigger className="w-[70px]">
+                <SelectTrigger 
+                  className="w-[70px]"
+                  onPointerDown={(e) => {
+                    // Prevent the popover from closing when clicking on select trigger
+                    e.stopPropagation();
+                  }}
+                >
                   <SelectValue placeholder="Час" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent 
+                  position="popper"
+                  onCloseAutoFocus={(e) => {
+                    // Prevent auto focus behavior from closing the parent popover
+                    e.preventDefault();
+                  }}
+                  onInteractOutside={(e) => {
+                    // Only prevent if it's within our time popover
+                    if (e.target instanceof Node && 
+                        document.querySelector('[role="dialog"]')?.contains(e.target)) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
                   {hourOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -143,13 +187,45 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
               </span>
               <Select 
                 value={minutes} 
-                onValueChange={setMinutes}
+                onValueChange={handleMinuteChange}
                 disabled={!date || disabled}
+                onOpenChange={(open) => {
+                  // Prevent closing the parent popover when opening the select
+                  if (open) {
+                    // Make sure we retain focus in the popover
+                    setTimeout(() => {
+                      document.querySelector('[data-state="open"]')?.addEventListener(
+                        'click',
+                        (e) => e.stopPropagation(),
+                        { once: true }
+                      );
+                    }, 0);
+                  }
+                }}
               >
-                <SelectTrigger className="w-[70px]">
+                <SelectTrigger 
+                  className="w-[70px]"
+                  onPointerDown={(e) => {
+                    // Prevent the popover from closing when clicking on select trigger
+                    e.stopPropagation();
+                  }}
+                >
                   <SelectValue placeholder="Мин" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent 
+                  position="popper"
+                  onCloseAutoFocus={(e) => {
+                    // Prevent auto focus behavior from closing the parent popover
+                    e.preventDefault();
+                  }}
+                  onInteractOutside={(e) => {
+                    // Only prevent if it's within our time popover
+                    if (e.target instanceof Node && 
+                        document.querySelector('[role="dialog"]')?.contains(e.target)) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
                   {minuteOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
