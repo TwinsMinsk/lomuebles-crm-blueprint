@@ -7,6 +7,8 @@ export interface User {
   email: string;
   full_name: string | null;
   role: string;
+  registration_date: string;
+  is_active: boolean;
 }
 
 export function useUsers() {
@@ -15,7 +17,7 @@ export function useUsers() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, email, full_name, role")
+        .select("id, email, full_name, role, registration_date, is_active")
         .eq("is_active", true)
         .order("full_name", { ascending: true });
 

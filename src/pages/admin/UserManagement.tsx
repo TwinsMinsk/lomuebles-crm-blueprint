@@ -35,18 +35,10 @@ import { Database } from "@/integrations/supabase/types";
 import { Loader2, RefreshCw, UserCog, ShieldAlert, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useUsers } from "@/hooks/useUsers";
 
 // Define the user role type from our database schema
 type UserRole = Database["public"]["Enums"]["user_role"];
-
-interface User {
-  id: string;
-  email: string;
-  full_name: string | null;
-  role: UserRole;
-  registration_date: string;
-  is_active: boolean;
-}
 
 const formatDate = (dateString: string) => {
   try {
@@ -69,7 +61,23 @@ const UserManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { session, userRole } = useAuth();
+  const { session, userRole, user: currentUser } = useAuth();
+
+  // Helper function to check if the current user can modify a specific user
+  const canModifyUser = (userToModify: User) => {
+    // Chief Administrator can modify anyone except themselves
+    if (userRole === 'Главный Администратор') {
+      return userToModify.id !== currentUser?.id;
+    }
+    
+    // Regular Administrator can only modify users who are NOT Chief Administrators and not themselves
+    if (userRole === 'Администратор') {
+      return userToModify.role !== 'Главный Администратор' && userToModify.id !== currentUser?.id;
+    }
+    
+    // Other roles cannot modify users
+    return false;
+  };
 
   const fetchUsers = async () => {
     try {
@@ -280,76 +288,101 @@ const UserManagement = () => {
                 </TableHeader>
                 <TableBody>
                   {users && users.length > 0 ? (
-                    users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.email}</TableCell>
-                        <TableCell>{user.full_name || "—"}</TableCell>
-                        <TableCell>
-                          <Select
-                            defaultValue={user.role}
-                            onValueChange={(value) => handleRoleChange(user.id, value as UserRole)}
-                          >
-                            <SelectTrigger className="w-[180px]">
-                              <SelectValue placeholder="Выберите роль" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Главный Администратор">
-                                Главный Администратор
-                              </SelectItem>
-                              <SelectItem value="Администратор">Администратор</SelectItem>
-                              <SelectItem value="Менеджер">Менеджер</SelectItem>
-                              <SelectItem value="Замерщик">Замерщик</SelectItem>
-                              <SelectItem value="Дизайнер">Дизайнер</SelectItem>
-                              <SelectItem value="Монтажник">Монтажник</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>{user.registration_date ? formatDate(user.registration_date) : "—"}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={user.is_active ? "outline" : "destructive"}
-                            className={user.is_active ? "bg-green-50 text-green-600 hover:bg-green-50" : ""}
-                          >
-                            {user.is_active ? "Активен" : "Неактивен"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant={user.is_active ? "destructive" : "outline"}
-                                size="sm"
+                    users.map((user) => {
+                      const canModify = canModifyUser(user);
+                      const isChiefAdmin = user.role === 'Главный Администратор';
+                      const isSelf = user.id === currentUser?.id;
+                      
+                      // Prepare a tooltip message explaining why the controls might be disabled
+                      let tooltipMessage = '';
+                      if (!canModify) {
+                        if (isSelf) {
+                          tooltipMessage = 'Вы не можете изменить свой собственный профиль';
+                        } else if (isChiefAdmin && userRole === 'Администратор') {
+                          tooltipMessage = 'Администратор не может изменять профили Главных Администраторов';
+                        }
+                      }
+                      
+                      return (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">
+                            {user.email}
+                            {isSelf && <span className="ml-2 text-xs text-blue-500">(Вы)</span>}
+                          </TableCell>
+                          <TableCell>{user.full_name || "—"}</TableCell>
+                          <TableCell>
+                            <Select
+                              defaultValue={user.role}
+                              onValueChange={(value) => handleRoleChange(user.id, value as UserRole)}
+                              disabled={!canModify}
+                            >
+                              <SelectTrigger 
+                                className="w-[180px]"
+                                title={!canModify ? tooltipMessage : ''}
                               >
-                                {user.is_active ? "Деактивировать" : "Активировать"}
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  {user.is_active
-                                    ? "Деактивировать пользователя"
-                                    : "Активировать пользователя"}
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  {user.is_active
-                                    ? "Вы уверены, что хотите деактивировать этого пользователя? Пользователь потеряет доступ к системе."
-                                    : "Вы уверены, что хотите активировать этого пользователя? Пользователь получит доступ к системе."}
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Отмена</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => toggleUserActiveState(user.id, user.is_active)}
-                                  className={user.is_active ? "bg-red-500 hover:bg-red-600" : ""}
+                                <SelectValue placeholder="Выберите роль" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Главный Администратор">
+                                  Главный Администратор
+                                </SelectItem>
+                                <SelectItem value="Администратор">Администратор</SelectItem>
+                                <SelectItem value="Менеджер">Менеджер</SelectItem>
+                                <SelectItem value="Замерщик">Замерщик</SelectItem>
+                                <SelectItem value="Дизайнер">Дизайнер</SelectItem>
+                                <SelectItem value="Монтажник">Монтажник</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>{user.registration_date ? formatDate(user.registration_date) : "—"}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={user.is_active ? "outline" : "destructive"}
+                              className={user.is_active ? "bg-green-50 text-green-600 hover:bg-green-50" : ""}
+                            >
+                              {user.is_active ? "Активен" : "Неактивен"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant={user.is_active ? "destructive" : "outline"}
+                                  size="sm"
+                                  disabled={!canModify}
+                                  title={!canModify ? tooltipMessage : ''}
                                 >
                                   {user.is_active ? "Деактивировать" : "Активировать"}
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    {user.is_active
+                                      ? "Деактивировать пользователя"
+                                      : "Активировать пользователя"}
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    {user.is_active
+                                      ? "Вы уверены, что хотите деактивировать этого пользователя? Пользователь потеряет доступ к системе."
+                                      : "Вы уверены, что хотите активировать этого пользователя? Пользователь получит доступ к системе."}
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Отмена</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => toggleUserActiveState(user.id, user.is_active)}
+                                    className={user.is_active ? "bg-red-500 hover:bg-red-600" : ""}
+                                  >
+                                    {user.is_active ? "Деактивировать" : "Активировать"}
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   ) : (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-8">
