@@ -18,12 +18,12 @@ export const useRelatedOrdersData = (searchTerm: string = "", limit: number = 20
       setError(null);
 
       try {
-        // Base query to orders table
+        // Base query to deals_orders table (not orders)
         let query = supabase
-          .from('orders')
+          .from('deals_orders')
           .select(`
             *,
-            contacts:client_contact_id(contact_id, full_name),
+            contacts:associated_contact_id(contact_id, full_name),
             profiles:assigned_user_id(id, full_name)
           `)
           .limit(limit);
@@ -36,31 +36,31 @@ export const useRelatedOrdersData = (searchTerm: string = "", limit: number = 20
         }
 
         // Execute the query
-        const { data, error: fetchError } = await query.order('created_at', { ascending: false });
+        const { data, error: fetchError } = await query.order('creation_date', { ascending: false });
 
         if (fetchError) throw fetchError;
 
         // Transform data to match our Order type, with safe access to potentially null relation data
         const transformedOrders = (data || []).map((order: any) => ({
-          id: order.id,
-          created_at: order.created_at,
+          id: order.deal_order_id,
+          created_at: order.creation_date,
           order_number: order.order_number,
           order_name: order.order_name,
-          order_type: order.order_type as "Готовая мебель (Tilda)" | "Мебель на заказ",
-          status: order.status,
-          client_contact_id: order.client_contact_id,
-          client_company_id: order.client_company_id,
+          order_type: order.order_type,
+          status: order.status_custom_made || order.status_ready_made || "Неизвестный статус",
+          client_contact_id: order.associated_contact_id,
+          client_company_id: order.associated_company_id,
           source_lead_id: order.source_lead_id,
           assigned_user_id: order.assigned_user_id,
-          partner_manufacturer_id: order.partner_manufacturer_id,
+          partner_manufacturer_id: order.associated_partner_manufacturer_id,
           final_amount: order.final_amount,
           payment_status: order.payment_status,
           delivery_address_full: order.delivery_address_full,
           notes_history: order.notes_history,
-          attached_files_order_docs: order.attached_files_order_docs as any[] | null,
+          attached_files_order_docs: order.attached_files_order_docs,
           closing_date: order.closing_date,
           creator_user_id: order.creator_user_id,
-          client_language: order.client_language as "ES" | "EN" | "RU",
+          client_language: order.client_language,
           contact_name: order.contacts?.full_name || undefined,
           assigned_user_name: order.profiles?.full_name || undefined
         }));

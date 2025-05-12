@@ -73,6 +73,8 @@ export const useTaskForm = (
         task_name: data.task_name
       };
 
+      console.log("Data being sent to Supabase:", taskData);
+
       // For existing tasks, update
       if (initialData?.task_id) {
         const { error } = await supabase
@@ -89,13 +91,17 @@ export const useTaskForm = (
           .from('tasks')
           .insert([taskData]);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase Task Insert Error:", error);
+          throw error;
+        }
         toast.success("Задача успешно создана");
       }
 
       // Invalidate task queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["calendarTasks"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       
       // Set success state
       setIsSuccess(true);
@@ -104,9 +110,9 @@ export const useTaskForm = (
       if (onSuccess) {
         onSuccess();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving task:", error);
-      toast.error("Ошибка при сохранении задачи");
+      toast.error(`Ошибка при сохранении задачи: ${error.message || 'Неизвестная ошибка'}`);
     } finally {
       setIsLoading(false);
     }

@@ -15,8 +15,8 @@ export const OrderSelector = ({ value, onChange }: OrderSelectorProps) => {
 
   // Format order data for display in entity selector
   const formattedOrders = orders.map((order) => ({
-    id: order.id,
-    name: order.order_name || `Заказ ${order.order_number}`, // Changed title to name to match EntityOption type
+    id: order.id, // This now correctly gets deal_order_id from deals_orders table
+    name: order.order_name || `Заказ ${order.order_number}`,
     description: `${formatDate(order.created_at)} - ${order.status}`,
     imageUrl: null,
     subtitle: order.contact_name || 'Без контакта'
