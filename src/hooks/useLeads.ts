@@ -30,26 +30,40 @@ export const useLeads = () => {
       // Set total pages based on count
       setTotalPages(Math.ceil((count || 0) / pageSize));
       
-      // Fetch leads with profiles for the current page
-      // Fix: Specify the exact column name for the join relation
-      const { data, error } = await supabase
+      // Fetch leads for the current page - without trying to join with profiles yet
+      const { data: leadsData, error: leadsError } = await supabase
         .from('leads')
-        .select(`
-          *,
-          profiles:assigned_user_id(full_name)
-        `)
+        .select('*')
         .order('creation_date', { ascending: false })
         .range(from, to);
 
-      if (error) throw error;
+      if (leadsError) throw leadsError;
       
-      // Type the data correctly as LeadWithProfile[]
-      const typedLeads = data?.map(lead => ({
-        ...lead,
-        profiles: lead.profiles || null
-      })) as LeadWithProfile[];
-
-      setLeads(typedLeads);
+      // Now for each lead, if assigned_user_id exists, fetch the profile separately
+      const leadsWithProfiles = await Promise.all(
+        leadsData.map(async (lead) => {
+          let profileData = null;
+          
+          if (lead.assigned_user_id) {
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('id', lead.assigned_user_id)
+              .single();
+              
+            if (!profileError && profile) {
+              profileData = profile;
+            }
+          }
+          
+          return {
+            ...lead,
+            profiles: profileData
+          } as LeadWithProfile;
+        })
+      );
+      
+      setLeads(leadsWithProfiles);
       setError(null);
     } catch (err) {
       console.error('Error fetching leads:', err);
