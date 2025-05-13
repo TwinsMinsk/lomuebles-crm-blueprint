@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +31,9 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
   const [loading, setLoading] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<any[]>([]);
   const { user } = useAuth();
+  
+  // Ref to track if form has been initialized with edit data
+  const initializedRef = useRef(false);
 
   // Initialize form with default values
   const form = useForm<ContactFormValues>({
@@ -84,49 +87,56 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
     fetchData();
   }, []);
 
-  // Set form values when editing a contact
+  // Set form values when editing a contact, but only once
   useEffect(() => {
-    if (contactToEdit) {
-      form.reset({
-        full_name: contactToEdit.full_name || "",
-        primary_phone: contactToEdit.primary_phone || "",
-        secondary_phone: contactToEdit.secondary_phone || "",
-        primary_email: contactToEdit.primary_email || "",
-        secondary_email: contactToEdit.secondary_email || "",
-        delivery_address_street: contactToEdit.delivery_address_street || "",
-        delivery_address_number: contactToEdit.delivery_address_number || "",
-        delivery_address_apartment: contactToEdit.delivery_address_apartment || "",
-        delivery_address_city: contactToEdit.delivery_address_city || "",
-        delivery_address_postal_code: contactToEdit.delivery_address_postal_code || "",
-        delivery_address_country: contactToEdit.delivery_address_country || "Spain",
-        associated_company_id: contactToEdit.associated_company_id,
-        owner_user_id: contactToEdit.owner_user_id || null,
-        notes: contactToEdit.notes || "",
-      });
-      
-      // Load attached files if they exist
-      if (contactToEdit.attached_files_general) {
-        setAttachedFiles(contactToEdit.attached_files_general);
+    // Only initialize once with edit data
+    if (!initializedRef.current) {
+      if (contactToEdit) {
+        // Editing existing contact
+        form.reset({
+          full_name: contactToEdit.full_name || "",
+          primary_phone: contactToEdit.primary_phone || "",
+          secondary_phone: contactToEdit.secondary_phone || "",
+          primary_email: contactToEdit.primary_email || "",
+          secondary_email: contactToEdit.secondary_email || "",
+          delivery_address_street: contactToEdit.delivery_address_street || "",
+          delivery_address_number: contactToEdit.delivery_address_number || "",
+          delivery_address_apartment: contactToEdit.delivery_address_apartment || "",
+          delivery_address_city: contactToEdit.delivery_address_city || "",
+          delivery_address_postal_code: contactToEdit.delivery_address_postal_code || "",
+          delivery_address_country: contactToEdit.delivery_address_country || "Spain",
+          associated_company_id: contactToEdit.associated_company_id,
+          owner_user_id: contactToEdit.owner_user_id || null,
+          notes: contactToEdit.notes || "",
+        });
+        
+        // Load attached files if they exist
+        if (contactToEdit.attached_files_general) {
+          setAttachedFiles(contactToEdit.attached_files_general);
+        }
+      } else {
+        // Reset form when adding a new contact
+        form.reset({
+          full_name: "",
+          primary_phone: "",
+          secondary_phone: "",
+          primary_email: "",
+          secondary_email: "",
+          delivery_address_street: "",
+          delivery_address_number: "",
+          delivery_address_apartment: "",
+          delivery_address_city: "",
+          delivery_address_postal_code: "",
+          delivery_address_country: "Spain",
+          associated_company_id: null,
+          owner_user_id: user?.id || null,
+          notes: "",
+        });
+        setAttachedFiles([]);
       }
-    } else {
-      // Reset form when adding a new contact
-      form.reset({
-        full_name: "",
-        primary_phone: "",
-        secondary_phone: "",
-        primary_email: "",
-        secondary_email: "",
-        delivery_address_street: "",
-        delivery_address_number: "",
-        delivery_address_apartment: "",
-        delivery_address_city: "",
-        delivery_address_postal_code: "",
-        delivery_address_country: "Spain",
-        associated_company_id: null,
-        owner_user_id: user?.id || null,
-        notes: "",
-      });
-      setAttachedFiles([]);
+      
+      // Mark as initialized so we don't reset on blur/focus
+      initializedRef.current = true;
     }
   }, [contactToEdit, form, user]);
 
@@ -193,6 +203,9 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
           : "Контакт успешно создан"
       );
       
+      // Reset initializedRef when closing the form so it can be initialized again next time
+      initializedRef.current = false;
+      
       onContactSaved();
       onClose();
     } catch (err) {
@@ -213,6 +226,13 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
     }
   };
 
+  // Сброс состояния формы при закрытии модального окна
+  const handleClose = () => {
+    // Reset initializedRef for next time the form opens
+    initializedRef.current = false;
+    onClose();
+  };
+
   return {
     form,
     companies,
@@ -220,6 +240,7 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
     loading,
     onSubmit,
     attachedFiles,
-    setAttachedFiles
+    setAttachedFiles,
+    handleClose
   };
 };

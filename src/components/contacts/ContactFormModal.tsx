@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
@@ -41,7 +42,8 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
     loading, 
     onSubmit,
     attachedFiles,
-    setAttachedFiles
+    setAttachedFiles,
+    handleClose
   } = useContactForm({
     contactToEdit,
     onContactSaved,
@@ -49,12 +51,15 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
   });
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {contactToEdit ? "Редактировать контакт" : "Добавить новый контакт"}
           </DialogTitle>
+          <DialogDescription>
+            Заполните информацию о контакте. Поля, отмеченные звездочкой (*), обязательны.
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -98,7 +103,7 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
             </Tabs>
 
             <DialogFooter>
-              <Button variant="outline" type="button" onClick={onClose}>
+              <Button variant="outline" type="button" onClick={handleClose}>
                 Отмена
               </Button>
               <Button type="submit" disabled={loading}>
