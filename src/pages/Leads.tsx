@@ -9,8 +9,7 @@ import { useState } from "react";
 import LeadFormModal from "@/components/leads/LeadFormModal";
 import { LeadWithProfile } from "@/components/leads/LeadTableRow";
 import DeleteLeadDialog from "@/components/leads/DeleteLeadDialog";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useLeadDelete } from "@/hooks/useLeadDelete";
 
 const Leads = () => {
   const { leads, loading, page, totalPages, setPage, refreshLeads } = useLeads();
@@ -18,7 +17,7 @@ const Leads = () => {
   const [selectedLead, setSelectedLead] = useState<LeadWithProfile | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [leadToDelete, setLeadToDelete] = useState<LeadWithProfile | null>(null);
-  const { toast } = useToast();
+  const { deleteLead, isDeleting } = useLeadDelete();
 
   const handleAddLead = () => {
     setSelectedLead(undefined);
@@ -51,33 +50,8 @@ const Leads = () => {
 
   const handleConfirmDelete = async () => {
     if (!leadToDelete) return;
-    
-    try {
-      const { error } = await supabase
-        .from("leads")
-        .delete()
-        .eq("lead_id", leadToDelete.lead_id);
-        
-      if (error) {
-        throw error;
-      }
-      
-      toast({
-        title: "Лид удален",
-        description: "Лид был успешно удален из системы.",
-      });
-      
-      refreshLeads();
-    } catch (error) {
-      console.error("Error deleting lead:", error);
-      toast({
-        title: "Ошибка при удалении",
-        description: "Не удалось удалить лид. Пожалуйста, попробуйте снова.",
-        variant: "destructive",
-      });
-    } finally {
-      handleCloseDeleteDialog();
-    }
+    deleteLead(leadToDelete.lead_id);
+    handleCloseDeleteDialog();
   };
 
   return (
@@ -129,6 +103,7 @@ const Leads = () => {
         onClose={handleCloseDeleteDialog}
         onConfirm={handleConfirmDelete}
         lead={leadToDelete}
+        isDeleting={isDeleting}
       />
     </div>
   );

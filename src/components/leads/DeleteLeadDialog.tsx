@@ -11,12 +11,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { LeadWithProfile } from "./LeadTableRow";
+import { Loader2 } from "lucide-react";
 
 interface DeleteLeadDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
   lead: LeadWithProfile | null;
+  isDeleting?: boolean;
 }
 
 const DeleteLeadDialog: React.FC<DeleteLeadDialogProps> = ({
@@ -24,6 +26,7 @@ const DeleteLeadDialog: React.FC<DeleteLeadDialogProps> = ({
   onClose,
   onConfirm,
   lead,
+  isDeleting = false,
 }) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -38,9 +41,20 @@ const DeleteLeadDialog: React.FC<DeleteLeadDialogProps> = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Отмена</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-            Удалить
+          <AlertDialogCancel disabled={isDeleting}>Отмена</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={onConfirm} 
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Удаление...
+              </>
+            ) : (
+              "Удалить"
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
