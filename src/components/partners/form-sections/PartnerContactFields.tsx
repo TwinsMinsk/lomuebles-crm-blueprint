@@ -70,6 +70,25 @@ const PartnerContactFields: React.FC<PartnerContactFieldsProps> = ({ form }) => 
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="website"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Веб-сайт</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="https://example.com" 
+                  type="url" 
+                  {...field} 
+                  value={field.value || ''} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
     </div>
   );

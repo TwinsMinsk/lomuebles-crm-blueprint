@@ -37,6 +37,7 @@ const PartnerTableRow: React.FC<PartnerTableRowProps> = ({
       <TableCell>{partner.contact_person || "-"}</TableCell>
       <TableCell>{partner.phone || "-"}</TableCell>
       <TableCell>{partner.email || "-"}</TableCell>
+      <TableCell>{partner.website || "-"}</TableCell>
       <TableCell>{partner.specialization || "-"}</TableCell>
       <TableCell>{formatDate(partner.creation_date)}</TableCell>
       <TableCell>

@@ -557,6 +557,7 @@ export type Database = {
           requisites: string | null
           specialization: string | null
           terms: string | null
+          website: string | null
         }
         Insert: {
           attached_files_partner_docs?: Json | null
@@ -571,6 +572,7 @@ export type Database = {
           requisites?: string | null
           specialization?: string | null
           terms?: string | null
+          website?: string | null
         }
         Update: {
           attached_files_partner_docs?: Json | null
@@ -585,6 +587,7 @@ export type Database = {
           requisites?: string | null
           specialization?: string | null
           terms?: string | null
+          website?: string | null
         }
         Relationships: [
           {

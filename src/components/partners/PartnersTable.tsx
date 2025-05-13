@@ -34,6 +34,7 @@ const PartnersTable: React.FC<PartnersTableProps> = ({
             <TableHead>Контактное лицо</TableHead>
             <TableHead>Телефон</TableHead>
             <TableHead>Email</TableHead>
+            <TableHead>Веб-сайт</TableHead>
             <TableHead>Специализация</TableHead>
             <TableHead>Дата создания</TableHead>
             <TableHead className="w-[50px]"></TableHead>
@@ -42,7 +43,7 @@ const PartnersTable: React.FC<PartnersTableProps> = ({
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-4">
+              <TableCell colSpan={9} className="text-center py-4">
                 Загрузка...
               </TableCell>
             </TableRow>
@@ -57,7 +58,7 @@ const PartnersTable: React.FC<PartnersTableProps> = ({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-4">
+              <TableCell colSpan={9} className="text-center py-4">
                 Партнеры-изготовители не найдены
               </TableCell>
             </TableRow>
