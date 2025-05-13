@@ -1,108 +1,83 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Plus } from "lucide-react";
-import LeadsTable from "@/components/leads/LeadsTable";
-import LeadsPagination from "@/components/leads/LeadsPagination";
-import { useLeads } from "@/hooks/useLeads";
+import React, { useState } from "react";
+import PageHeader from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useLeads } from "@/hooks/useLeads";
+import LeadsTable from "@/components/leads/LeadsTable";
 import LeadFormModal from "@/components/leads/LeadFormModal";
+import LeadsPagination from "@/components/leads/LeadsPagination";
 import { LeadWithProfile } from "@/components/leads/LeadTableRow";
 import DeleteLeadDialog from "@/components/leads/DeleteLeadDialog";
 import { useLeadDelete } from "@/hooks/useLeadDelete";
 
-const Leads = () => {
-  const { leads, loading, page, totalPages, setPage, refreshLeads } = useLeads();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedLead, setSelectedLead] = useState<LeadWithProfile | undefined>(undefined);
+const Leads: React.FC = () => {
+  const { leads, loading, page, totalPages, setPage } = useLeads();
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<LeadWithProfile | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [leadToDelete, setLeadToDelete] = useState<LeadWithProfile | null>(null);
   const { deleteLead, isDeleting } = useLeadDelete();
 
-  const handleAddLead = () => {
-    setSelectedLead(undefined);
-    setIsModalOpen(true);
-  };
-
-  const handleEditLead = (lead: LeadWithProfile) => {
+  const handleLeadClick = (lead: LeadWithProfile) => {
     setSelectedLead(lead);
-    setIsModalOpen(true);
+    setIsFormOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedLead(undefined);
+  const handleAddNewClick = () => {
+    setSelectedLead(null);
+    setIsFormOpen(true);
   };
 
-  const handleSuccess = () => {
-    refreshLeads();
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setSelectedLead(null);
   };
 
   const handleDeleteLead = (lead: LeadWithProfile) => {
-    setLeadToDelete(lead);
+    setSelectedLead(lead);
     setIsDeleteDialogOpen(true);
   };
 
-  const handleCloseDeleteDialog = () => {
-    setIsDeleteDialogOpen(false);
-    setLeadToDelete(null);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!leadToDelete) return;
-    deleteLead(leadToDelete.lead_id);
-    handleCloseDeleteDialog();
+  const confirmDelete = () => {
+    if (selectedLead) {
+      deleteLead(selectedLead.lead_id);
+      setIsDeleteDialogOpen(false);
+    }
   };
 
   return (
-    <div className="container mx-auto py-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Лиды</CardTitle>
-          <Button onClick={handleAddLead}>
-            <Plus className="mr-2 h-4 w-4" />
-            Добавить лид
-          </Button>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex justify-center my-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : (
-            <>
-              <LeadsTable 
-                leads={leads} 
-                loading={loading} 
-                onLeadClick={handleEditLead}
-                onLeadDelete={handleDeleteLead}
-              />
-              
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <LeadsPagination 
-                  page={page} 
-                  totalPages={totalPages} 
-                  setPage={setPage} 
-                />
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
+    <div className="container mx-auto py-4">
+      <PageHeader
+        title="Лиды"
+        description="Управление потенциальными клиентами"
+        action={
+          <Button onClick={handleAddNewClick}>Новый лид</Button>
+        }
+      />
+
+      <LeadsTable
+        leads={leads}
+        loading={loading}
+        onLeadClick={handleLeadClick}
+        onLeadDelete={handleDeleteLead}
+      />
+
+      <LeadsPagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
 
       <LeadFormModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
+        isOpen={isFormOpen}
+        onClose={handleCloseForm}
         lead={selectedLead}
-        onSuccess={handleSuccess}
       />
 
       <DeleteLeadDialog
         isOpen={isDeleteDialogOpen}
-        onClose={handleCloseDeleteDialog}
-        onConfirm={handleConfirmDelete}
-        lead={leadToDelete}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={confirmDelete}
+        lead={selectedLead}
         isDeleting={isDeleting}
       />
     </div>
