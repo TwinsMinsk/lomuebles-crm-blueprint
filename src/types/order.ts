@@ -15,6 +15,7 @@ export const orderSchema = z.object({
   partnerManufacturerId: z.number().optional().nullable(),
   finalAmount: z.number().optional().nullable(),
   paymentStatus: z.enum(["Не оплачен", "Частично оплачен", "Оплачен полностью", "Возврат"]).optional().nullable(),
+  partialPaymentAmount: z.number().optional().nullable(),
   deliveryAddressFull: z.string().optional().nullable(),
   notesHistory: z.string().optional().nullable(),
   attachedFilesOrderDocs: z.array(z.any()).optional().nullable(),
@@ -38,6 +39,7 @@ export type Order = {
   partner_manufacturer_id: number | null;
   final_amount: number | null;
   payment_status: string | null;
+  partial_payment_amount: number | null;
   delivery_address_full: string | null;
   notes_history: string | null;
   attached_files_order_docs: any[] | null;

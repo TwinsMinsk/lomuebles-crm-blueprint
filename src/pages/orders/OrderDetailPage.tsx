@@ -61,6 +61,7 @@ const OrderDetailPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">
           Редактирование заказа #{order.order_number}
+          {order.order_name && ` (${order.order_name})`}
         </h1>
         <Button variant="outline" onClick={handleBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />

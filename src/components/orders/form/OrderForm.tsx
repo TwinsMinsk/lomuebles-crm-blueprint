@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -51,6 +52,7 @@ const orderFormSchema = z.object({
   partner_manufacturer_id: z.number().optional().nullable(),
   final_amount: z.number().optional().nullable(),
   payment_status: z.string().optional().nullable(),
+  partial_payment_amount: z.number().optional().nullable(),
   delivery_address_full: z.string().optional().nullable(),
   notes_history: z.string().optional().nullable(),
   attached_files_order_docs: z.array(
@@ -63,6 +65,15 @@ const orderFormSchema = z.object({
     })
   ).optional().nullable(),
   client_language: z.enum(["ES", "EN", "RU"]),
+}).refine(data => {
+  // If payment status is "Частично оплачен", partial_payment_amount is required
+  if (data.payment_status === "Частично оплачен") {
+    return !!data.partial_payment_amount;
+  }
+  return true;
+}, {
+  message: "Необходимо указать сумму частичной оплаты",
+  path: ["partial_payment_amount"]
 });
 
 type OrderFormValues = z.infer<typeof orderFormSchema>;
@@ -107,6 +118,7 @@ export default function OrderForm({ order, onSuccess }: OrderFormProps) {
           partner_manufacturer_id: order.partner_manufacturer_id || null,
           final_amount: order.final_amount || null,
           payment_status: order.payment_status || null,
+          partial_payment_amount: order.partial_payment_amount || null,
           delivery_address_full: order.delivery_address_full || "",
           notes_history: order.notes_history || "",
           attached_files_order_docs: order.attached_files_order_docs || [],
@@ -123,6 +135,7 @@ export default function OrderForm({ order, onSuccess }: OrderFormProps) {
           partner_manufacturer_id: null,
           final_amount: null,
           payment_status: null,
+          partial_payment_amount: null,
           delivery_address_full: "",
           notes_history: "",
           attached_files_order_docs: [],
@@ -132,6 +145,16 @@ export default function OrderForm({ order, onSuccess }: OrderFormProps) {
   
   // Watch for order_type changes to update status options
   const selectedOrderType = form.watch("order_type");
+  
+  // Watch payment status for conditional rendering of partial payment field
+  const paymentStatus = form.watch("payment_status");
+  
+  // Reset partial payment amount if payment status is not "Частично оплачен"
+  useEffect(() => {
+    if (paymentStatus !== "Частично оплачен") {
+      form.setValue("partial_payment_amount", null);
+    }
+  }, [paymentStatus, form]);
   
   // Load status options based on order type
   const [statusOptions, setStatusOptions] = useState<string[]>([]);
@@ -618,6 +641,29 @@ export default function OrderForm({ order, onSuccess }: OrderFormProps) {
             )}
           />
         </div>
+        
+        {/* Partial Payment Amount - Only show when payment status is "Частично оплачен" */}
+        {paymentStatus === "Частично оплачен" && (
+          <FormField
+            control={form.control}
+            name="partial_payment_amount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Сумма частичной оплаты</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="0.00"
+                    {...field}
+                    value={field.value === null ? "" : field.value}
+                    onChange={(e) => field.onChange(e.target.value === "" ? null : Number(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         {/* Client Language */}
         <FormField

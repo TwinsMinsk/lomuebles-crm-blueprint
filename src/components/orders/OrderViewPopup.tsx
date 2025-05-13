@@ -83,6 +83,12 @@ const OrderViewPopup: React.FC<OrderViewPopupProps> = ({ orderId }) => {
             <p className="text-sm text-muted-foreground">Статус оплаты</p>
             <p>{order.payment_status || "—"}</p>
           </div>
+          {order.payment_status === "Частично оплачен" && order.partial_payment_amount !== null && (
+            <div>
+              <p className="text-sm text-muted-foreground">Сумма частичной оплаты</p>
+              <p className="font-medium">{formatCurrency(order.partial_payment_amount)}</p>
+            </div>
+          )}
           <div>
             <p className="text-sm text-muted-foreground">Язык клиента</p>
             <p>{order.client_language}</p>

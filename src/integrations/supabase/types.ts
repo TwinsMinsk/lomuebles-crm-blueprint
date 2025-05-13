@@ -451,6 +451,7 @@ export type Database = {
           order_name: string | null
           order_number: string
           order_type: string
+          partial_payment_amount: number | null
           partner_manufacturer_id: number | null
           payment_status: string | null
           source_lead_id: number | null
@@ -472,6 +473,7 @@ export type Database = {
           order_name?: string | null
           order_number: string
           order_type: string
+          partial_payment_amount?: number | null
           partner_manufacturer_id?: number | null
           payment_status?: string | null
           source_lead_id?: number | null
@@ -493,6 +495,7 @@ export type Database = {
           order_name?: string | null
           order_number?: string
           order_type?: string
+          partial_payment_amount?: number | null
           partner_manufacturer_id?: number | null
           payment_status?: string | null
           source_lead_id?: number | null
