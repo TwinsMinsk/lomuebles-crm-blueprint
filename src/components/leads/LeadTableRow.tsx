@@ -7,7 +7,7 @@ import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Define the Lead type with profile information
-interface ProfileData {
+export interface ProfileData {
   full_name: string | null;
 }
 

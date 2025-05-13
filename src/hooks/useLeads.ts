@@ -31,22 +31,23 @@ export const useLeads = () => {
       setTotalPages(Math.ceil((count || 0) / pageSize));
       
       // Fetch leads with profiles for the current page
+      // Fix: Specify the exact column name for the join relation
       const { data, error } = await supabase
         .from('leads')
         .select(`
           *,
-          profiles:assigned_user_id(*)
+          profiles:assigned_user_id(full_name)
         `)
         .order('creation_date', { ascending: false })
         .range(from, to);
 
       if (error) throw error;
       
-      // Ensure data is properly typed as LeadWithProfile[]
+      // Type the data correctly as LeadWithProfile[]
       const typedLeads = data?.map(lead => ({
         ...lead,
         profiles: lead.profiles || null
-      })) as LeadWithProfile[] || [];
+      })) as LeadWithProfile[];
 
       setLeads(typedLeads);
       setError(null);
