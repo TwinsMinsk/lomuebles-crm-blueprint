@@ -93,6 +93,7 @@ export const useRelatedOrdersData = (searchTerm: string = "", limit: number = 10
           partner_manufacturer_id: order.partner_manufacturer_id,
           final_amount: order.final_amount,
           payment_status: order.payment_status,
+          partial_payment_amount: order.partial_payment_amount, // Add the new field here
           delivery_address_full: order.delivery_address_full,
           notes_history: order.notes_history,
           attached_files_order_docs: order.attached_files_order_docs,
