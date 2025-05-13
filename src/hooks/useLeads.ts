@@ -1,88 +1,67 @@
 
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { LeadWithProfile } from "@/components/leads/LeadTableRow";
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { LeadWithProfile } from '@/components/leads/LeadTableRow';
 
-interface UseLeadsParams {
-  page?: number;
-  pageSize?: number;
-  sortColumn?: string;
-  sortDirection?: 'asc' | 'desc';
-}
-
-export const useLeads = (params?: UseLeadsParams) => {
+export const useLeads = () => {
   const [leads, setLeads] = useState<LeadWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(params?.page || 1);
+  const [error, setError] = useState<Error | null>(null);
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = params?.pageSize || 10;
+  const pageSize = 10; // Number of leads per page
 
   const fetchLeads = useCallback(async () => {
-    setLoading(true);
     try {
-      // First, get the total count to calculate pagination
-      const { count } = await supabase
-        .from("leads")
-        .select("*", { count: "exact", head: true });
+      setLoading(true);
+      
+      // Calculate the range for pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
 
-      // Calculate total pages
-      const total = count || 0;
-      setTotalPages(Math.ceil(total / itemsPerPage));
-
-      // Fetch the leads with pagination and explicitly specify the column for the join
+      // Get count of total leads for pagination
+      const { count, error: countError } = await supabase
+        .from('leads')
+        .select('*', { count: 'exact', head: true });
+      
+      if (countError) throw countError;
+      
+      // Set total pages based on count
+      setTotalPages(Math.ceil((count || 0) / pageSize));
+      
+      // Fetch leads with profiles for the current page
       const { data, error } = await supabase
-        .from("leads")
+        .from('leads')
         .select(`
           *,
-          profiles:assigned_user_id(full_name)
+          profiles:assigned_user_id(*)
         `)
-        .range((page - 1) * itemsPerPage, page * itemsPerPage - 1)
-        .order(params?.sortColumn || "creation_date", { ascending: (params?.sortDirection || "desc") === "asc" });
+        .order('creation_date', { ascending: false })
+        .range(from, to);
 
-      if (error) {
-        console.error("Error fetching leads:", error);
-        return;
-      }
-
-      if (data) {
-        // Transform the data to match our LeadWithProfile type with safer type handling
-        const transformedData: LeadWithProfile[] = data.map(item => {
-          // Ensure profiles is of the correct shape or null
-          let profileData: { full_name: string | null } | null = null;
-          
-          // Add proper null check before accessing item.profiles
-          if (item.profiles && typeof item.profiles === 'object') {
-            // Check if full_name property exists in the profiles object
-            const profilesObj = item.profiles as Record<string, unknown>;
-            if ('full_name' in profilesObj) {
-              profileData = {
-                full_name: profilesObj.full_name as string | null
-              };
-            }
-          }
-          
-          return {
-            ...item,
-            profiles: profileData
-          };
-        });
-        
-        setLeads(transformedData);
-      }
-    } catch (error) {
-      console.error("Failed to fetch leads:", error);
+      if (error) throw error;
+      
+      setLeads(data || []);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching leads:', err);
+      setError(err instanceof Error ? err : new Error('Unknown error occurred'));
     } finally {
       setLoading(false);
     }
-  }, [page, itemsPerPage, params?.sortColumn, params?.sortDirection]);
+  }, [page, pageSize]);
 
   useEffect(() => {
     fetchLeads();
   }, [fetchLeads]);
 
-  const refreshLeads = useCallback(() => {
-    fetchLeads();
-  }, [fetchLeads]);
-
-  return { leads, loading, page, totalPages, setPage, refreshLeads };
+  return { 
+    leads, 
+    loading, 
+    error, 
+    page, 
+    setPage, 
+    totalPages,
+    refreshLeads: fetchLeads 
+  };
 };

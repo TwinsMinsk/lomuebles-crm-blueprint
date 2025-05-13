@@ -1,5 +1,5 @@
 
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 import { useContacts } from "@/hooks/useContacts";
 import { usePaginationAndSort } from "./contacts/usePaginationAndSort";
 import { useContactsFilter } from "./contacts/useContactsFilter";

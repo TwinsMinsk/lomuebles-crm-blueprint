@@ -26,7 +26,7 @@ export const useLeadDelete = () => {
       });
     },
     onError: (err: Error) => {
-      console.error('Supabase Lead Delete Error:', err);
+      console.error('Lead Delete Error:', err);
       toast({
         title: "Ошибка при удалении",
         description: `Ошибка при удалении лида: ${err.message || 'Неизвестная ошибка'}`,
