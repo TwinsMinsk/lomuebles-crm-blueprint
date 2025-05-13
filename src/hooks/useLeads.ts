@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { LeadWithProfile } from '@/components/leads/LeadTableRow';
+import { toast } from '@/hooks/use-toast';
 
 export const useLeads = () => {
   const [leads, setLeads] = useState<LeadWithProfile[]>([]);
@@ -41,11 +42,24 @@ export const useLeads = () => {
 
       if (error) throw error;
       
-      setLeads(data || []);
+      // Ensure data is properly typed as LeadWithProfile[]
+      const typedLeads = data?.map(lead => ({
+        ...lead,
+        profiles: lead.profiles || null
+      })) as LeadWithProfile[] || [];
+
+      setLeads(typedLeads);
       setError(null);
     } catch (err) {
       console.error('Error fetching leads:', err);
       setError(err instanceof Error ? err : new Error('Unknown error occurred'));
+      
+      // Show error toast
+      toast({
+        title: "Ошибка",
+        description: "Не удалось загрузить список лидов",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }

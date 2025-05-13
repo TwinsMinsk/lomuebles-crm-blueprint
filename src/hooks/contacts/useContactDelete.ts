@@ -1,7 +1,8 @@
+
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { ContactWithRelations } from "@/components/contacts/ContactTableRow";
 
 export function useContactDelete({ onDeleteSuccess }: { onDeleteSuccess: () => void }) {
@@ -51,6 +52,7 @@ export function useContactDelete({ onDeleteSuccess }: { onDeleteSuccess: () => v
     onSuccess: () => {
       // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      
       toast({
         title: "Контакт удален",
         description: "Контакт успешно удален из системы"
@@ -66,6 +68,7 @@ export function useContactDelete({ onDeleteSuccess }: { onDeleteSuccess: () => v
     },
     onError: (error: Error) => {
       console.error("Contact deletion error:", error);
+      
       toast({
         variant: "destructive",
         title: "Ошибка при удалении контакта",

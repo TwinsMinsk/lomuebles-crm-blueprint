@@ -1,5 +1,5 @@
 
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { useContacts } from "@/hooks/useContacts";
 import { usePaginationAndSort } from "./contacts/usePaginationAndSort";
 import { useContactsFilter } from "./contacts/useContactsFilter";
@@ -83,8 +83,10 @@ export function useContactsState() {
 
   // Show error toast if data fetching fails
   if (error) {
-    toast.error("Ошибка при загрузке контактов", {
-      description: error.message
+    toast({
+      title: "Ошибка при загрузке контактов",
+      description: error.message,
+      variant: "destructive"
     });
   }
 
