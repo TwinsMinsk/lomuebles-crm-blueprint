@@ -24,7 +24,7 @@ import AssignmentAndCommentFields from "./form-sections/AssignmentAndCommentFiel
 interface LeadFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  lead?: LeadWithProfile;
+  lead?: LeadWithProfile | null;
   onSuccess: () => void;
 }
 

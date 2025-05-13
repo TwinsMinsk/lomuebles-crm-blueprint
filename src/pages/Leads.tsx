@@ -11,7 +11,7 @@ import DeleteLeadDialog from "@/components/leads/DeleteLeadDialog";
 import { useLeadDelete } from "@/hooks/useLeadDelete";
 
 const Leads: React.FC = () => {
-  const { leads, loading, page, totalPages, setPage } = useLeads();
+  const { leads, loading, page, totalPages, setPage, refreshLeads } = useLeads();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<LeadWithProfile | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -62,15 +62,16 @@ const Leads: React.FC = () => {
       />
 
       <LeadsPagination
-        currentPage={page}
+        page={page}
         totalPages={totalPages}
-        onPageChange={setPage}
+        setPage={setPage}
       />
 
       <LeadFormModal
         isOpen={isFormOpen}
         onClose={handleCloseForm}
         lead={selectedLead}
+        onSuccess={refreshLeads}
       />
 
       <DeleteLeadDialog
