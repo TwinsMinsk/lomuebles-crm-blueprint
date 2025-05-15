@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,9 +23,10 @@ interface UseContactFormProps {
   contactToEdit?: ContactWithRelations;
   onContactSaved: () => void;
   onClose: () => void;
+  isOpen: boolean; // New prop to track when modal is open
 }
 
-export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseContactFormProps) => {
+export const useContactForm = ({ contactToEdit, onContactSaved, onClose, isOpen }: UseContactFormProps) => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,6 +35,14 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
   
   // Ref to track if form has been initialized with edit data
   const initializedRef = useRef(false);
+
+  // Reset the initialization flag when the modal is closed or opened
+  useEffect(() => {
+    if (!isOpen) {
+      // Reset when modal closes
+      initializedRef.current = false;
+    }
+  }, [isOpen]);
 
   // Initialize form with default values
   const form = useForm<ContactFormValues>({
@@ -87,12 +97,19 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
     fetchData();
   }, []);
 
-  // Set form values when editing a contact, but only once
+  // Set form values when editing a contact or resetting
   useEffect(() => {
-    // Only initialize once with edit data
-    if (!initializedRef.current) {
+    console.log("Form initialization effect running", { 
+      isInitialized: initializedRef.current, 
+      isOpen, 
+      isEditing: !!contactToEdit 
+    });
+
+    // Only initialize if form is open and not already initialized
+    if (isOpen && !initializedRef.current) {
       if (contactToEdit) {
         // Editing existing contact
+        console.log("Initializing form with contact data:", contactToEdit);
         form.reset({
           full_name: contactToEdit.full_name || "",
           nie: contactToEdit.nie || "",
@@ -114,9 +131,12 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
         // Load attached files if they exist
         if (contactToEdit.attached_files_general) {
           setAttachedFiles(contactToEdit.attached_files_general);
+        } else {
+          setAttachedFiles([]);
         }
       } else {
         // Reset form when adding a new contact
+        console.log("Initializing empty form for new contact");
         form.reset({
           full_name: "",
           nie: "",
@@ -137,10 +157,11 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
         setAttachedFiles([]);
       }
       
-      // Mark as initialized so we don't reset on blur/focus
+      // Mark as initialized
       initializedRef.current = true;
+      console.log("Form initialization complete");
     }
-  }, [contactToEdit, form, user]);
+  }, [contactToEdit, form, user, isOpen]);
 
   const onSubmit = async (values: ContactFormValues) => {
     try {
@@ -231,7 +252,7 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
 
   // Сброс состояния формы при закрытии модального окна
   const handleClose = () => {
-    // Reset initializedRef for next time the form opens
+    // Reset initializedRef when closing the form
     initializedRef.current = false;
     onClose();
   };

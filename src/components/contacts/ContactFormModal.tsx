@@ -47,7 +47,8 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
   } = useContactForm({
     contactToEdit,
     onContactSaved,
-    onClose
+    onClose,
+    isOpen  // Pass the isOpen prop to the hook
   });
 
   return (
