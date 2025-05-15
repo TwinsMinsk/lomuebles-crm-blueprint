@@ -22,7 +22,7 @@ export const useOrdersKanban = () => {
   const { updateOrder, isLoading: isUpdating } = useUpdateOrder();
   const { readyMadeStatuses, customMadeStatuses } = useFilterOptions();
   
-  const [selectedOrderType, setSelectedOrderType] = useState<string>("Готовая мебель (Tilda)");
+  const [selectedOrderType, setSelectedOrderType] = useState<string>("Мебель на заказ");
 
   // Get applicable statuses based on the selected order type
   const getApplicableStatuses = () => {

@@ -21,7 +21,7 @@ const OrdersPage: React.FC = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue="table">
+      <Tabs defaultValue="kanban">
         <div className="flex justify-between items-center mb-4">
           <TabsList>
             <TabsTrigger value="table">
