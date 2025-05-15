@@ -25,6 +25,20 @@ const ContactBasicInfoFields: React.FC<ContactBasicInfoFieldsProps> = ({ form })
           </FormItem>
         )}
       />
+      
+      <FormField
+        control={form.control}
+        name="nie"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>NIE</FormLabel>
+            <FormControl>
+              <Input {...field} placeholder="X-0000000-A" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField

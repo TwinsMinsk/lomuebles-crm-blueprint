@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 export interface ContactWithRelations {
   contact_id: number;
   full_name: string;
+  nie: string | null;
   primary_phone: string | null;
   primary_email: string | null;
   secondary_phone: string | null;

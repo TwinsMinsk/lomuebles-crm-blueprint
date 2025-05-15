@@ -4,6 +4,7 @@ import * as z from "zod";
 // Define validation schema
 export const formSchema = z.object({
   full_name: z.string().min(1, { message: "ФИО обязательно" }),
+  nie: z.string().optional(),
   primary_phone: z.string().optional(),
   secondary_phone: z.string().optional(),
   primary_email: z

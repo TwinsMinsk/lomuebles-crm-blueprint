@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,6 +39,7 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
     resolver: zodResolver(formSchema),
     defaultValues: {
       full_name: "",
+      nie: "",
       primary_phone: "",
       secondary_phone: "",
       primary_email: "",
@@ -95,6 +95,7 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
         // Editing existing contact
         form.reset({
           full_name: contactToEdit.full_name || "",
+          nie: contactToEdit.nie || "",
           primary_phone: contactToEdit.primary_phone || "",
           secondary_phone: contactToEdit.secondary_phone || "",
           primary_email: contactToEdit.primary_email || "",
@@ -118,6 +119,7 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
         // Reset form when adding a new contact
         form.reset({
           full_name: "",
+          nie: "",
           primary_phone: "",
           secondary_phone: "",
           primary_email: "",
@@ -155,6 +157,7 @@ export const useContactForm = ({ contactToEdit, onContactSaved, onClose }: UseCo
       // Create a typed object that matches the expected Supabase database structure
       const contactData = {
         full_name: values.full_name,
+        nie: values.nie,
         primary_phone: values.primary_phone,
         secondary_phone: values.secondary_phone,
         primary_email: values.primary_email,

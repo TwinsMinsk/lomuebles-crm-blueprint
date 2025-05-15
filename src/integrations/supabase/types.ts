@@ -69,6 +69,7 @@ export type Database = {
           delivery_address_postal_code: string | null
           delivery_address_street: string | null
           full_name: string
+          nie: string | null
           notes: string | null
           owner_user_id: string | null
           primary_email: string | null
@@ -88,6 +89,7 @@ export type Database = {
           delivery_address_postal_code?: string | null
           delivery_address_street?: string | null
           full_name: string
+          nie?: string | null
           notes?: string | null
           owner_user_id?: string | null
           primary_email?: string | null
@@ -107,6 +109,7 @@ export type Database = {
           delivery_address_postal_code?: string | null
           delivery_address_street?: string | null
           full_name?: string
+          nie?: string | null
           notes?: string | null
           owner_user_id?: string | null
           primary_email?: string | null
