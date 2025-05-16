@@ -1,1 +1,5 @@
+
 project_id = "cwcanbtwrledbysakavj"
+
+[functions.tilda-webhook-receiver]
+verify_jwt = false
