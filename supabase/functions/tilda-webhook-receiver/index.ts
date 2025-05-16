@@ -59,8 +59,8 @@ serve(async (req) => {
       })
     }
     
-    // Extract data
-    const { name, phone, source, language = 'RU' } = requestData
+    // Extract data, now including initial_comment
+    const { name, phone, source, language = 'RU', initial_comment } = requestData
     
     // Create lead in Supabase
     const leadData = {
@@ -70,6 +70,8 @@ serve(async (req) => {
       client_language: language,
       lead_status: 'Новый',
       creator_user_id: ADMIN_USER_ID,
+      // Add initial_comment field to the data being inserted
+      initial_comment: initial_comment,
       // assigned_user_id remains null by default
     }
 
