@@ -48,30 +48,38 @@ serve(async (req) => {
   try {
     // Get request body
     const requestData = await req.json()
-    console.log('Received webhook data:', JSON.stringify(requestData))
+    console.log('Received webhook data:', JSON.stringify(requestData, null, 2))
 
-    // Validate required fields
-    if (!requestData.formType || requestData.formType !== 'callback' || !requestData.name || !requestData.phone) {
-      console.log('Bad request: Invalid or missing required fields')
-      return new Response(JSON.stringify({ status: 'error', message: 'Invalid data format' }), { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
-        status: 400 
+    // Extract and validate required fields
+    const { formType, name, phone, source, language = 'RU', initial_comment, formIdTilda } = requestData
+
+    // 1. General validation for required fields
+    if (!formType || !name || !phone) {
+      console.error('Bad request: Missing formType, name, or phone. Received data:', JSON.stringify(requestData, null, 2))
+      return new Response(JSON.stringify({ status: 'error', message: 'Invalid data: Missing formType, name, or phone' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400
+      })
+    }
+
+    // 2. Validate formType is one of the expected types
+    if (formType !== 'callback' && formType !== 'product_order_lead_simple') {
+      console.error('Bad request: Unknown formType. Received formType:', formType, 'Full data:', JSON.stringify(requestData, null, 2))
+      return new Response(JSON.stringify({ status: 'error', message: `Invalid data: Unknown formType: ${formType}` }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400
       })
     }
     
-    // Extract data, now including initial_comment
-    const { name, phone, source, language = 'RU', initial_comment } = requestData
-    
-    // Create lead in Supabase
+    // Create lead data with improved field handling
     const leadData = {
       name,
       phone,
-      lead_source: source || `Обратный звонок: ${requestData.formIdTilda || 'неизвестная форма'}`,
+      lead_source: source || `Данные с Tilda: ${formIdTilda || 'неизвестная форма'}`,
       client_language: language,
       lead_status: 'Новый',
       creator_user_id: ADMIN_USER_ID,
-      // Add initial_comment field to the data being inserted
-      initial_comment: initial_comment,
+      initial_comment: initial_comment || null,
       // assigned_user_id remains null by default
     }
 
@@ -84,8 +92,12 @@ serve(async (req) => {
       .single()
       
     if (error) {
-      console.error('Error creating lead:', error.message)
-      return new Response(JSON.stringify({ status: 'error', message: 'Failed to create lead' }), { 
+      console.error('Error creating lead in Supabase:', error.message, JSON.stringify(error, null, 2))
+      return new Response(JSON.stringify({ 
+        status: 'error', 
+        message: 'Failed to create lead', 
+        details: error.message 
+      }), { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
         status: 500 
       })
@@ -97,7 +109,16 @@ serve(async (req) => {
       status: 201 
     })
   } catch (error) {
-    console.error('Server error:', error.message)
+    console.error('Overall server error in Edge Function:', error.message, JSON.stringify(error, null, 2))
+    
+    // Handle JSON parsing errors specifically
+    if (error instanceof SyntaxError && error.message.includes("JSON")) {
+      return new Response(JSON.stringify({ status: 'error', message: 'Invalid JSON format in request body' }), { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+        status: 400 
+      })
+    }
+    
     return new Response(JSON.stringify({ status: 'error', message: 'Internal server error' }), { 
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
       status: 500 
