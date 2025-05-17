@@ -10,9 +10,10 @@ import {
 import { Plus } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useTransactionCategories } from "@/hooks/finance/useTransactionCategories";
-import { useAddTransaction } from "@/hooks/finance/useTransactions";
+import { useAddTransaction, TransactionFormData } from "@/hooks/finance/useTransactions";
 import TransactionForm from "@/components/finance/TransactionForm";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 interface CreateIncomeFromOrderProps {
   order: {
@@ -74,11 +75,13 @@ const CreateIncomeFromOrder: React.FC<CreateIncomeFromOrderProps> = ({ order }) 
   };
   
   // Handle form submit
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: TransactionFormData) => {
     try {
       await addTransaction.mutateAsync(data);
+      toast.success("Доходная операция успешно создана");
       setIsDialogOpen(false);
     } catch (error) {
+      toast.error("Ошибка при создании доходной операции");
       console.error("Error creating income transaction:", error);
     }
   };
@@ -116,8 +119,8 @@ const CreateIncomeFromOrder: React.FC<CreateIncomeFromOrderProps> = ({ order }) 
             </DialogTitle>
           </DialogHeader>
           <TransactionForm
-            onSubmit={handleSubmit}
             initialData={initialTransactionData}
+            onSuccess={handleSubmit}
             onCancel={() => setIsDialogOpen(false)}
             isSubmitting={addTransaction.isPending}
           />

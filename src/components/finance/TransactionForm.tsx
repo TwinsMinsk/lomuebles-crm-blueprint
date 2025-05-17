@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -46,20 +45,22 @@ const transactionFormSchema = z.object({
   related_user_id: z.string().optional().nullable(),
 });
 
-type TransactionFormValues = z.infer<typeof transactionFormSchema>;
+export type TransactionFormValues = z.infer<typeof transactionFormSchema>;
 
-interface TransactionFormProps {
+export interface TransactionFormProps {
   transaction?: Transaction;
-  onSuccess: () => void;
-  defaultValues?: Partial<TransactionFormValues>;
+  initialData?: Partial<TransactionFormValues>;
+  onSuccess: (data: TransactionFormValues) => void;
   onCancel: () => void;
+  isSubmitting?: boolean;
 }
 
 const TransactionForm: React.FC<TransactionFormProps> = ({
   transaction,
-  defaultValues,
+  initialData,
   onSuccess,
   onCancel,
+  isSubmitting = false,
 }) => {
   const { user } = useAuth();
   const [files, setFiles] = useState<any[]>([]);
@@ -114,18 +115,18 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     defaultValues: {
       transaction_date: transaction 
         ? new Date(transaction.transaction_date) 
-        : defaultValues?.transaction_date || new Date(),
-      type: transaction?.type || defaultValues?.type || "income",
-      category_id: transaction?.category_id || defaultValues?.category_id,
-      amount: transaction?.amount || defaultValues?.amount,
-      currency: transaction?.currency || defaultValues?.currency || "EUR",
-      description: transaction?.description || defaultValues?.description || "",
-      payment_method: transaction?.payment_method || defaultValues?.payment_method || "",
-      related_order_id: transaction?.related_order_id || defaultValues?.related_order_id,
-      related_contact_id: transaction?.related_contact_id || defaultValues?.related_contact_id,
-      related_supplier_id: transaction?.related_supplier_id || defaultValues?.related_supplier_id,
-      related_partner_manufacturer_id: transaction?.related_partner_manufacturer_id || defaultValues?.related_partner_manufacturer_id,
-      related_user_id: transaction?.related_user_id || defaultValues?.related_user_id,
+        : initialData?.transaction_date ? new Date(initialData.transaction_date) : new Date(),
+      type: transaction?.type || initialData?.type || "income",
+      category_id: transaction?.category_id || initialData?.category_id,
+      amount: transaction?.amount || initialData?.amount,
+      currency: transaction?.currency || initialData?.currency || "EUR",
+      description: transaction?.description || initialData?.description || "",
+      payment_method: transaction?.payment_method || initialData?.payment_method || "",
+      related_order_id: transaction?.related_order_id || initialData?.related_order_id,
+      related_contact_id: transaction?.related_contact_id || initialData?.related_contact_id,
+      related_supplier_id: transaction?.related_supplier_id || initialData?.related_supplier_id,
+      related_partner_manufacturer_id: transaction?.related_partner_manufacturer_id || initialData?.related_partner_manufacturer_id,
+      related_user_id: transaction?.related_user_id || initialData?.related_user_id,
     },
   });
 
@@ -142,13 +143,15 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     setFiles(newFiles);
   };
 
-  const onSubmit = async (data: TransactionFormValues) => {
-    // Mock submit for now - this would be replaced with the actual submit logic
-    console.log("Form data:", data);
-    console.log("Files:", files);
+  const onSubmit = (data: TransactionFormValues) => {
+    // Add files to the data
+    const fullData = {
+      ...data,
+      files
+    };
     
-    // Call onSuccess callback
-    onSuccess();
+    // Call onSuccess callback with form data
+    onSuccess(data);
   };
 
   return (

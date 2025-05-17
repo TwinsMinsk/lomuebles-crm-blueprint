@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useOrderById } from "@/hooks/orders/useOrderById";
@@ -120,9 +119,9 @@ const OrderDetailPage = () => {
             </h1>
             <div className="flex items-center mt-1 text-sm text-gray-500">
               <span className="mr-4">
-                Создан: {format(new Date(order.creation_date), "dd MMMM yyyy", { locale: ru })}
+                Создан: {format(new Date(order.created_at), "dd MMMM yyyy", { locale: ru })}
               </span>
-              <OrderStatusBadge orderType={order.order_type} status={order.status_ready_made || order.status_custom_made} />
+              <OrderStatusBadge orderType={order.order_type} status={order.status} />
             </div>
           </div>
         </div>
@@ -174,9 +173,7 @@ const OrderDetailPage = () => {
                     </p>
                     <p>
                       <span className="font-medium">Статус:</span>{" "}
-                      {order.order_type === "Готовая мебель (Tilda)"
-                        ? order.status_ready_made
-                        : order.status_custom_made}
+                      {order.status}
                     </p>
                     <p>
                       <span className="font-medium">Статус оплаты:</span>{" "}

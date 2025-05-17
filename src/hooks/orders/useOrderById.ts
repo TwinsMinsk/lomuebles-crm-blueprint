@@ -19,7 +19,16 @@ export const fetchOrderById = async (id: number): Promise<Order> => {
     .single();
 
   if (error) throw error;
-  return data as Order;
+  
+  // Transform data to match our Order type
+  const transformedOrder: Order = {
+    ...data,
+    // Add missing fields or rename fields as needed
+    created_at: data.created_at,
+    status: data.status || '',
+  };
+
+  return transformedOrder;
 };
 
 export const useOrderById = (id: number | undefined) => {

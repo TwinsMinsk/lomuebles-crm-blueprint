@@ -65,6 +65,22 @@ export interface TransactionsFilters {
   categoryId?: number;
 }
 
+export type TransactionFormData = {
+  transaction_date: Date | string;
+  type: 'income' | 'expense';
+  category_id: number;
+  amount: number;
+  currency: string;
+  description?: string | null;
+  payment_method?: string | null;
+  related_order_id?: number | null;
+  related_contact_id?: number | null;
+  related_supplier_id?: number | null;
+  related_partner_manufacturer_id?: number | null;
+  related_user_id?: string | null;
+  attached_files?: any[] | null;
+};
+
 export const fetchTransactions = async (filters?: TransactionsFilters): Promise<TransactionWithRelations[]> => {
   let query = supabase
     .from("transactions")
@@ -156,15 +172,29 @@ export const useAddTransaction = () => {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (transactionData: Partial<Transaction>) => {
+    mutationFn: async (transactionData: TransactionFormData) => {
       if (!user) throw new Error('User not authenticated');
 
       const { data, error } = await supabase
         .from("transactions")
-        .insert([{
-          ...transactionData,
+        .insert({
+          transaction_date: transactionData.transaction_date instanceof Date ? 
+            transactionData.transaction_date.toISOString().split('T')[0] : 
+            transactionData.transaction_date,
+          type: transactionData.type,
+          category_id: transactionData.category_id,
+          amount: transactionData.amount,
+          currency: transactionData.currency || 'EUR',
+          description: transactionData.description,
+          related_order_id: transactionData.related_order_id,
+          related_contact_id: transactionData.related_contact_id,
+          related_supplier_id: transactionData.related_supplier_id,
+          related_partner_manufacturer_id: transactionData.related_partner_manufacturer_id,
+          related_user_id: transactionData.related_user_id,
+          payment_method: transactionData.payment_method,
+          attached_files: transactionData.attached_files,
           creator_user_id: user.id
-        }])
+        })
         .select('id')
         .single();
 
@@ -181,10 +211,17 @@ export const useUpdateTransaction = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, transactionData }: { id: string; transactionData: Partial<Transaction> }) => {
+    mutationFn: async ({ id, transactionData }: { id: string; transactionData: Partial<TransactionFormData> }) => {
+      const updateData: any = { ...transactionData };
+      
+      // Convert Date object to string format for the database
+      if (updateData.transaction_date instanceof Date) {
+        updateData.transaction_date = updateData.transaction_date.toISOString().split('T')[0];
+      }
+      
       const { data, error } = await supabase
         .from("transactions")
-        .update(transactionData)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
