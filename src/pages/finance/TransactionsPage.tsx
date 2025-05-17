@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { useTransactions, useAddTransaction, useUpdateTransaction, useDeleteTransaction, TransactionWithRelations, TransactionFormData, TransactionsFilters } from "@/hooks/finance/useTransactions";
@@ -228,7 +229,7 @@ const TransactionsPage = () => {
                   <SelectValue placeholder="Все категории" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Все категории</SelectItem>
+                  <SelectItem value="all-categories">Все категории</SelectItem>
                   {categories
                     .filter(cat => !filters.type || filters.type === 'all' || cat.type === filters.type)
                     .map(category => (
