@@ -84,11 +84,11 @@ const TransactionsPage = () => {
     return (
       transaction.description?.toLowerCase().includes(searchLower) ||
       transaction.category.name.toLowerCase().includes(searchLower) ||
-      transaction.related_order?.order_number.toLowerCase().includes(searchLower) ||
-      transaction.related_contact?.full_name.toLowerCase().includes(searchLower) ||
-      transaction.related_supplier?.company_name.toLowerCase().includes(searchLower) ||
-      transaction.related_partner_manufacturer?.company_name.toLowerCase().includes(searchLower) ||
-      transaction.related_user?.full_name.toLowerCase().includes(searchLower)
+      (transaction.related_order?.order_number?.toLowerCase().includes(searchLower) || false) ||
+      (transaction.related_contact?.full_name?.toLowerCase().includes(searchLower) || false) ||
+      (transaction.related_supplier?.company_name?.toLowerCase().includes(searchLower) || false) ||
+      (transaction.related_partner_manufacturer?.company_name?.toLowerCase().includes(searchLower) || false) ||
+      (transaction.related_user?.full_name?.toLowerCase().includes(searchLower) || false)
     );
   });
   
