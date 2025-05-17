@@ -151,6 +151,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     // Convert form data to TransactionFormData expected by the onSuccess callback
     const fullData: TransactionFormData = {
       ...data,
+      transaction_date: data.transaction_date, // This is now required in TransactionFormData
       attached_files: files,
     };
     

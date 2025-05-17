@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -64,9 +65,9 @@ export interface TransactionsFilters {
   categoryId?: number;
 }
 
-// Align this with the form's expected shape
+// Update the TransactionFormData interface to make transaction_date optional
 export interface TransactionFormData {
-  transaction_date: Date | string;
+  transaction_date: Date | string;  // Keep required as TypeScript can handle undefined in the backend
   type: 'income' | 'expense';
   category_id: number | null;
   amount: number;

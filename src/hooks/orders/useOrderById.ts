@@ -33,7 +33,21 @@ export const fetchOrderById = async (id: number): Promise<Order> => {
         typeof data.attached_files_order_docs === 'string' ? 
           JSON.parse(data.attached_files_order_docs) : 
           [])
-      : []
+      : [],
+    // Ensure creator is properly defined
+    creator: data.creator ? {
+      id: data.creator.id || "",
+      full_name: data.creator.full_name || ""
+    } : {
+      id: "",
+      full_name: ""
+    },
+    // Ensure other relational objects are properly defined
+    contact: data.contact || null,
+    company: data.company || null,
+    assigned_user: data.assigned_user || null,
+    partner_manufacturer: data.partner_manufacturer || null,
+    source_lead: data.source_lead || null
   };
 
   return transformedOrder;
