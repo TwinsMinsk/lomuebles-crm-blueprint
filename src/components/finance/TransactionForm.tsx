@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -151,10 +152,18 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const onSubmit = (data: TransactionFormValues) => {
     // Convert form data to TransactionFormData expected by the onSuccess callback
     const fullData: TransactionFormData = {
-      ...data,
       transaction_date: data.transaction_date,
-      // Ensure type is always provided as it's required
-      type: data.type || 'income',
+      type: data.type,
+      category_id: data.category_id,
+      amount: data.amount,
+      currency: data.currency,
+      description: data.description,
+      payment_method: data.payment_method,
+      related_order_id: data.related_order_id,
+      related_contact_id: data.related_contact_id,
+      related_supplier_id: data.related_supplier_id,
+      related_partner_manufacturer_id: data.related_partner_manufacturer_id,
+      related_user_id: data.related_user_id,
       attached_files: files,
     };
     

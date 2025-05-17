@@ -34,9 +34,9 @@ export const fetchOrderById = async (id: number): Promise<Order> => {
           JSON.parse(data.attached_files_order_docs) : 
           [])
       : [],
-    // Ensure creator is properly defined
+    // Ensure creator is properly defined with fallback
     creator: data.creator || {
-      id: "",
+      id: data.creator_user_id || "",
       full_name: ""
     },
     // Ensure other relational objects are properly defined

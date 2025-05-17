@@ -13,7 +13,7 @@ interface OrderSelectorProps {
 export const OrderSelector = ({ value, onChange }: OrderSelectorProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const { user } = useAuth();
-  const { orders, isLoading, error } = useRelatedOrdersData(searchTerm);
+  const { orders, isLoading, refreshOrders } = useRelatedOrdersData(searchTerm);
 
   // Enhanced logging for debugging
   console.log("OrderSelector received orders:", {
@@ -37,7 +37,7 @@ export const OrderSelector = ({ value, onChange }: OrderSelectorProps) => {
       onChange={onChange}
       options={formattedOrders}
       isLoading={isLoading}
-      error={error?.message}
+      error={null} // Set error to null since it's not provided by useRelatedOrdersData
       searchTerm={searchTerm}
       onSearchChange={setSearchTerm}
       placeholder="Поиск заказа..."

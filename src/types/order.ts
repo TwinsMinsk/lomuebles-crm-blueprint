@@ -1,4 +1,6 @@
 
+import { z } from "zod";
+
 // Define interfaces for order-related types
 export interface Order {
   id: number;
@@ -52,11 +54,6 @@ export interface Order {
   source_lead: {
     lead_id: number;
   } | null;
-
-  // Display properties - not in the database but used for UI
-  contact_name?: string;
-  company_name?: string;
-  assigned_user_name?: string;
 }
 
 // OrderItem interface for OrderItemsTable

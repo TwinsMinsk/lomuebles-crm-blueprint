@@ -22,7 +22,7 @@ export const fetchOrders = async (): Promise<Order[]> => {
   if (error) throw error;
   
   // Transform data to match our Order type, safely handling potential null values
-  return (data || []).map((order: any) => ({
+  const transformedOrders: Order[] = (data || []).map((order: any) => ({
     id: order.id,
     created_at: order.created_at,
     order_number: order.order_number,
@@ -43,7 +43,7 @@ export const fetchOrders = async (): Promise<Order[]> => {
       (Array.isArray(order.attached_files_order_docs) ? 
         order.attached_files_order_docs : []),
     closing_date: order.closing_date,
-    creator_user_id: order.creator_user_id,
+    creator_user_id: order.creator_user_id || "",
     client_language: order.client_language as "ES" | "EN" | "RU",
     // Add nested relation objects
     contact: order.contacts ? {
@@ -52,7 +52,7 @@ export const fetchOrders = async (): Promise<Order[]> => {
     } : null,
     // Ensure creator exists (with defaults)
     creator: {
-      id: order.creator_user_id,
+      id: order.creator_user_id || "",
       full_name: "Unknown" // Default value
     },
     assigned_user: order.profiles ? {
@@ -62,11 +62,10 @@ export const fetchOrders = async (): Promise<Order[]> => {
     // Default values for other required fields
     company: null,
     partner_manufacturer: null,
-    source_lead: null,
-    // Keeping these for backward compatibility
-    contact_name: order.contacts?.full_name,
-    assigned_user_name: order.profiles?.full_name
+    source_lead: null
   }));
+
+  return transformedOrders;
 };
 
 export const useOrders = () => {
@@ -76,6 +75,7 @@ export const useOrders = () => {
   });
 };
 
+// Keeping the fetchOrderById function but note that it's also defined in useOrderById.ts
 export const fetchOrderById = async (id: number): Promise<Order> => {
   const { data, error } = await supabase
     .from('orders')
@@ -95,7 +95,7 @@ export const fetchOrderById = async (id: number): Promise<Order> => {
   // Cast the data to any to safely access properties without TypeScript errors
   const orderData: any = data;
   
-  return {
+  const transformedOrder: Order = {
     id: orderData.id,
     created_at: orderData.created_at,
     order_number: orderData.order_number,
@@ -112,14 +112,38 @@ export const fetchOrderById = async (id: number): Promise<Order> => {
     partial_payment_amount: orderData.partial_payment_amount,
     delivery_address_full: orderData.delivery_address_full,
     notes_history: orderData.notes_history,
-    attached_files_order_docs: orderData.attached_files_order_docs as any[] | null,
+    attached_files_order_docs: Array.isArray(orderData.attached_files_order_docs) ? 
+      orderData.attached_files_order_docs : [],
     closing_date: orderData.closing_date,
-    creator_user_id: orderData.creator_user_id,
+    creator_user_id: orderData.creator_user_id || "",
     client_language: orderData.client_language as "ES" | "EN" | "RU",
-    contact_name: orderData.contacts?.full_name,
-    company_name: orderData.companies?.company_name,
-    assigned_user_name: orderData.profiles?.full_name
+    // Add relation objects
+    contact: orderData.contacts ? {
+      contact_id: orderData.contacts.contact_id,
+      full_name: orderData.contacts.full_name
+    } : null,
+    company: orderData.companies ? {
+      company_id: orderData.companies.company_id,
+      company_name: orderData.companies.company_name
+    } : null,
+    creator: {
+      id: orderData.creator_user_id || "",
+      full_name: "Unknown"
+    },
+    assigned_user: orderData.profiles ? {
+      id: orderData.profiles.id,
+      full_name: orderData.profiles.full_name
+    } : null,
+    partner_manufacturer: orderData.partners ? {
+      partner_manufacturer_id: orderData.partners.partner_manufacturer_id,
+      company_name: orderData.partners.company_name  
+    } : null,
+    source_lead: orderData.leads ? {
+      lead_id: orderData.leads.lead_id
+    } : null
   };
+  
+  return transformedOrder;
 };
 
 export const useOrderById = (id: number | undefined) => {

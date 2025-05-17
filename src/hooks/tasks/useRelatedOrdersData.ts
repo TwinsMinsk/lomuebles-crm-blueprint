@@ -79,7 +79,7 @@ export const useRelatedOrdersData = (assignedUserId?: string) => {
         // Add required fields based on our type definition
         company: null, 
         creator: {
-          id: order.creator_user_id,
+          id: order.creator_user_id || "",
           full_name: ""
         },
         assigned_user: order.profiles ? {
@@ -88,9 +88,6 @@ export const useRelatedOrdersData = (assignedUserId?: string) => {
         } : null,
         partner_manufacturer: null,
         source_lead: order.source_lead_id ? { lead_id: order.source_lead_id } : null,
-        // Legacy fields for backward compatibility
-        contact_name: order.contacts?.full_name,
-        assigned_user_name: order.profiles?.full_name
       }));
 
       setOrders(transformedOrders);
