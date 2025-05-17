@@ -108,7 +108,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   });
 
   // Get transaction categories
-  const { data: categories = [] } = useTransactionCategories();
+  const { data: categoriesData = [] } = useTransactionCategories();
+  const categories = Array.isArray(categoriesData) ? categoriesData : [];
 
   // Form initialization
   const form = useForm<TransactionFormValues>({
@@ -139,8 +140,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const currentType = form.watch("type");
   
   // Filter categories based on selected type
-  const filteredCategories = categories.filter(
-    (category) => category.type === currentType
+  const filteredCategories = (categories || []).filter(
+    (category) => category?.type === currentType
   );
 
   // Handle files change

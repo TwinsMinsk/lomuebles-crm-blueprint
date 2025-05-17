@@ -80,7 +80,7 @@ const TransactionsPage = () => {
     
     const searchLower = filters.searchTerm.toLowerCase();
     
-    // Search in various fields
+    // Search in various fields with null/undefined checks
     return (
       (transaction.description?.toLowerCase().includes(searchLower) || false) ||
       (transaction.category?.name?.toLowerCase().includes(searchLower) || false) ||
@@ -230,7 +230,7 @@ const TransactionsPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all-categories">Все категории</SelectItem>
-                  {categories
+                  {categories && categories.length > 0 && categories
                     .filter(cat => !filters.type || filters.type === 'all' || cat.type === filters.type)
                     .map(category => (
                       <SelectItem key={category.id} value={category.id.toString()}>
