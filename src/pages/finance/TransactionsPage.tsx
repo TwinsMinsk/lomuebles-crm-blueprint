@@ -82,8 +82,8 @@ const TransactionsPage = () => {
     
     // Search in various fields
     return (
-      transaction.description?.toLowerCase().includes(searchLower) ||
-      transaction.category.name.toLowerCase().includes(searchLower) ||
+      (transaction.description?.toLowerCase().includes(searchLower) || false) ||
+      (transaction.category?.name?.toLowerCase().includes(searchLower) || false) ||
       (transaction.related_order?.order_number?.toLowerCase().includes(searchLower) || false) ||
       (transaction.related_contact?.full_name?.toLowerCase().includes(searchLower) || false) ||
       (transaction.related_supplier?.company_name?.toLowerCase().includes(searchLower) || false) ||
@@ -304,7 +304,7 @@ const TransactionsPage = () => {
                           {transaction.type === 'income' ? 'Доход' : 'Расход'}
                         </span>
                       </TableCell>
-                      <TableCell>{transaction.category.name}</TableCell>
+                      <TableCell>{transaction.category?.name || '—'}</TableCell>
                       <TableCell className="max-w-xs truncate">
                         {transaction.description || '—'}
                       </TableCell>
@@ -429,7 +429,7 @@ const TransactionsPage = () => {
                 <div className="space-y-2">
                   <p><span className="font-medium">Дата:</span> {formatDate(selectedTransaction.transaction_date)}</p>
                   <p><span className="font-medium">Тип:</span> {selectedTransaction.type === 'income' ? 'Доход' : 'Расход'}</p>
-                  <p><span className="font-medium">Категория:</span> {selectedTransaction.category.name}</p>
+                  <p><span className="font-medium">Категория:</span> {selectedTransaction.category?.name || '—'}</p>
                   <p className="font-medium">
                     Сумма: <span className={selectedTransaction.type === 'income' ? 'text-green-600' : 'text-red-600'}>
                       {formatAmount(selectedTransaction.amount, selectedTransaction.currency)}

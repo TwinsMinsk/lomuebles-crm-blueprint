@@ -264,7 +264,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value && filteredCategories
+                          {field.value && filteredCategories && filteredCategories.length > 0
                             ? filteredCategories.find(
                                 (category) => category.id === field.value
                               )?.name || "Выберите категорию"
@@ -401,7 +401,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value && orders
+                          {field.value && orders && orders.length > 0
                             ? orders.find((order) => order.id === field.value)?.order_number || "Выберите заказ"
                             : "Выберите заказ"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -447,7 +447,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
               )}
             />
 
-            {/* Similar dropdown selectors for other related entities */}
             {/* Files upload section */}
             <div className="space-y-2">
               <FormLabel>Прикрепленные файлы</FormLabel>
