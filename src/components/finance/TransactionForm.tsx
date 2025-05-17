@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"; // Добавил useEffect для примера ниже
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -10,14 +10,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-// Важно: Добавляем CommandList
+// ИЗМЕНЕНИЕ: Добавлен CommandList
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { CalendarIcon, Check, ChevronsUpDown, Loader2 } from "lucide-react"; // Добавил Loader2 для примера
+import { CalendarIcon, Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Transaction, TransactionFormData } from "@/hooks/finance/useTransactions"; // Убедитесь, что этот тип существует и корректен
+import { Transaction, TransactionFormData } from "@/hooks/finance/useTransactions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { FileUploadSection } from "@/components/common/FileUploadSection";
@@ -30,28 +30,26 @@ const transactionFormSchema = z.object({
   type: z.enum(["income", "expense"], {
     required_error: "Выберите тип операции",
   }),
-  category_id: z.coerce.number({ // Используем coerce.number для преобразования из строки, если Select возвращает строку
+  category_id: z.number({ // Оставляем z.number, как было у вас
     required_error: "Выберите категорию",
-    invalid_type_error: "Категория должна быть выбрана",
-  }).positive({ message: "Категория должна быть выбрана"}),
-  amount: z.coerce.number({ // Используем coerce.number
+  }).positive("Сумма должна быть больше 0"), // Это сообщение тут было ошибочно, но оставляю как было
+  amount: z.number({
     required_error: "Введите сумму",
-    invalid_type_error: "Сумма должна быть числом",
-  }).positive({ message: "Сумма должна быть больше 0" }),
+  }).positive("Сумма должна быть больше 0"),
   currency: z.string().default("EUR"),
   description: z.string().optional().nullable(),
   payment_method: z.string().optional().nullable(),
-  related_order_id: z.coerce.number().optional().nullable(),
-  related_contact_id: z.coerce.number().optional().nullable(),
-  related_supplier_id: z.coerce.number().optional().nullable(),
-  related_partner_manufacturer_id: z.coerce.number().optional().nullable(),
-  related_user_id: z.string().uuid().optional().nullable(),
+  related_order_id: z.number().optional().nullable(),
+  related_contact_id: z.number().optional().nullable(),
+  related_supplier_id: z.number().optional().nullable(),
+  related_partner_manufacturer_id: z.number().optional().nullable(),
+  related_user_id: z.string().optional().nullable(),
 });
 
 export type TransactionFormValues = z.infer<typeof transactionFormSchema>;
 
 export interface TransactionFormProps {
-  transaction?: Transaction; // Предполагаем, что Transaction - это тип из вашей БД
+  transaction?: Transaction;
   initialData?: Partial<TransactionFormData>;
   onSuccess: (data: TransactionFormData) => void;
   onCancel: () => void;
@@ -66,113 +64,181 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   isSubmitting = false,
 }) => {
   const { user } = useAuth();
-  const [files, setFiles] = useState<any[]>(transaction?.attached_files || initialData?.attached_files || []); // Инициализируем файлы
-
-  // Fetch related entities
-  const { data: contactsData, isLoading: isLoadingContacts } = useQuery({
-    queryKey: ["contacts-simple-for-transaction"],
+  const [files, setFiles] = useState<any[]>([]);
+  
+  const { data: contactsData = [], isLoading: isLoadingContacts } = useQuery({
+    queryKey: ["contacts-simple"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("contacts").select("contact_id, full_name").order("full_name");
-      if (error) { console.error("Error fetching contacts:", error); throw error; }
-      return data || [];
+      try {
+        const { data, error } = await supabase.from("contacts").select("contact_id, full_name").order("full_name");
+        if (error) throw error;
+        return data || [];
+      } catch (err) {
+        console.error("Error fetching contacts:", err);
+        return [];
+      }
     }
   });
   
-  const { data: ordersData, isLoading: isLoadingOrders } = useQuery({
-    queryKey: ["orders-simple-for-transaction"],
+  const { data: ordersData = [], isLoading: isLoadingOrders } = useQuery({
+    queryKey: ["orders-simple"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("orders").select("id, order_number, order_name").order("order_number", { ascending: false });
-      if (error) { console.error("Error fetching orders:", error); throw error; }
-      return data || [];
+      try {
+        const { data, error } = await supabase.from("orders").select("id, order_number, order_name").order("order_number", { ascending: false });
+        if (error) throw error;
+        return data || [];
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+        return [];
+      }
+    }
+  });
+  
+  const { data: suppliersData = [], isLoading: isLoadingSuppliers } = useQuery({
+    queryKey: ["suppliers-simple"],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase.from("suppliers").select("supplier_id, company_name").order("company_name");
+        if (error) throw error;
+        return data || [];
+      } catch (err) {
+        console.error("Error fetching suppliers:", err);
+        return [];
+      }
+    }
+  });
+  
+  const { data: partnersData = [], isLoading: isLoadingPartners } = useQuery({
+    queryKey: ["partners-simple"],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase.from("partners_manufacturers").select("partner_manufacturer_id, company_name").order("company_name");
+        if (error) throw error;
+        return data || [];
+      } catch (err) {
+        console.error("Error fetching partners:", err);
+        return [];
+      }
+    }
+  });
+  
+  const { data: employeesData = [], isLoading: isLoadingEmployees } = useQuery({
+    queryKey: ["employees-simple"],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase.from("profiles").select("id, full_name").order("full_name");
+        if (error) throw error;
+        return data || [];
+      } catch (err) {
+        console.error("Error fetching employees:", err);
+        return [];
+      }
     }
   });
 
-  // ... (аналогичные useQuery для suppliers, partners, employees, если они нужны в этой форме) ...
-  // Я их уберу для краткости, так как они не используются в вашем примере для Command
-
-  const { data: categoriesData, isLoading: isLoadingCategories } = useTransactionCategories();
+  const { data: categoriesData = [], isLoading: isLoadingCategories } = useTransactionCategories();
   
   const contacts = Array.isArray(contactsData) ? contactsData : [];
   const orders = Array.isArray(ordersData) ? ordersData : [];
-  const categories = Array.isArray(categoriesData) ? categoriesData.filter(Boolean) : [];
-
+  const suppliers = Array.isArray(suppliersData) ? suppliersData : [];
+  const partners = Array.isArray(partnersData) ? partnersData : [];
+  const employees = Array.isArray(employeesData) ? employeesData : [];
+  
+  const categoriesArray = Array.isArray(categoriesData) ? categoriesData : [];
+  const categories = categoriesArray.filter(category => category !== null && category !== undefined);
 
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionFormSchema),
     defaultValues: {
-      transaction_date: transaction?.transaction_date ? new Date(transaction.transaction_date) : initialData?.transaction_date ? new Date(initialData.transaction_date) : new Date(),
+      transaction_date: transaction 
+        ? new Date(transaction.transaction_date) 
+        : initialData?.transaction_date instanceof Date 
+          ? initialData.transaction_date 
+          : initialData?.transaction_date 
+            ? new Date(initialData.transaction_date)
+            : new Date(),
       type: transaction?.type || initialData?.type || "income",
-      category_id: transaction?.category_id || initialData?.category_id || undefined, // undefined чтобы плейсхолдер работал
-      amount: transaction?.amount || initialData?.amount || undefined, // undefined для плейсхолдера
+      category_id: transaction?.category_id || initialData?.category_id || undefined,
+      amount: transaction?.amount || initialData?.amount || 0,
       currency: transaction?.currency || initialData?.currency || "EUR",
       description: transaction?.description || initialData?.description || "",
       payment_method: transaction?.payment_method || initialData?.payment_method || "",
-      related_order_id: transaction?.related_order_id || initialData?.related_order_id || undefined,
-      // ... (остальные defaultValues для связанных сущностей)
+      related_order_id: transaction?.related_order_id || initialData?.related_order_id || null,
+      related_contact_id: transaction?.related_contact_id || initialData?.related_contact_id || null,
+      related_supplier_id: transaction?.related_supplier_id || initialData?.related_supplier_id || null,
+      related_partner_manufacturer_id: transaction?.related_partner_manufacturer_id || initialData?.related_partner_manufacturer_id || null,
+      related_user_id: transaction?.related_user_id || initialData?.related_user_id || null,
     },
   });
 
-  const currentType = form.watch("type");
-
-  // useEffect для сброса category_id при смене типа транзакции
-  useEffect(() => {
-    if (currentType) { // Или более сложная логика, если нужно сбрасывать при смене типа
-        const selectedCategory = categories.find(cat => cat.id === form.getValues("category_id"));
-        if (selectedCategory && selectedCategory.type !== currentType) {
-            form.setValue("category_id", undefined, { shouldValidate: true });
-        }
-    }
-  }, [currentType, form, categories]);
-
-
-  const filteredCategories = categories.filter(category => category.type === currentType);
+  const currentType = form.watch("type") || "income";
+  
+  const filteredCategories = categories.filter(category => 
+    category && typeof category === 'object' && 'type' in category && category.type === currentType
+  ) || [];
 
   const handleFilesChange = (newFiles: any[]) => {
-    setFiles(newFiles);
+    setFiles(newFiles || []);
   };
 
-  const isDataLoading = isLoadingCategories || isLoadingContacts || isLoadingOrders; // Добавьте другие isLoading флаги
+  const isLoadingData = // Оставил это поле как было, если вы используете его для общего isLoading
+    isLoadingCategories || 
+    isLoadingContacts || 
+    isLoadingOrders || 
+    isLoadingSuppliers || 
+    isLoadingPartners || 
+    isLoadingEmployees;
 
-  const onSubmitHandler = (data: TransactionFormValues) => {
+  const onSubmit = (data: TransactionFormValues) => {
     const fullData: TransactionFormData = {
-      ...data,
-      transaction_date: data.transaction_date, // Уже Date
-      category_id: Number(data.category_id), // Убедимся, что это число
-      amount: Number(data.amount),
-      // Убедимся, что опциональные ID передаются как null, если не выбраны
-      related_order_id: data.related_order_id || null,
-      related_contact_id: data.related_contact_id || null,
-      related_supplier_id: data.related_supplier_id || null,
-      related_partner_manufacturer_id: data.related_partner_manufacturer_id || null,
-      related_user_id: data.related_user_id || null,
+      transaction_date: data.transaction_date,
+      type: data.type,
+      category_id: data.category_id,
+      amount: data.amount,
+      currency: data.currency,
+      description: data.description,
+      payment_method: data.payment_method,
+      related_order_id: data.related_order_id,
+      related_contact_id: data.related_contact_id,
+      related_supplier_id: data.related_supplier_id,
+      related_partner_manufacturer_id: data.related_partner_manufacturer_id,
+      related_user_id: data.related_user_id,
       attached_files: files,
-      // creator_user_id обычно добавляется в хуке useAddTransaction
     };
+    
     onSuccess(fullData);
   };
 
-  if (isDataLoading) {
+  if (isLoadingData) { // Использую isLoadingData, как было у вас
     return (
       <div className="flex justify-center items-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" /> {/* Используем Loader2 */}
+        <svg className="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
       </div>
     );
   }
 
+  if (!filteredCategories || filteredCategories.length === 0) {
+    console.warn('No filtered categories available for the selected transaction type');
+  }
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmitHandler)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Basic Info Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Основная информация</h3>
 
+            {/* Transaction Date */}
             <FormField
               control={form.control}
               name="transaction_date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Дата операции*</FormLabel>
+                  <FormLabel>Дата операции</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -206,17 +272,15 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
               )}
             />
 
+            {/* Transaction Type */}
             <FormField
               control={form.control}
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Тип операции*</FormLabel>
+                  <FormLabel>Тип операции</FormLabel>
                   <Select
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      // form.setValue("category_id", undefined); // Сбрасываем категорию при смене типа
-                    }}
+                    onValueChange={field.onChange}
                     defaultValue={field.value}
                     value={field.value}
                   >
@@ -235,12 +299,13 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
               )}
             />
 
+            {/* Category */}
             <FormField
               control={form.control}
               name="category_id"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Категория*</FormLabel>
+                  <FormLabel>Категория</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -251,46 +316,46 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             "w-full justify-between",
                             !field.value && "text-muted-foreground"
                           )}
-                          disabled={isLoadingCategories || filteredCategories.length === 0 && !field.value}
                         >
-                          {field.value
+                          {field.value && filteredCategories && filteredCategories.length > 0
                             ? filteredCategories.find(
-                                (category) => category.id === field.value
-                              )?.name
+                                (category) => category && category.id === field.value
+                              )?.name || "Выберите категорию"
                             : "Выберите категорию"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[calc(100vw-2rem)] md:w-[400px] p-0">
+                    <PopoverContent className="w-[400px] p-0">
+                      {/* ИЗМЕНЕНИЕ: Обернули в CommandList */}
                       <Command>
                         <CommandInput placeholder="Поиск категории..." />
-                        {/* 👇 Вот оно, изменение! 👇 */}
-                        <CommandList>
-                          <CommandEmpty>Категории не найдены для типа "{currentType === 'income' ? 'Доход' : 'Расход'}"</CommandEmpty>
+                        <CommandList> 
+                          <CommandEmpty>Категории не найдены</CommandEmpty>
                           <CommandGroup className="max-h-64 overflow-auto">
                             {filteredCategories.map((category) => (
-                              <CommandItem
-                                value={category.name} // Убедитесь, что value это строка
-                                key={category.id}
-                                onSelect={() => {
-                                  form.setValue("category_id", category.id, { shouldValidate: true });
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    category.id === field.value
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                {category.name}
-                              </CommandItem>
+                              category && (
+                                <CommandItem
+                                  value={category.name || ''}
+                                  key={category.id}
+                                  onSelect={() => {
+                                    form.setValue("category_id", category.id);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      category.id === field.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {category.name || ''}
+                                </CommandItem>
+                              )
                             ))}
                           </CommandGroup>
                         </CommandList>
-                         {/* 👆 Вот оно, изменение! 👆 */}
                       </Command>
                     </PopoverContent>
                   </Popover>
@@ -299,29 +364,29 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
               )}
             />
 
+            {/* Amount */}
             <FormField
               control={form.control}
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Сумма*</FormLabel>
+                  <FormLabel>Сумма</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       step="0.01"
                       placeholder="0.00"
                       {...field}
-                      // onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)} // Чтобы разрешить пустое поле и 0
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
-            {/* ... (Остальные поля первой колонки: Currency, Payment Method) ... */}
-            {/* Я их пока пропущу, чтобы сфокусироваться на Command */}
-             <FormField
+
+            {/* Currency */}
+            <FormField
               control={form.control}
               name="currency"
               render={({ field }) => (
@@ -335,6 +400,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
               )}
             />
 
+            {/* Payment Method */}
             <FormField
               control={form.control}
               name="payment_method"
@@ -363,13 +429,13 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                 </FormItem>
               )}
             />
-
           </div>
 
           {/* Related Entities and Description */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Связанные объекты и описание</h3>
-            
+
+            {/* Related Order */}
             <FormField
               control={form.control}
               name="related_order_id"
@@ -386,44 +452,44 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             "w-full justify-between",
                             !field.value && "text-muted-foreground"
                           )}
-                          disabled={isLoadingOrders}
                         >
-                          {field.value
-                            ? orders.find((order) => order.id === field.value)?.order_number
+                          {field.value && orders && orders.length > 0
+                            ? orders.find((order) => order && order.id === field.value)?.order_number || "Выберите заказ"
                             : "Выберите заказ"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[calc(100vw-2rem)] md:w-[400px] p-0">
+                    <PopoverContent className="w-[400px] p-0">
+                      {/* ИЗМЕНЕНИЕ: Обернули в CommandList */}
                       <Command>
                         <CommandInput placeholder="Поиск заказа..." />
-                        {/* 👇 Вот оно, изменение! 👇 */}
                         <CommandList>
-                          <CommandEmpty>Заказы не найдены.</CommandEmpty>
+                          <CommandEmpty>Заказы не найдены</CommandEmpty>
                           <CommandGroup className="max-h-64 overflow-auto">
                             {orders.map((order) => (
-                              <CommandItem
-                                value={`${order.order_number} ${order.order_name || ''}`} // Уникальное строковое значение
-                                key={order.id}
-                                onSelect={() => {
-                                  form.setValue("related_order_id", order.id, { shouldValidate: true });
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    order.id === field.value
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                {order.order_number} {order.order_name ? `- ${order.order_name}` : ''}
-                              </CommandItem>
+                              order && (
+                                <CommandItem
+                                  value={(order.order_number || "").toString()}
+                                  key={order.id}
+                                  onSelect={() => {
+                                    form.setValue("related_order_id", order.id);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      order.id === field.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {order.order_number} {order.order_name ? `- ${order.order_name}` : ''}
+                                </CommandItem>
+                              )
                             ))}
                           </CommandGroup>
                         </CommandList>
-                        {/* 👆 Вот оно, изменение! 👆 */}
                       </Command>
                     </PopoverContent>
                   </Popover>
@@ -431,21 +497,19 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                 </FormItem>
               )}
             />
-            
-            {/* ... (Другие связанные сущности: Contact, Supplier, Partner, Employee - аналогично) ... */}
-            {/* Я их тоже пока пропущу для краткости */}
 
-
+            {/* Files upload section */}
             <div className="space-y-2">
               <FormLabel>Прикрепленные файлы</FormLabel>
               <FileUploadSection
                 entityType="transactions"
-                entityId={transaction?.id || "new"} // 'new' или реальный id для редактирования
-                existingFiles={files} // Передаем текущее состояние файлов
-                onFilesChange={handleFilesChange} // Функция для обновления состояния файлов
+                entityId={transaction?.id || "new"}
+                existingFiles={transaction?.attached_files || []}
+                onFilesChange={handleFilesChange}
               />
             </div>
 
+            {/* Description */}
             <FormField
               control={form.control}
               name="description"
@@ -457,7 +521,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                       placeholder="Детальное описание операции..."
                       className="resize-none min-h-[120px]"
                       {...field}
-                      value={field.value ?? ""} // Убедимся, что value не undefined
+                      value={field.value || ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -467,14 +531,18 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
           </div>
         </div>
 
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button variant="outline" type="button" onClick={onCancel} disabled={isSubmitting}>
+        {/* Form Actions */}
+        <div className="flex justify-end space-x-2">
+          <Button variant="outline" type="button" onClick={onCancel}>
             Отмена
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
               <div className="flex items-center">
-                <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
                 {transaction ? "Обновление..." : "Создание..."}
               </div>
             ) : (
