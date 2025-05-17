@@ -32,7 +32,7 @@ const transactionFormSchema = z.object({
   }),
   category_id: z.number({
     required_error: "Выберите категорию",
-  }),
+  }).positive("Сумма должна быть больше 0"),
   amount: z.number({
     required_error: "Введите сумму",
   }).positive("Сумма должна быть больше 0"),
@@ -177,16 +177,16 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   });
 
   // Get the current selected type to filter categories
-  const currentType = form.watch("type");
+  const currentType = form.watch("type") || "income"; // Ensure currentType is never undefined
   
   // Filter categories based on selected type with proper null checks
   const filteredCategories = categories.filter(category => 
     category && typeof category === 'object' && 'type' in category && category.type === currentType
-  );
+  ) || [];
 
   // Handle files change
   const handleFilesChange = (newFiles: any[]) => {
-    setFiles(newFiles);
+    setFiles(newFiles || []);
   };
 
   // Check for loading states
@@ -229,6 +229,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
         </svg>
       </div>
     );
+  }
+
+  // Check if there's an empty array in categories to prevent the error
+  if (!filteredCategories || filteredCategories.length === 0) {
+    console.warn('No filtered categories available for the selected transaction type');
   }
 
   return (
@@ -324,7 +329,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value && filteredCategories.length > 0
+                          {field.value && filteredCategories && filteredCategories.length > 0
                             ? filteredCategories.find(
                                 (category) => category && category.id === field.value
                               )?.name || "Выберите категорию"
@@ -569,3 +574,4 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
 };
 
 export default TransactionForm;
+
