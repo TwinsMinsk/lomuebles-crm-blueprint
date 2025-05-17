@@ -89,7 +89,7 @@ const CreateIncomeFromOrder: React.FC<CreateIncomeFromOrderProps> = ({ order }) 
   // Initial transaction data
   const initialTransactionData: Partial<TransactionFormData> = {
     transaction_date: order.closing_date ? new Date(order.closing_date) : new Date(),
-    type: "income",
+    type: "income", // Ensure this is not undefined
     category_id: defaultCategoryId,
     amount: order.final_amount || 0,
     currency: "EUR",

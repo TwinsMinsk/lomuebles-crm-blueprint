@@ -147,11 +147,14 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     setFiles(newFiles);
   };
 
+  // Handle form submit
   const onSubmit = (data: TransactionFormValues) => {
     // Convert form data to TransactionFormData expected by the onSuccess callback
     const fullData: TransactionFormData = {
       ...data,
-      transaction_date: data.transaction_date, // This is now required in TransactionFormData
+      transaction_date: data.transaction_date,
+      // Ensure type is always provided as it's required
+      type: data.type || 'income',
       attached_files: files,
     };
     

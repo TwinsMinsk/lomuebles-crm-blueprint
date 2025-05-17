@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Order } from "@/types/order";
@@ -40,7 +39,9 @@ export const fetchOrders = async (): Promise<Order[]> => {
     partial_payment_amount: order.partial_payment_amount,
     delivery_address_full: order.delivery_address_full,
     notes_history: order.notes_history,
-    attached_files_order_docs: order.attached_files_order_docs as any[] | null,
+    attached_files_order_docs: 
+      (Array.isArray(order.attached_files_order_docs) ? 
+        order.attached_files_order_docs : []),
     closing_date: order.closing_date,
     creator_user_id: order.creator_user_id,
     client_language: order.client_language as "ES" | "EN" | "RU",
@@ -48,11 +49,23 @@ export const fetchOrders = async (): Promise<Order[]> => {
     contact: order.contacts ? {
       contact_id: order.contacts.contact_id,
       full_name: order.contacts.full_name
-    } : undefined,
+    } : null,
+    // Ensure creator exists (with defaults)
+    creator: {
+      id: order.creator_user_id,
+      full_name: "Unknown" // Default value
+    },
     assigned_user: order.profiles ? {
       id: order.profiles.id,
       full_name: order.profiles.full_name
-    } : undefined
+    } : null,
+    // Default values for other required fields
+    company: null,
+    partner_manufacturer: null,
+    source_lead: null,
+    // Keeping these for backward compatibility
+    contact_name: order.contacts?.full_name,
+    assigned_user_name: order.profiles?.full_name
   }));
 };
 

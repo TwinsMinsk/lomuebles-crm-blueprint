@@ -35,10 +35,7 @@ export const fetchOrderById = async (id: number): Promise<Order> => {
           [])
       : [],
     // Ensure creator is properly defined
-    creator: data.creator ? {
-      id: data.creator.id || "",
-      full_name: data.creator.full_name || ""
-    } : {
+    creator: data.creator || {
       id: "",
       full_name: ""
     },

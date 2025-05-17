@@ -40,17 +40,17 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, index }) => {
                   {order.order_name && (
                     <p className="text-sm font-medium truncate">{order.order_name}</p>
                   )}
-                  {order.contact_name && (
+                  {order.contact && (
                     <p className="text-xs text-muted-foreground truncate">
-                      {order.contact_name}
+                      {order.contact.full_name}
                     </p>
                   )}
                 </CardContent>
                 <CardFooter className="p-3 pt-0 flex justify-between">
                   <div className="text-xs">
-                    {order.assigned_user_name && (
+                    {order.assigned_user && (
                       <span className="bg-muted px-1 py-0.5 rounded text-muted-foreground truncate">
-                        {order.assigned_user_name}
+                        {order.assigned_user.full_name}
                       </span>
                     )}
                   </div>

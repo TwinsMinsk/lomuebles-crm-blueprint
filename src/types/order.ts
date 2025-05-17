@@ -1,5 +1,5 @@
 
-// We need to add the relational fields to the Order type
+// Define interfaces for order-related types
 export interface Order {
   id: number;
   order_number: string;
@@ -52,4 +52,43 @@ export interface Order {
   source_lead: {
     lead_id: number;
   } | null;
+
+  // Display properties - not in the database but used for UI
+  contact_name?: string;
+  company_name?: string;
+  assigned_user_name?: string;
 }
+
+// OrderItem interface for OrderItemsTable
+export interface OrderItem {
+  order_item_id: number;
+  parent_deal_order_id: number;
+  product_name_from_tilda: string;
+  sku_from_tilda?: string | null;
+  quantity: number;
+  price_per_item_from_tilda: number;
+  total_item_price: number;
+  link_to_product_on_tilda?: string | null;
+}
+
+// Form schema for order editing
+export const orderSchema = z.object({
+  orderName: z.string().optional().nullable(),
+  orderType: z.enum(["Готовая мебель (Tilda)", "Мебель на заказ"]),
+  status: z.string(),
+  clientContactId: z.number(),
+  clientCompanyId: z.number().optional().nullable(),
+  sourceLeadId: z.number().optional().nullable(),
+  assignedUserId: z.string().optional().nullable(),
+  partnerManufacturerId: z.number().optional().nullable(),
+  finalAmount: z.number().optional().nullable(),
+  paymentStatus: z.string().optional().nullable(),
+  partialPaymentAmount: z.number().optional().nullable(),
+  deliveryAddressFull: z.string().optional().nullable(),
+  notesHistory: z.string().optional().nullable(),
+  closingDate: z.string().optional().nullable(),
+  clientLanguage: z.enum(["ES", "EN", "RU"]).default("RU")
+});
+
+// Values type for the order form
+export type OrderFormValues = z.infer<typeof orderSchema>;
