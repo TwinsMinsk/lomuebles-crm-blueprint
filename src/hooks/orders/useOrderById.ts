@@ -11,8 +11,8 @@ export const fetchOrderById = async (id: number): Promise<Order> => {
       *,
       contact:client_contact_id(contact_id, full_name, primary_phone, primary_email),
       company:client_company_id(company_id, company_name),
-      creator_profile:creator_user_id(id, full_name),
-      assignee_profile:assigned_user_id(id, full_name),
+      creator:profiles!creator_user_id(id, full_name),
+      assignee:profiles!assigned_user_id(id, full_name),
       partner_manufacturer:partner_manufacturer_id(partner_manufacturer_id, company_name),
       source_lead:source_lead_id(lead_id)
     `)
@@ -38,12 +38,12 @@ export const fetchOrderById = async (id: number): Promise<Order> => {
     // Define creator object correctly
     creator: {
       id: data.creator_user_id || "",
-      full_name: data.creator_profile?.full_name || ""
+      full_name: data.creator?.full_name || ""
     },
     // Define assigned user object correctly with null check
     assigned_user: data.assigned_user_id ? {
       id: data.assigned_user_id,
-      full_name: data.assignee_profile?.full_name || ""
+      full_name: data.assignee?.full_name || ""
     } : null,
     // Ensure other relational objects are properly defined
     contact: data.contact || null,
