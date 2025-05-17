@@ -334,7 +334,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-[400px] p-0">
-                      {filteredCategories.length > 0 ? (
+                      {filteredCategories && filteredCategories.length > 0 ? (
                         <Command>
                           <CommandInput placeholder="Поиск категории..." />
                           <CommandEmpty>Категории не найдены</CommandEmpty>
@@ -463,7 +463,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value && orders.length > 0
+                          {field.value && orders && orders.length > 0
                             ? orders.find((order) => order && order.id === field.value)?.order_number || "Выберите заказ"
                             : "Выберите заказ"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
