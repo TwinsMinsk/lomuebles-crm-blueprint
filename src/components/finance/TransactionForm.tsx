@@ -146,7 +146,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const suppliers = Array.isArray(suppliersData) ? suppliersData : [];
   const partners = Array.isArray(partnersData) ? partnersData : [];
   const employees = Array.isArray(employeesData) ? employeesData : [];
-  const categories = Array.isArray(categoriesData) ? categoriesData.filter(Boolean) : [];
+  
+  // Ensure categories is always an array and filter out null/undefined items
+  const categoriesArray = Array.isArray(categoriesData) ? categoriesData : [];
+  const categories = categoriesArray.filter(category => category !== null && category !== undefined);
 
   // Form initialization
   const form = useForm<TransactionFormValues>({
@@ -176,8 +179,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   // Get the current selected type to filter categories
   const currentType = form.watch("type");
   
-  // Filter categories based on selected type
-  const filteredCategories = categories.filter(category => category && category.type === currentType) || [];
+  // Filter categories based on selected type with proper null checks
+  const filteredCategories = categories.filter(category => 
+    category && typeof category === 'object' && 'type' in category && category.type === currentType
+  );
 
   // Handle files change
   const handleFilesChange = (newFiles: any[]) => {
@@ -337,7 +342,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             {filteredCategories.map((category) => (
                               category && (
                                 <CommandItem
-                                  value={category.name}
+                                  value={category.name || ''}
                                   key={category.id}
                                   onSelect={() => {
                                     form.setValue("category_id", category.id);
@@ -474,7 +479,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             {orders.map((order) => (
                               order && (
                                 <CommandItem
-                                  value={order.order_number || ""}
+                                  value={(order.order_number || "").toString()}
                                   key={order.id}
                                   onSelect={() => {
                                     form.setValue("related_order_id", order.id);
