@@ -356,7 +356,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                                         : "opacity-0"
                                     )}
                                   />
-                                  {category.name}
+                                  {category.name || ''}
                                 </CommandItem>
                               )
                             ))}
@@ -471,7 +471,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-[400px] p-0">
-                      {orders.length > 0 ? (
+                      {orders && orders.length > 0 ? (
                         <Command>
                           <CommandInput placeholder="Поиск заказа..." />
                           <CommandEmpty>Заказы не найдены</CommandEmpty>
