@@ -66,7 +66,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const { user } = useAuth();
   const [files, setFiles] = useState<any[]>([]);
   
-  // Fetch related entities with safe data handling
+  // Fetch related entities with safe data handling and default empty arrays
   const { data: contactsData = [] } = useQuery({
     queryKey: ["contacts-simple"],
     queryFn: async () => {
@@ -75,9 +75,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       return data || [];
     }
   });
-  // Ensure contacts is always an array
-  const contacts = Array.isArray(contactsData) ? contactsData : [];
-
+  
   const { data: ordersData = [] } = useQuery({
     queryKey: ["orders-simple"],
     queryFn: async () => {
@@ -86,9 +84,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       return data || [];
     }
   });
-  // Ensure orders is always an array
-  const orders = Array.isArray(ordersData) ? ordersData : [];
-
+  
   const { data: suppliersData = [] } = useQuery({
     queryKey: ["suppliers-simple"],
     queryFn: async () => {
@@ -97,9 +93,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       return data || [];
     }
   });
-  // Ensure suppliers is always an array
-  const suppliers = Array.isArray(suppliersData) ? suppliersData : [];
-
+  
   const { data: partnersData = [] } = useQuery({
     queryKey: ["partners-simple"],
     queryFn: async () => {
@@ -108,9 +102,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       return data || [];
     }
   });
-  // Ensure partners is always an array
-  const partners = Array.isArray(partnersData) ? partnersData : [];
-
+  
   const { data: employeesData = [] } = useQuery({
     queryKey: ["employees-simple"],
     queryFn: async () => {
@@ -119,12 +111,16 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       return data || [];
     }
   });
-  // Ensure employees is always an array
+
+  // Always ensure these are arrays
+  const contacts = Array.isArray(contactsData) ? contactsData : [];
+  const orders = Array.isArray(ordersData) ? ordersData : [];
+  const suppliers = Array.isArray(suppliersData) ? suppliersData : [];
+  const partners = Array.isArray(partnersData) ? partnersData : [];
   const employees = Array.isArray(employeesData) ? employeesData : [];
 
   // Get transaction categories with strict type checking
   const { data: categoriesData = [] } = useTransactionCategories();
-  // Ensure categories is always an array with valid items
   const categories = Array.isArray(categoriesData) ? categoriesData.filter(Boolean) : [];
 
   // Form initialization
@@ -279,9 +275,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value && filteredCategories.length > 0
+                          {field.value
                             ? filteredCategories.find(
-                                (category) => category?.id === field.value
+                                (category) => category.id === field.value
                               )?.name || "Выберите категорию"
                             : "Выберите категорию"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -416,8 +412,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value && orders.length > 0
-                            ? orders.find((order) => order?.id === field.value)?.order_number || "Выберите заказ"
+                          {field.value
+                            ? orders.find((order) => order.id === field.value)?.order_number || "Выберите заказ"
                             : "Выберите заказ"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
@@ -430,25 +426,23 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                           <CommandEmpty>Заказы не найдены</CommandEmpty>
                           <CommandGroup>
                             {orders.map((order) => (
-                              order && (
-                                <CommandItem
-                                  value={order.order_number || ""}
-                                  key={order.id}
-                                  onSelect={() => {
-                                    form.setValue("related_order_id", order.id);
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      order.id === field.value
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                  {order.order_number} {order.order_name ? `- ${order.order_name}` : ''}
-                                </CommandItem>
-                              )
+                              <CommandItem
+                                value={order.order_number || ""}
+                                key={order.id}
+                                onSelect={() => {
+                                  form.setValue("related_order_id", order.id);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    order.id === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {order.order_number} {order.order_name ? `- ${order.order_name}` : ''}
+                              </CommandItem>
                             ))}
                           </CommandGroup>
                         </Command>
