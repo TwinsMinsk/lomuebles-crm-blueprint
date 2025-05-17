@@ -15,24 +15,45 @@ export interface CategorySummary {
 }
 
 // Get financial summary for a date range
-export const fetchFinancialSummary = async (dateFrom: string, dateTo: string) => {
-  const { data, error } = await supabase
-    .rpc("get_financial_summary", {
-      date_from: dateFrom,
-      date_to: dateTo,
-    });
+export const fetchFinancialSummary = async (dateFrom: string, dateTo: string): Promise<FinancialSummary> => {
+  // Since we can't directly use RPC for get_financial_summary yet, let's use separate queries
+  const { data: incomeData, error: incomeError } = await supabase
+    .from("transactions")
+    .select("amount")
+    .eq("type", "income")
+    .gte("transaction_date", dateFrom)
+    .lte("transaction_date", dateTo);
 
-  if (error) throw error;
-  return data as FinancialSummary;
+  if (incomeError) throw incomeError;
+
+  const { data: expenseData, error: expenseError } = await supabase
+    .from("transactions")
+    .select("amount")
+    .eq("type", "expense")
+    .gte("transaction_date", dateFrom)
+    .lte("transaction_date", dateTo);
+
+  if (expenseError) throw expenseError;
+
+  // Calculate totals
+  const totalIncome = incomeData.reduce((sum, item) => sum + Number(item.amount), 0);
+  const totalExpense = expenseData.reduce((sum, item) => sum + Number(item.amount), 0);
+  const profit = totalIncome - totalExpense;
+
+  return {
+    total_income: totalIncome,
+    total_expense: totalExpense,
+    profit: profit
+  };
 };
 
 // Hook for fetching financial summary
 export const useFinancialSummary = (dateFrom: string | null, dateTo: string | null) => {
   return useQuery({
     queryKey: ["financial_summary", dateFrom, dateTo],
-    queryFn: () => {
+    queryFn: async () => {
       if (!dateFrom || !dateTo) return null;
-      return fetchFinancialSummary(dateFrom, dateTo);
+      return await fetchFinancialSummary(dateFrom, dateTo);
     },
     enabled: !!dateFrom && !!dateTo,
   });
@@ -49,7 +70,7 @@ export const fetchCategorySummary = async (
     .select(`
       category_id,
       amount,
-      category:category_id(name)
+      category:transaction_categories!category_id(name)
     `)
     .eq("type", type)
     .gte("transaction_date", dateFrom)
@@ -83,9 +104,9 @@ export const useCategorySummary = (
 ) => {
   return useQuery({
     queryKey: [`${type}_categories_summary`, dateFrom, dateTo],
-    queryFn: () => {
+    queryFn: async () => {
       if (!dateFrom || !dateTo) return [];
-      return fetchCategorySummary(dateFrom, dateTo, type);
+      return await fetchCategorySummary(dateFrom, dateTo, type);
     },
     enabled: !!dateFrom && !!dateTo,
   });

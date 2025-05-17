@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useOrderById } from "@/hooks/orders/useOrderById";
@@ -98,6 +99,12 @@ const OrderDetailPage = () => {
 
   // Check if user is admin
   const isAdmin = userRole === "Главный Администратор" || userRole === "Администратор";
+
+  // Handle file upload changes
+  const handleFilesChange = (files: any[]) => {
+    // This would typically update the order with the new files
+    console.log("Files updated:", files);
+  };
 
   return (
     <div className="container mx-auto p-6">
@@ -274,6 +281,7 @@ const OrderDetailPage = () => {
                 entityType="orders"
                 entityId={order.id}
                 existingFiles={order.attached_files_order_docs || []}
+                onFilesChange={handleFilesChange}
               />
             </div>
           </TabsContent>

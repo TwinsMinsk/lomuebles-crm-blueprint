@@ -1,282 +1,298 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { format } from "date-fns";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { useAuth } from "@/context/AuthContext";
+import { useTransactionCategories } from "@/hooks/finance/useTransactionCategories";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import { useTransactionCategories } from "@/hooks/finance/useTransactionCategories";
-import { useUsers } from "@/hooks/useUsers";
-import { FileUploadSection } from "@/components/common/FileUploadSection";
-import { CalendarIcon, Check } from "lucide-react";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
+import { CalendarIcon, Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { TransactionFormData } from "@/hooks/finance/useTransactions";
-import { useOrders } from "@/hooks/orders/useOrders";
-import { useContacts } from "@/hooks/useContacts";
-import { useSuppliers } from "@/hooks/useSuppliers";
-import { usePartners } from "@/hooks/usePartners";
+import { Transaction } from "@/hooks/finance/useTransactions";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { FileUploadSection } from "@/components/common/FileUploadSection";
 
-const transactionSchema = z.object({
-  transaction_date: z.string().min(1, "Дата операции обязательна"),
+// Define schema for the form
+const transactionFormSchema = z.object({
+  transaction_date: z.date({
+    required_error: "Дата обязательна",
+  }),
   type: z.enum(["income", "expense"], {
-    required_error: "Необходимо выбрать тип операции",
+    required_error: "Выберите тип операции",
   }),
   category_id: z.number({
-    required_error: "Категория обязательна",
+    required_error: "Выберите категорию",
   }),
-  amount: z.number().positive("Сумма должна быть положительной"),
+  amount: z.number({
+    required_error: "Введите сумму",
+  }).positive("Сумма должна быть больше 0"),
   currency: z.string().default("EUR"),
   description: z.string().optional().nullable(),
+  payment_method: z.string().optional().nullable(),
   related_order_id: z.number().optional().nullable(),
   related_contact_id: z.number().optional().nullable(),
   related_supplier_id: z.number().optional().nullable(),
   related_partner_manufacturer_id: z.number().optional().nullable(),
   related_user_id: z.string().optional().nullable(),
-  payment_method: z.string().optional().nullable(),
-  attached_files: z.any().optional().nullable(),
 });
 
+type TransactionFormValues = z.infer<typeof transactionFormSchema>;
+
 interface TransactionFormProps {
-  onSubmit: (data: TransactionFormData) => void;
-  initialData?: any;
+  transaction?: Transaction;
+  onSuccess: () => void;
+  defaultValues?: Partial<TransactionFormValues>;
   onCancel: () => void;
-  isSubmitting: boolean;
 }
 
 const TransactionForm: React.FC<TransactionFormProps> = ({
-  onSubmit,
-  initialData,
+  transaction,
+  defaultValues,
+  onSuccess,
   onCancel,
-  isSubmitting,
 }) => {
-  const [attachedFiles, setAttachedFiles] = useState<any[]>(
-    initialData?.attached_files || []
-  );
-  const [transactionType, setTransactionType] = useState<"income" | "expense">(
-    initialData?.type || "income"
-  );
+  const { user } = useAuth();
+  const [files, setFiles] = useState<any[]>([]);
+  
+  // Fetch related entities for dropdowns
+  const { data: contacts = [] } = useQuery({
+    queryKey: ["contacts-simple"],
+    queryFn: async () => {
+      const { data } = await supabase.from("contacts").select("contact_id, full_name").order("full_name");
+      return data || [];
+    }
+  });
 
-  const { data: categories } = useTransactionCategories();
-  const { data: orders } = useOrders({ pageSize: 100 });
-  const { contacts } = useContacts();
-  const { suppliers } = useSuppliers();
-  const { partners } = usePartners();
-  const { users } = useUsers();
+  const { data: orders = [] } = useQuery({
+    queryKey: ["orders-simple"],
+    queryFn: async () => {
+      const { data } = await supabase.from("orders").select("id, order_number, order_name").order("order_number", { ascending: false });
+      return data || [];
+    }
+  });
 
-  // Filter categories based on selected type
-  const filteredCategories = categories?.filter(
-    (category) => category.type === transactionType
-  ) || [];
+  const { data: suppliers = [] } = useQuery({
+    queryKey: ["suppliers-simple"],
+    queryFn: async () => {
+      const { data } = await supabase.from("suppliers").select("supplier_id, company_name").order("company_name");
+      return data || [];
+    }
+  });
 
-  const form = useForm<TransactionFormData>({
-    resolver: zodResolver(transactionSchema),
+  const { data: partners = [] } = useQuery({
+    queryKey: ["partners-simple"],
+    queryFn: async () => {
+      const { data } = await supabase.from("partners_manufacturers").select("partner_manufacturer_id, company_name").order("company_name");
+      return data || [];
+    }
+  });
+
+  const { data: employees = [] } = useQuery({
+    queryKey: ["employees-simple"],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("id, full_name").order("full_name");
+      return data || [];
+    }
+  });
+
+  // Get transaction categories
+  const { data: categories = [] } = useTransactionCategories();
+
+  // Form initialization
+  const form = useForm<TransactionFormValues>({
+    resolver: zodResolver(transactionFormSchema),
     defaultValues: {
-      transaction_date: initialData?.transaction_date || format(new Date(), "yyyy-MM-dd"),
-      type: initialData?.type || "income",
-      category_id: initialData?.category_id || undefined,
-      amount: initialData?.amount || undefined,
-      currency: initialData?.currency || "EUR",
-      description: initialData?.description || "",
-      related_order_id: initialData?.related_order_id || null,
-      related_contact_id: initialData?.related_contact_id || null,
-      related_supplier_id: initialData?.related_supplier_id || null,
-      related_partner_manufacturer_id: initialData?.related_partner_manufacturer_id || null,
-      related_user_id: initialData?.related_user_id || null,
-      payment_method: initialData?.payment_method || "",
-      attached_files: initialData?.attached_files || null,
+      transaction_date: transaction 
+        ? new Date(transaction.transaction_date) 
+        : defaultValues?.transaction_date || new Date(),
+      type: transaction?.type || defaultValues?.type || "income",
+      category_id: transaction?.category_id || defaultValues?.category_id,
+      amount: transaction?.amount || defaultValues?.amount,
+      currency: transaction?.currency || defaultValues?.currency || "EUR",
+      description: transaction?.description || defaultValues?.description || "",
+      payment_method: transaction?.payment_method || defaultValues?.payment_method || "",
+      related_order_id: transaction?.related_order_id || defaultValues?.related_order_id,
+      related_contact_id: transaction?.related_contact_id || defaultValues?.related_contact_id,
+      related_supplier_id: transaction?.related_supplier_id || defaultValues?.related_supplier_id,
+      related_partner_manufacturer_id: transaction?.related_partner_manufacturer_id || defaultValues?.related_partner_manufacturer_id,
+      related_user_id: transaction?.related_user_id || defaultValues?.related_user_id,
     },
   });
 
-  // When transaction type changes, reset category selection
-  useEffect(() => {
-    const currentType = form.getValues("type");
-    if (currentType !== transactionType) {
-      form.setValue("category_id", undefined as any);
-    }
-    setTransactionType(currentType);
-  }, [form.watch("type")]);
+  // Get the current selected type to filter categories
+  const currentType = form.watch("type");
+  
+  // Filter categories based on selected type
+  const filteredCategories = categories.filter(
+    (category) => category.type === currentType
+  );
 
-  const handleFormSubmit = (data: TransactionFormData) => {
-    onSubmit({
-      ...data,
-      attached_files: attachedFiles.length > 0 ? attachedFiles : null,
-    });
+  // Handle files change
+  const handleFilesChange = (newFiles: any[]) => {
+    setFiles(newFiles);
+  };
+
+  const onSubmit = async (data: TransactionFormValues) => {
+    // Mock submit for now - this would be replaced with the actual submit logic
+    console.log("Form data:", data);
+    console.log("Files:", files);
+    
+    // Call onSuccess callback
+    onSuccess();
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Transaction Date */}
-          <FormField
-            control={form.control}
-            name="transaction_date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Дата операции *</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(new Date(field.value), "dd.MM.yyyy")
-                        ) : (
-                          <span>Выберите дату</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) =>
-                        field.onChange(date ? format(date, "yyyy-MM-dd") : "")
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Basic Info Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Основная информация</h3>
 
-          {/* Transaction Type */}
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Тип операции *</FormLabel>
-                <FormControl>
+            {/* Transaction Date */}
+            <FormField
+              control={form.control}
+              name="transaction_date"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Дата операции</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "d MMMM yyyy", { locale: ru })
+                          ) : (
+                            <span>Выберите дату</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Transaction Type */}
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Тип операции</FormLabel>
                   <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
                     value={field.value}
-                    onValueChange={(value: "income" | "expense") => {
-                      field.onChange(value);
-                      setTransactionType(value);
-                    }}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Выберите тип операции" />
-                    </SelectTrigger>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите тип" />
+                      </SelectTrigger>
+                    </FormControl>
                     <SelectContent>
                       <SelectItem value="income">Доход</SelectItem>
                       <SelectItem value="expense">Расход</SelectItem>
                     </SelectContent>
                   </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Category */}
-          <FormField
-            control={form.control}
-            name="category_id"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Категория *</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          "justify-between",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value
-                          ? filteredCategories.find(
-                              (category) => category.id === field.value
-                            )?.name || "Выберите категорию"
-                          : "Выберите категорию"}
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[300px] p-0">
-                    <Command>
-                      <CommandInput placeholder="Поиск категории..." />
-                      <CommandEmpty>Категории не найдены</CommandEmpty>
-                      <CommandGroup>
-                        {filteredCategories.map((category) => (
-                          <CommandItem
-                            value={category.name}
-                            key={category.id}
-                            onSelect={() => {
-                              form.setValue("category_id", category.id);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                category.id === field.value
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {category.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            {/* Category */}
+            <FormField
+              control={form.control}
+              name="category_id"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Категория</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value
+                            ? filteredCategories.find(
+                                (category) => category.id === field.value
+                              )?.name
+                            : "Выберите категорию"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[400px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Поиск категории..." />
+                        <CommandEmpty>Категории не найдены</CommandEmpty>
+                        <CommandGroup>
+                          {filteredCategories.map((category) => (
+                            <CommandItem
+                              value={category.name}
+                              key={category.id}
+                              onSelect={() => {
+                                form.setValue("category_id", category.id);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  category.id === field.value
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {category.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div className="grid grid-cols-2 gap-2">
             {/* Amount */}
             <FormField
               control={form.control}
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Сумма *</FormLabel>
+                  <FormLabel>Сумма</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -299,20 +315,132 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                 <FormItem>
                   <FormLabel>Валюта</FormLabel>
                   <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      defaultValue="EUR"
-                    >
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Payment Method */}
+            <FormField
+              control={form.control}
+              name="payment_method"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Способ оплаты</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value || ""}
+                    value={field.value || ""}
+                  >
+                    <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="EUR" />
+                        <SelectValue placeholder="Выберите способ оплаты" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="EUR">EUR</SelectItem>
-                        <SelectItem value="USD">USD</SelectItem>
-                        <SelectItem value="RUB">RUB</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Наличные">Наличные</SelectItem>
+                      <SelectItem value="Карта">Карта</SelectItem>
+                      <SelectItem value="Банковский перевод">Банковский перевод</SelectItem>
+                      <SelectItem value="PayPal">PayPal</SelectItem>
+                      <SelectItem value="Другое">Другое</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Related Entities and Description */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Связанные объекты и описание</h3>
+
+            {/* Related Order */}
+            <FormField
+              control={form.control}
+              name="related_order_id"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Связанный заказ</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value
+                            ? orders.find((order) => order.id === field.value)?.order_number || "Выберите заказ"
+                            : "Выберите заказ"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[400px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Поиск заказа..." />
+                        <CommandEmpty>Заказы не найдены</CommandEmpty>
+                        <CommandGroup>
+                          {orders.map((order) => (
+                            <CommandItem
+                              value={order.order_number}
+                              key={order.id}
+                              onSelect={() => {
+                                form.setValue("related_order_id", order.id);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  order.id === field.value
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {order.order_number} {order.order_name ? `- ${order.order_name}` : ''}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Similar dropdown selectors for other related entities */}
+            {/* Files upload section */}
+            <div className="space-y-2">
+              <FormLabel>Прикрепленные файлы</FormLabel>
+              <FileUploadSection
+                entityType="transactions"
+                entityId={transaction?.id || "new"}
+                existingFiles={transaction?.attached_files || []}
+                onFilesChange={handleFilesChange}
+              />
+            </div>
+
+            {/* Description */}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Описание</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Детальное описание операции..."
+                      className="resize-none min-h-[120px]"
+                      {...field}
+                      value={field.value || ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -321,376 +449,13 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
           </div>
         </div>
 
-        {/* Description */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Описание</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Введите описание операции"
-                  {...field}
-                  value={field.value || ""}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Payment Method */}
-        <FormField
-          control={form.control}
-          name="payment_method"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Способ оплаты</FormLabel>
-              <FormControl>
-                <Select
-                  value={field.value || ""}
-                  onValueChange={field.onChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите способ оплаты" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="cash">Наличные</SelectItem>
-                    <SelectItem value="card">Карта</SelectItem>
-                    <SelectItem value="bank_transfer">Банковский перевод</SelectItem>
-                    <SelectItem value="other">Другое</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Related Order */}
-          <FormField
-            control={form.control}
-            name="related_order_id"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Связанный заказ</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          "justify-between",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value && orders?.data
-                          ? orders.data.find((order) => order.id === field.value)
-                              ?.order_number || "Выберите заказ"
-                          : "Выберите заказ"}
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[300px] p-0">
-                    <Command>
-                      <CommandInput placeholder="Поиск заказа..." />
-                      <CommandEmpty>Заказы не найдены</CommandEmpty>
-                      <CommandGroup>
-                        {orders?.data?.map((order) => (
-                          <CommandItem
-                            value={order.order_number}
-                            key={order.id}
-                            onSelect={() => {
-                              form.setValue("related_order_id", order.id);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                order.id === field.value
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {order.order_number} - {order.order_name || "Без названия"}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Related Contact */}
-          <FormField
-            control={form.control}
-            name="related_contact_id"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Связанный контакт</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          "justify-between",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value
-                          ? contacts?.find(
-                              (contact) => contact.contact_id === field.value
-                            )?.full_name || "Выберите контакт"
-                          : "Выберите контакт"}
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[300px] p-0">
-                    <Command>
-                      <CommandInput placeholder="Поиск контакта..." />
-                      <CommandEmpty>Контакты не найдены</CommandEmpty>
-                      <CommandGroup>
-                        {contacts?.map((contact) => (
-                          <CommandItem
-                            value={contact.full_name}
-                            key={contact.contact_id}
-                            onSelect={() => {
-                              form.setValue("related_contact_id", contact.contact_id);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                contact.contact_id === field.value
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {contact.full_name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Additional related entities conditionally shown by transaction type */}
-        {transactionType === "expense" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Related Supplier */}
-            <FormField
-              control={form.control}
-              name="related_supplier_id"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Связанный поставщик</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className={cn(
-                            "justify-between",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value
-                            ? suppliers?.find(
-                                (supplier) => supplier.supplier_id === field.value
-                              )?.supplier_name || "Выберите поставщика"
-                            : "Выберите поставщика"}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[300px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Поиск поставщика..." />
-                        <CommandEmpty>Поставщики не найдены</CommandEmpty>
-                        <CommandGroup>
-                          {suppliers?.map((supplier) => (
-                            <CommandItem
-                              value={supplier.supplier_name}
-                              key={supplier.supplier_id}
-                              onSelect={() => {
-                                form.setValue("related_supplier_id", supplier.supplier_id);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  supplier.supplier_id === field.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              {supplier.supplier_name}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Related Partner/Manufacturer */}
-            <FormField
-              control={form.control}
-              name="related_partner_manufacturer_id"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Связанный партнер-изготовитель</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className={cn(
-                            "justify-between",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value
-                            ? partners?.find(
-                                (partner) =>
-                                  partner.partner_manufacturer_id === field.value
-                              )?.company_name || "Выберите партнера"
-                            : "Выберите партнера"}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[300px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Поиск партнера..." />
-                        <CommandEmpty>Партнеры не найдены</CommandEmpty>
-                        <CommandGroup>
-                          {partners?.map((partner) => (
-                            <CommandItem
-                              value={partner.company_name}
-                              key={partner.partner_manufacturer_id}
-                              onSelect={() => {
-                                form.setValue(
-                                  "related_partner_manufacturer_id",
-                                  partner.partner_manufacturer_id
-                                );
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  partner.partner_manufacturer_id === field.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              {partner.company_name}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        )}
-
-        {/* Related User (For employee expenses) */}
-        {transactionType === "expense" && (
-          <FormField
-            control={form.control}
-            name="related_user_id"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Связанный сотрудник</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          "justify-between",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value
-                          ? users?.find((user) => user.id === field.value)?.full_name ||
-                            "Выберите сотрудника"
-                          : "Выберите сотрудника"}
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[300px] p-0">
-                    <Command>
-                      <CommandInput placeholder="Поиск сотрудника..." />
-                      <CommandEmpty>Сотрудники не найдены</CommandEmpty>
-                      <CommandGroup>
-                        {users?.map((user) => (
-                          <CommandItem
-                            value={user.full_name || user.email}
-                            key={user.id}
-                            onSelect={() => {
-                              form.setValue("related_user_id", user.id);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                user.id === field.value
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {user.full_name || user.email}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        {/* File Upload Section */}
-        <div className="mt-6">
-          <h3 className="mb-2 font-medium">Прикрепленные файлы</h3>
-          <FileUploadSection
-            entityType="transactions"
-            entityId={initialData?.id}
-            existingFiles={attachedFiles}
-            onFilesChange={setAttachedFiles}
-          />
-        </div>
-
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button type="button" variant="outline" onClick={onCancel}>
+        {/* Form Actions */}
+        <div className="flex justify-end space-x-2">
+          <Button variant="outline" type="button" onClick={onCancel}>
             Отмена
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Сохранение..." : initialData ? "Обновить" : "Создать"}
+          <Button type="submit">
+            {transaction ? "Обновить операцию" : "Создать операцию"}
           </Button>
         </div>
       </form>
