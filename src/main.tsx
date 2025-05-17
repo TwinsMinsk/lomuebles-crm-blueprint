@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx';
 import './index.css';
 import { AuthProvider } from './context/AuthContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const rootElement = document.getElementById("root");
 
@@ -12,12 +13,24 @@ if (!rootElement) {
   throw new Error("Root element not found");
 }
 
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // default: true
+      retry: 1
+    },
+  },
+});
+
 createRoot(rootElement).render(
   <React.StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </QueryClientProvider>
     </BrowserRouter>
   </React.StrictMode>
 );
