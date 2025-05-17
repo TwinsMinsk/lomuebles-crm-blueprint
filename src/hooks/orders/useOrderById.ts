@@ -4,14 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Order } from "@/types/order";
 
 export const fetchOrderById = async (id: number): Promise<Order> => {
+  // Fixing the query by making the column references more explicit
   const { data, error } = await supabase
     .from("orders")
     .select(`
       *,
       contact:client_contact_id(contact_id, full_name, primary_phone, primary_email),
       company:client_company_id(company_id, company_name),
-      creator_profile:creator_user_id(id, full_name),
-      assigned_profile:assigned_user_id(id, full_name),
+      creator_user:creator_user_id(id, full_name),
+      assigned_user:assigned_user_id(id, full_name),
       partner_manufacturer:partner_manufacturer_id(partner_manufacturer_id, company_name),
       source_lead:source_lead_id(lead_id)
     `)
@@ -34,15 +35,15 @@ export const fetchOrderById = async (id: number): Promise<Order> => {
           JSON.parse(data.attached_files_order_docs) : 
           [])
       : [],
-    // Map creator from creator_profile
+    // Define creator object correctly
     creator: {
       id: data.creator_user_id || "",
-      full_name: data.creator_profile?.full_name || ""
+      full_name: data.creator_user?.full_name || ""
     },
-    // Map assigned_user from assigned_profile
-    assigned_user: data.assigned_profile ? {
-      id: data.assigned_profile.id || "",
-      full_name: data.assigned_profile.full_name || ""
+    // Define assigned user object correctly with null check
+    assigned_user: data.assigned_user_id ? {
+      id: data.assigned_user_id,
+      full_name: data.assigned_user?.full_name || ""
     } : null,
     // Ensure other relational objects are properly defined
     contact: data.contact || null,
