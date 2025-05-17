@@ -67,7 +67,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const [files, setFiles] = useState<any[]>([]);
   
   // Fetch related entities with safe data handling and default empty arrays
-  const { data: contactsData = [] } = useQuery({
+  const { data: contactsData = [], isLoading: isLoadingContacts } = useQuery({
     queryKey: ["contacts-simple"],
     queryFn: async () => {
       try {
@@ -81,7 +81,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     }
   });
   
-  const { data: ordersData = [] } = useQuery({
+  const { data: ordersData = [], isLoading: isLoadingOrders } = useQuery({
     queryKey: ["orders-simple"],
     queryFn: async () => {
       try {
@@ -95,7 +95,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     }
   });
   
-  const { data: suppliersData = [] } = useQuery({
+  const { data: suppliersData = [], isLoading: isLoadingSuppliers } = useQuery({
     queryKey: ["suppliers-simple"],
     queryFn: async () => {
       try {
@@ -109,7 +109,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     }
   });
   
-  const { data: partnersData = [] } = useQuery({
+  const { data: partnersData = [], isLoading: isLoadingPartners } = useQuery({
     queryKey: ["partners-simple"],
     queryFn: async () => {
       try {
@@ -123,7 +123,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     }
   });
   
-  const { data: employeesData = [] } = useQuery({
+  const { data: employeesData = [], isLoading: isLoadingEmployees } = useQuery({
     queryKey: ["employees-simple"],
     queryFn: async () => {
       try {
@@ -137,15 +137,15 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     }
   });
 
-  // Always ensure these are arrays
+  // Get transaction categories
+  const { data: categoriesData = [], isLoading: isLoadingCategories } = useTransactionCategories();
+  
+  // Ensure all arrays are properly initialized
   const contacts = Array.isArray(contactsData) ? contactsData : [];
   const orders = Array.isArray(ordersData) ? ordersData : [];
   const suppliers = Array.isArray(suppliersData) ? suppliersData : [];
   const partners = Array.isArray(partnersData) ? partnersData : [];
   const employees = Array.isArray(employeesData) ? employeesData : [];
-
-  // Get transaction categories with strict type checking
-  const { data: categoriesData = [] } = useTransactionCategories();
   const categories = Array.isArray(categoriesData) ? categoriesData.filter(Boolean) : [];
 
   // Form initialization
@@ -176,16 +176,22 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   // Get the current selected type to filter categories
   const currentType = form.watch("type");
   
-  // Safely filter categories based on selected type
-  // This ensures we always have a valid array of filtered categories
-  const filteredCategories = Array.isArray(categories) 
-    ? categories.filter(category => category && category.type === currentType) 
-    : [];
+  // Filter categories based on selected type
+  const filteredCategories = categories.filter(category => category && category.type === currentType) || [];
 
   // Handle files change
   const handleFilesChange = (newFiles: any[]) => {
     setFiles(newFiles);
   };
+
+  // Check for loading states
+  const isLoading = 
+    isLoadingCategories || 
+    isLoadingContacts || 
+    isLoadingOrders || 
+    isLoadingSuppliers || 
+    isLoadingPartners || 
+    isLoadingEmployees;
 
   // Handle form submit
   const onSubmit = (data: TransactionFormValues) => {
@@ -207,6 +213,18 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     
     onSuccess(fullData);
   };
+
+  // Render a loading state if data is still loading
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <svg className="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>
@@ -311,7 +329,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-[400px] p-0">
-                      {filteredCategories && filteredCategories.length > 0 ? (
+                      {filteredCategories.length > 0 ? (
                         <Command>
                           <CommandInput placeholder="Поиск категории..." />
                           <CommandEmpty>Категории не найдены</CommandEmpty>
@@ -440,7 +458,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value && orders && orders.length > 0
+                          {field.value && orders.length > 0
                             ? orders.find((order) => order && order.id === field.value)?.order_number || "Выберите заказ"
                             : "Выберите заказ"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -448,7 +466,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-[400px] p-0">
-                      {orders && orders.length > 0 ? (
+                      {orders.length > 0 ? (
                         <Command>
                           <CommandInput placeholder="Поиск заказа..." />
                           <CommandEmpty>Заказы не найдены</CommandEmpty>
