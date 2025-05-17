@@ -264,41 +264,47 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value
+                          {field.value && filteredCategories
                             ? filteredCategories.find(
                                 (category) => category.id === field.value
-                              )?.name
+                              )?.name || "Выберите категорию"
                             : "Выберите категорию"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Поиск категории..." />
-                        <CommandEmpty>Категории не найдены</CommandEmpty>
-                        <CommandGroup>
-                          {filteredCategories && filteredCategories.length > 0 && filteredCategories.map((category) => (
-                            <CommandItem
-                              value={category.name}
-                              key={category.id}
-                              onSelect={() => {
-                                form.setValue("category_id", category.id);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  category.id === field.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              {category.name}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
+                      {filteredCategories && filteredCategories.length > 0 ? (
+                        <Command>
+                          <CommandInput placeholder="Поиск категории..." />
+                          <CommandEmpty>Категории не найдены</CommandEmpty>
+                          <CommandGroup>
+                            {filteredCategories.map((category) => (
+                              <CommandItem
+                                value={category.name}
+                                key={category.id}
+                                onSelect={() => {
+                                  form.setValue("category_id", category.id);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    category.id === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {category.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </Command>
+                      ) : (
+                        <div className="p-2 text-sm text-muted-foreground text-center">
+                          Нет доступных категорий
+                        </div>
+                      )}
                     </PopoverContent>
                   </Popover>
                   <FormMessage />
@@ -395,7 +401,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value
+                          {field.value && orders
                             ? orders.find((order) => order.id === field.value)?.order_number || "Выберите заказ"
                             : "Выберите заказ"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -403,31 +409,37 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Поиск заказа..." />
-                        <CommandEmpty>Заказы не найдены</CommandEmpty>
-                        <CommandGroup>
-                          {orders && orders.length > 0 && orders.map((order) => (
-                            <CommandItem
-                              value={order.order_number}
-                              key={order.id}
-                              onSelect={() => {
-                                form.setValue("related_order_id", order.id);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  order.id === field.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              {order.order_number} {order.order_name ? `- ${order.order_name}` : ''}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
+                      {orders && orders.length > 0 ? (
+                        <Command>
+                          <CommandInput placeholder="Поиск заказа..." />
+                          <CommandEmpty>Заказы не найдены</CommandEmpty>
+                          <CommandGroup>
+                            {orders.map((order) => (
+                              <CommandItem
+                                value={order.order_number}
+                                key={order.id}
+                                onSelect={() => {
+                                  form.setValue("related_order_id", order.id);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    order.id === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {order.order_number} {order.order_name ? `- ${order.order_name}` : ''}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </Command>
+                      ) : (
+                        <div className="p-2 text-sm text-muted-foreground text-center">
+                          Нет доступных заказов
+                        </div>
+                      )}
                     </PopoverContent>
                   </Popover>
                   <FormMessage />

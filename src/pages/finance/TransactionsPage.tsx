@@ -373,7 +373,7 @@ const TransactionsPage = () => {
                 type: "income",
                 amount: 0,
                 currency: "EUR",
-                category_id: null
+                category_id: undefined
               }}
               onSuccess={handleAddTransaction}
               onCancel={() => setIsAddDialogOpen(false)}
