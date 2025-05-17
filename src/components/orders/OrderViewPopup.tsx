@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useOrderById } from "@/hooks/orders/useOrders";
+import { useOrderById } from "@/hooks/orders/useOrderById";
 import { formatDate, formatCurrency } from "@/utils/formatters";
 import {
   DialogHeader,
@@ -63,15 +63,15 @@ const OrderViewPopup: React.FC<OrderViewPopupProps> = ({ orderId }) => {
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Клиент</p>
-            <p>{order.contact_name || "—"}</p>
+            <p>{order.contact?.full_name || "—"}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Компания</p>
-            <p>{order.company_name || "—"}</p>
+            <p>{order.company?.company_name || "—"}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Менеджер</p>
-            <p>{order.assigned_user_name || "Не назначен"}</p>
+            <p>{order.assigned_user?.full_name || "Не назначен"}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Сумма</p>

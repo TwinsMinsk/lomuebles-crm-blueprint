@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +17,7 @@ import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { CalendarIcon, Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Transaction } from "@/hooks/finance/useTransactions";
+import { Transaction, TransactionFormData } from "@/hooks/finance/useTransactions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { FileUploadSection } from "@/components/common/FileUploadSection";

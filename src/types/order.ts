@@ -32,8 +32,6 @@ export type Order = {
   order_name: string | null;
   order_type: "Готовая мебель (Tilda)" | "Мебель на заказ";
   status: string;
-  status_ready_made?: string | null;
-  status_custom_made?: string | null;
   client_contact_id: number;
   client_company_id: number | null;
   source_lead_id: number | null;
@@ -48,6 +46,13 @@ export type Order = {
   closing_date: string | null;
   creator_user_id: string;
   client_language: "ES" | "EN" | "RU";
+  
+  // Add these properties to fix type errors
+  contact_name?: string;
+  company_name?: string;
+  assigned_user_name?: string;
+  
+  // Nested relations
   contact?: {
     contact_id: number;
     full_name: string;

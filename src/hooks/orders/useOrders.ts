@@ -44,8 +44,15 @@ export const fetchOrders = async (): Promise<Order[]> => {
     closing_date: order.closing_date,
     creator_user_id: order.creator_user_id,
     client_language: order.client_language as "ES" | "EN" | "RU",
-    contact_name: order.contacts?.full_name || undefined,
-    assigned_user_name: order.profiles?.full_name || undefined
+    // Add nested relation objects
+    contact: order.contacts ? {
+      contact_id: order.contacts.contact_id,
+      full_name: order.contacts.full_name
+    } : undefined,
+    assigned_user: order.profiles ? {
+      id: order.profiles.id,
+      full_name: order.profiles.full_name
+    } : undefined
   }));
 };
 

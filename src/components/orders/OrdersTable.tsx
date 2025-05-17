@@ -101,8 +101,8 @@ const OrdersTable: React.FC = () => {
               <TableCell>{order.order_name || "-"}</TableCell>
               <TableCell>{order.order_type}</TableCell>
               <TableCell>{order.status}</TableCell>
-              <TableCell>{order.contact_name || "-"}</TableCell>
-              <TableCell>{order.assigned_user_name || "-"}</TableCell>
+              <TableCell>{order.contact?.full_name || "-"}</TableCell>
+              <TableCell>{order.assigned_user?.full_name || "-"}</TableCell>
               <TableCell className="text-right">{formatCurrency(order.final_amount)}</TableCell>
               <TableCell>{formatDate(order.created_at)}</TableCell>
               <TableCell className="text-right space-x-2" onClick={(e) => e.stopPropagation()}>

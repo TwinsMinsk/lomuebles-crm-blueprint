@@ -28,7 +28,7 @@ export const OrderSelector = ({ value, onChange }: OrderSelectorProps) => {
     name: order.order_name || `Заказ ${order.order_number}`,
     description: `${formatDate(order.created_at)} - ${order.status}`,
     imageUrl: null,
-    subtitle: order.contact_name || 'Без контакта'
+    subtitle: order.contact?.full_name || 'Без контакта'
   }));
 
   return (

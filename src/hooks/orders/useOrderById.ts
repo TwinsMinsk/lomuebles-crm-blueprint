@@ -20,12 +20,11 @@ export const fetchOrderById = async (id: number): Promise<Order> => {
 
   if (error) throw error;
   
-  // Transform data to match our Order type
+  // Transform data to match our Order type, ensuring the specific enum values are correctly typed
   const transformedOrder: Order = {
     ...data,
-    // Add missing fields or rename fields as needed
-    created_at: data.created_at,
-    status: data.status || '',
+    order_type: data.order_type as "Готовая мебель (Tilda)" | "Мебель на заказ",
+    client_language: data.client_language as "ES" | "EN" | "RU"
   };
 
   return transformedOrder;

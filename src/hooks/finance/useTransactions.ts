@@ -68,7 +68,7 @@ export interface TransactionsFilters {
 export type TransactionFormData = {
   transaction_date: Date | string;
   type: 'income' | 'expense';
-  category_id: number;
+  category_id: number | null;
   amount: number;
   currency: string;
   description?: string | null;
@@ -174,6 +174,10 @@ export const useAddTransaction = () => {
   return useMutation({
     mutationFn: async (transactionData: TransactionFormData) => {
       if (!user) throw new Error('User not authenticated');
+      
+      if (!transactionData.category_id) {
+        throw new Error('Category is required');
+      }
 
       const { data, error } = await supabase
         .from("transactions")
