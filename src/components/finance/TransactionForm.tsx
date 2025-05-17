@@ -154,7 +154,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   // Safely filter categories based on selected type
   // This ensures we always have a valid array of filtered categories
   const filteredCategories = categories
-    .filter(category => category && category.type === currentType);
+    .filter(category => category && category.type === currentType) || [];
 
   // Handle files change
   const handleFilesChange = (newFiles: any[]) => {
@@ -275,7 +275,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value
+                          {field.value && filteredCategories.length
                             ? filteredCategories.find(
                                 (category) => category.id === field.value
                               )?.name || "Выберите категорию"
@@ -412,7 +412,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value
+                          {field.value && orders.length
                             ? orders.find((order) => order.id === field.value)?.order_number || "Выберите заказ"
                             : "Выберите заказ"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
