@@ -221,7 +221,7 @@ const TransactionsPage = () => {
                 onValueChange={(value) => 
                   setFilters(prev => ({ 
                     ...prev, 
-                    categoryId: value ? parseInt(value) : undefined 
+                    categoryId: value && value !== "all-categories" ? parseInt(value) : undefined 
                   }))
                 }
               >
@@ -366,23 +366,25 @@ const TransactionsPage = () => {
           <DialogHeader>
             <DialogTitle>Создать новую операцию</DialogTitle>
           </DialogHeader>
-          <TransactionForm
-            initialData={{
-              transaction_date: new Date(),
-              type: "income",
-              amount: 0,
-              currency: "EUR",
-              category_id: null
-            }}
-            onSuccess={handleAddTransaction}
-            onCancel={() => setIsAddDialogOpen(false)}
-            isSubmitting={addTransaction.isPending}
-          />
+          {isAddDialogOpen && (
+            <TransactionForm
+              initialData={{
+                transaction_date: new Date(),
+                type: "income",
+                amount: 0,
+                currency: "EUR",
+                category_id: null
+              }}
+              onSuccess={handleAddTransaction}
+              onCancel={() => setIsAddDialogOpen(false)}
+              isSubmitting={addTransaction.isPending}
+            />
+          )}
         </DialogContent>
       </Dialog>
       
       {/* Edit Transaction Dialog */}
-      {selectedTransaction && (
+      {selectedTransaction && isEditDialogOpen && (
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
@@ -413,7 +415,7 @@ const TransactionsPage = () => {
       )}
       
       {/* View Transaction Dialog */}
-      {selectedTransaction && (
+      {selectedTransaction && isViewDialogOpen && (
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
