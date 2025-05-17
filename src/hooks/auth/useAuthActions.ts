@@ -7,6 +7,7 @@ export const useAuthActions = () => {
 
   const signUp = async (email: string, password: string, fullName?: string) => {
     try {
+      console.log("Attempting to sign up user:", email);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -18,12 +19,58 @@ export const useAuthActions = () => {
       });
 
       if (error) {
+        console.error("Error during signup:", error);
         toast({
           title: "Ошибка при регистрации",
           description: error.message,
           variant: "destructive",
         });
         return { error };
+      }
+
+      // Проверяем, успешно ли создан пользователь
+      if (data.user) {
+        console.log("User successfully created, checking if profile exists");
+        
+        // Проверяем, существует ли уже профиль
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', data.user.id)
+          .maybeSingle();
+          
+        if (profileError) {
+          console.error("Error checking profile:", profileError);
+        }
+        
+        // Если профиль не существует, создаем его вручную
+        if (!profileData) {
+          console.log("Profile not found, creating manually");
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert([
+              { 
+                id: data.user.id, 
+                email: email,
+                full_name: fullName || '',
+                role: 'Менеджер', // роль по умолчанию
+                is_active: true 
+              }
+            ]);
+            
+          if (insertError) {
+            console.error("Error creating profile:", insertError);
+            toast({
+              title: "Профиль создан, но произошла ошибка при настройке доступа",
+              description: "Пожалуйста, обратитесь к администратору",
+              variant: "destructive",
+            });
+          } else {
+            console.log("Profile successfully created");
+          }
+        } else {
+          console.log("Profile already exists");
+        }
       }
 
       toast({
@@ -45,18 +92,58 @@ export const useAuthActions = () => {
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log("Attempting to sign in user:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error("Error during signin:", error);
         toast({
           title: "Ошибка входа",
           description: error.message,
           variant: "destructive",
         });
         return { error };
+      }
+
+      // Дополнительно проверим наличие профиля после успешного входа
+      if (data.user) {
+        console.log("User successfully logged in, checking profile");
+        
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('id, role')
+          .eq('id', data.user.id)
+          .maybeSingle();
+          
+        if (profileError) {
+          console.error("Error checking profile:", profileError);
+        }
+        
+        // Если профиль не существует, создаем его вручную
+        if (!profileData) {
+          console.log("Profile not found after login, creating manually");
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert([
+              { 
+                id: data.user.id, 
+                email: email,
+                role: 'Менеджер', // роль по умолчанию
+                is_active: true 
+              }
+            ]);
+            
+          if (insertError) {
+            console.error("Error creating profile after login:", insertError);
+          } else {
+            console.log("Profile successfully created after login");
+          }
+        } else {
+          console.log("Profile exists with role:", profileData.role);
+        }
       }
 
       toast({
