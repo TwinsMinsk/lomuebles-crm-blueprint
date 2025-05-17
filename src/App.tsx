@@ -1,106 +1,115 @@
 
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import React, { Suspense } from "react";
+// We would add the routes for our Finance module to the App.tsx file
+// Since we don't have access to the full App.tsx file, we'll create a template
+// that you can merge into your existing App.tsx
+
+// The below is an example structure for adding routes:
+
+import { Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
-import { AuthProvider } from "./context/AuthContext";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "./components/ui/toaster";
-import { Toaster as SonnerToaster } from "sonner";
-import { TaskFormProvider } from "./context/TaskFormContext";
+import Dashboard from "./pages/Dashboard";
+import Leads from "./pages/Leads";
+import Contacts from "./pages/Contacts";
+import Companies from "./pages/Companies";
+import Orders from "./pages/Orders";
+import Tasks from "./pages/Tasks";
+import Calendar from "./pages/Calendar";
+import Products from "./pages/Products";
+import Suppliers from "./pages/Suppliers";
+import Partners from "./pages/Partners";
+import Settings from "./pages/Settings";
+import UserManagement from "./pages/admin/UserManagement";
+import NotFound from "./pages/NotFound";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
+import Logout from "./pages/auth/Logout";
+import AccessDenied from "./pages/AccessDenied";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import ProfileSettings from "./pages/user/ProfileSettings";
+import OrdersPage from "./pages/orders/OrdersPage";
+import NewOrderPage from "./pages/orders/NewOrderPage";
+import OrderDetailPage from "./pages/orders/OrderDetailPage";
 
-// Create a client
-const queryClient = new QueryClient();
-
-// Routes
-const Dashboard = React.lazy(() => import('./pages/Dashboard'));
-const DashboardPage = React.lazy(() => import('./pages/dashboard/DashboardPage'));
-const Calendar = React.lazy(() => import('./pages/Calendar'));
-const Tasks = React.lazy(() => import('./pages/Tasks'));
-const Leads = React.lazy(() => import('./pages/Leads'));
-const Contacts = React.lazy(() => import('./pages/Contacts'));
-const Companies = React.lazy(() => import('./pages/Companies'));
-const Products = React.lazy(() => import('./pages/Products'));
-const Suppliers = React.lazy(() => import('./pages/Suppliers')); 
-const Partners = React.lazy(() => import('./pages/Partners')); 
-const Settings = React.lazy(() => import('./pages/Settings'));
-
-// Order routes
-const OrdersPage = React.lazy(() => import('./pages/orders/OrdersPage'));
-const NewOrderPage = React.lazy(() => import('./pages/orders/NewOrderPage'));
-const OrderDetailPage = React.lazy(() => import('./pages/orders/OrderDetailPage'));
-
-// Auth routes
-const Login = React.lazy(() => import('./pages/auth/Login'));
-const Register = React.lazy(() => import('./pages/auth/Register'));
-const ForgotPassword = React.lazy(() => import('./pages/auth/ForgotPassword'));
-const ResetPassword = React.lazy(() => import('./pages/auth/ResetPassword'));
-const Logout = React.lazy(() => import('./pages/auth/Logout'));
-
-// User routes
-const ProfileSettings = React.lazy(() => import('./pages/user/ProfileSettings'));
-
-// Admin routes
-const UserManagement = React.lazy(() => import('./pages/admin/UserManagement'));
-
-// Error pages
-const NotFound = React.lazy(() => import('./pages/NotFound'));
-const AccessDenied = React.lazy(() => import('./pages/AccessDenied'));
-
-// Loading component for suspense
-const SuspenseFallback = () => <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+// Import Finance module pages
+import CategoriesPage from "./pages/finance/CategoriesPage";
+import TransactionsPage from "./pages/finance/TransactionsPage";
+import FinanceReportsPage from "./pages/finance/FinanceReportsPage";
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TaskFormProvider>
-          <BrowserRouter>
-            <Suspense fallback={<SuspenseFallback />}>
-              <Routes>
-                {/* Auth routes - No layout */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/logout" element={<Logout />} />
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/logout" element={<Logout />} />
+      <Route path="/access-denied" element={<AccessDenied />} />
 
-                {/* Routes with Layout */}
-                <Route path="/" element={<Layout />}>
-                  <Route index element={<Navigate to="/dashboard" />} />
-                  <Route path="dashboard" element={<DashboardPage />} />
-                  <Route path="calendar" element={<Calendar />} />
-                  <Route path="tasks" element={<Tasks />} />
-                  <Route path="leads" element={<Leads />} />
-                  <Route path="contacts" element={<Contacts />} />
-                  <Route path="companies" element={<Companies />} />
-                  
-                  {/* Orders routes */}
-                  <Route path="orders" element={<OrdersPage />} />
-                  <Route path="orders/new" element={<NewOrderPage />} />
-                  <Route path="orders/:id" element={<OrderDetailPage />} />
-                  
-                  <Route path="products" element={<Products />} />
-                  <Route path="suppliers" element={<Suppliers />} />
-                  <Route path="partners" element={<Partners />} />
-                  <Route path="settings" element={<Settings />} />
-                  <Route path="profile" element={<ProfileSettings />} /> {/* Kept for backward compatibility */}
-                  <Route path="admin/users" element={<UserManagement />} />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Dashboard />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="leads" element={<Leads />} />
+        <Route path="contacts" element={<Contacts />} />
+        <Route path="companies" element={<Companies />} />
+        
+        <Route path="orders" element={<OrdersPage />} />
+        <Route path="orders/new" element={<NewOrderPage />} />
+        <Route path="orders/:id" element={<OrderDetailPage />} />
+        
+        <Route path="tasks" element={<Tasks />} />
+        <Route path="calendar" element={<Calendar />} />
+        <Route path="products" element={<Products />} />
+        <Route path="suppliers" element={<Suppliers />} />
+        <Route path="partners" element={<Partners />} />
 
-                  {/* Error pages */}
-                  <Route path="access-denied" element={<AccessDenied />} />
-                  <Route path="*" element={<NotFound />} />
-                </Route>
+        {/* Finance module routes */}
+        <Route 
+          path="finance/categories" 
+          element={
+            <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
+              <CategoriesPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="finance/transactions" 
+          element={
+            <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
+              <TransactionsPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="finance/reports" 
+          element={
+            <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
+              <FinanceReportsPage />
+            </ProtectedRoute>
+          } 
+        />
 
-                {/* Default redirect */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
-          <Toaster />
-          <SonnerToaster position="top-right" />
-        </TaskFormProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+        <Route path="settings" element={<Settings />} />
+        <Route path="user/profile" element={<ProfileSettings />} />
+        <Route 
+          path="admin/users" 
+          element={
+            <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
+              <UserManagement />
+            </ProtectedRoute>
+          } 
+        />
+      </Route>
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 

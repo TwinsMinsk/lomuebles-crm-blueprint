@@ -842,6 +842,154 @@ export type Database = {
           },
         ]
       }
+      transaction_categories: {
+        Row: {
+          created_at: string
+          creator_user_id: string
+          description: string | null
+          id: number
+          name: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_user_id: string
+          description?: string | null
+          id?: number
+          name: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_user_id?: string
+          description?: string | null
+          id?: number
+          name?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_categories_creator_user_id_fkey"
+            columns: ["creator_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          amount: number
+          attached_files: Json | null
+          category_id: number
+          created_at: string
+          creator_user_id: string
+          currency: string
+          description: string | null
+          id: string
+          payment_method: string | null
+          related_contact_id: number | null
+          related_order_id: number | null
+          related_partner_manufacturer_id: number | null
+          related_supplier_id: number | null
+          related_user_id: string | null
+          transaction_date: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          attached_files?: Json | null
+          category_id: number
+          created_at?: string
+          creator_user_id: string
+          currency?: string
+          description?: string | null
+          id?: string
+          payment_method?: string | null
+          related_contact_id?: number | null
+          related_order_id?: number | null
+          related_partner_manufacturer_id?: number | null
+          related_supplier_id?: number | null
+          related_user_id?: string | null
+          transaction_date: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          attached_files?: Json | null
+          category_id?: number
+          created_at?: string
+          creator_user_id?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          payment_method?: string | null
+          related_contact_id?: number | null
+          related_order_id?: number | null
+          related_partner_manufacturer_id?: number | null
+          related_supplier_id?: number | null
+          related_user_id?: string | null
+          transaction_date?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "transaction_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_creator_user_id_fkey"
+            columns: ["creator_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_related_contact_id_fkey"
+            columns: ["related_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "transactions_related_order_id_fkey"
+            columns: ["related_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_related_partner_manufacturer_id_fkey"
+            columns: ["related_partner_manufacturer_id"]
+            isOneToOne: false
+            referencedRelation: "partners_manufacturers"
+            referencedColumns: ["partner_manufacturer_id"]
+          },
+          {
+            foreignKeyName: "transactions_related_supplier_id_fkey"
+            columns: ["related_supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["supplier_id"]
+          },
+          {
+            foreignKeyName: "transactions_related_user_id_fkey"
+            columns: ["related_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
