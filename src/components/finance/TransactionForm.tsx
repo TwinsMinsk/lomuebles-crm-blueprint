@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -50,8 +49,8 @@ export type TransactionFormValues = z.infer<typeof transactionFormSchema>;
 
 export interface TransactionFormProps {
   transaction?: Transaction;
-  initialData?: Partial<TransactionFormValues>;
-  onSuccess: (data: TransactionFormValues) => void;
+  initialData?: Partial<TransactionFormData>;
+  onSuccess: (data: TransactionFormData) => void;
   onCancel: () => void;
   isSubmitting?: boolean;
 }
@@ -116,18 +115,22 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     defaultValues: {
       transaction_date: transaction 
         ? new Date(transaction.transaction_date) 
-        : initialData?.transaction_date ? new Date(initialData.transaction_date) : new Date(),
+        : initialData?.transaction_date instanceof Date 
+          ? initialData.transaction_date 
+          : initialData?.transaction_date 
+            ? new Date(initialData.transaction_date)
+            : new Date(),
       type: transaction?.type || initialData?.type || "income",
-      category_id: transaction?.category_id || initialData?.category_id,
-      amount: transaction?.amount || initialData?.amount,
+      category_id: transaction?.category_id || initialData?.category_id || undefined,
+      amount: transaction?.amount || initialData?.amount || 0,
       currency: transaction?.currency || initialData?.currency || "EUR",
       description: transaction?.description || initialData?.description || "",
       payment_method: transaction?.payment_method || initialData?.payment_method || "",
-      related_order_id: transaction?.related_order_id || initialData?.related_order_id,
-      related_contact_id: transaction?.related_contact_id || initialData?.related_contact_id,
-      related_supplier_id: transaction?.related_supplier_id || initialData?.related_supplier_id,
-      related_partner_manufacturer_id: transaction?.related_partner_manufacturer_id || initialData?.related_partner_manufacturer_id,
-      related_user_id: transaction?.related_user_id || initialData?.related_user_id,
+      related_order_id: transaction?.related_order_id || initialData?.related_order_id || null,
+      related_contact_id: transaction?.related_contact_id || initialData?.related_contact_id || null,
+      related_supplier_id: transaction?.related_supplier_id || initialData?.related_supplier_id || null,
+      related_partner_manufacturer_id: transaction?.related_partner_manufacturer_id || initialData?.related_partner_manufacturer_id || null,
+      related_user_id: transaction?.related_user_id || initialData?.related_user_id || null,
     },
   });
 
@@ -145,14 +148,14 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   };
 
   const onSubmit = (data: TransactionFormValues) => {
-    // Add files to the data
-    const fullData = {
+    // Convert form data to TransactionFormData expected by the onSuccess callback
+    const fullData: TransactionFormData = {
       ...data,
-      files
+      attached_files: files,
     };
     
     // Call onSuccess callback with form data
-    onSuccess(data);
+    onSuccess(fullData);
   };
 
   return (
@@ -440,7 +443,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                   <FormLabel>Описание</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Детальное описание операции..."
+                      placeholder="Детальное описание операц��и..."
                       className="resize-none min-h-[120px]"
                       {...field}
                       value={field.value || ""}

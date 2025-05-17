@@ -21,10 +21,19 @@ export const fetchOrderById = async (id: number): Promise<Order> => {
   if (error) throw error;
   
   // Transform data to match our Order type, ensuring the specific enum values are correctly typed
+  // and JSON data is properly handled
   const transformedOrder: Order = {
     ...data,
     order_type: data.order_type as "Готовая мебель (Tilda)" | "Мебель на заказ",
-    client_language: data.client_language as "ES" | "EN" | "RU"
+    client_language: data.client_language as "ES" | "EN" | "RU",
+    // Ensure attached_files_order_docs is always an array
+    attached_files_order_docs: data.attached_files_order_docs ? 
+      (Array.isArray(data.attached_files_order_docs) ? 
+        data.attached_files_order_docs : 
+        typeof data.attached_files_order_docs === 'string' ? 
+          JSON.parse(data.attached_files_order_docs) : 
+          [])
+      : []
   };
 
   return transformedOrder;

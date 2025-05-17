@@ -1,13 +1,12 @@
-
 import React, { useState } from "react";
 import { format } from "date-fns";
-import { useTransactions, useAddTransaction, useUpdateTransaction, useDeleteTransaction, TransactionWithRelations, TransactionFormData } from "@/hooks/finance/useTransactions";
+import { useTransactions, useAddTransaction, useUpdateTransaction, useDeleteTransaction, TransactionWithRelations, TransactionFormData, TransactionsFilters } from "@/hooks/finance/useTransactions";
 import { useTransactionCategories } from "@/hooks/finance/useTransactionCategories";
 import { DateRangePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Search, Plus, Edit, Trash2, FileText } from "lucide-react";
@@ -30,7 +29,7 @@ import {
 } from "@/components/ui/table";
 
 // Define interface for local filters
-interface TransactionsFilters {
+interface LocalTransactionsFilters {
   dateFrom?: Date;
   dateTo?: Date;
   type?: 'income' | 'expense' | 'all';
@@ -40,7 +39,7 @@ interface TransactionsFilters {
 
 const TransactionsPage = () => {
   // State for filters
-  const [filters, setFilters] = useState<TransactionsFilters>({
+  const [filters, setFilters] = useState<LocalTransactionsFilters>({
     dateFrom: undefined,
     dateTo: undefined,
     type: 'all',
@@ -56,7 +55,7 @@ const TransactionsPage = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
   // Convert date filters to ISO string format for the API
-  const apiFilters = {
+  const apiFilters: TransactionsFilters = {
     dateFrom: filters.dateFrom ? format(filters.dateFrom, "yyyy-MM-dd") : undefined,
     dateTo: filters.dateTo ? format(filters.dateTo, "yyyy-MM-dd") : undefined,
     type: filters.type !== 'all' ? filters.type : undefined,
@@ -369,7 +368,7 @@ const TransactionsPage = () => {
           <TransactionForm
             initialData={{
               transaction_date: new Date(),
-              type: "income" as const,
+              type: "income",
               amount: 0,
               currency: "EUR",
               category_id: null

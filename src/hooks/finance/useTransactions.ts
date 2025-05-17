@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -65,7 +64,8 @@ export interface TransactionsFilters {
   categoryId?: number;
 }
 
-export type TransactionFormData = {
+// Align this with the form's expected shape
+export interface TransactionFormData {
   transaction_date: Date | string;
   type: 'income' | 'expense';
   category_id: number | null;
@@ -79,7 +79,7 @@ export type TransactionFormData = {
   related_partner_manufacturer_id?: number | null;
   related_user_id?: string | null;
   attached_files?: any[] | null;
-};
+}
 
 export const fetchTransactions = async (filters?: TransactionsFilters): Promise<TransactionWithRelations[]> => {
   let query = supabase
