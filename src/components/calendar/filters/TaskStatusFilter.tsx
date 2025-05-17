@@ -32,14 +32,16 @@ const TaskStatusFilter: React.FC<TaskStatusFilterProps> = ({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Все статусы</SelectItem>
-          {taskStatusOptions && taskStatusOptions.map((option) => (
-            <SelectItem 
-              key={option.value || "unknown"} 
-              value={option.value || "unknown"} // Ensure value is never empty
-            >
-              {option.label}
-            </SelectItem>
-          ))}
+          {taskStatusOptions && taskStatusOptions
+            .filter(option => option.value && option.value.trim() !== "") // Filter out options with empty values
+            .map((option) => (
+              <SelectItem 
+                key={option.value} 
+                value={option.value} 
+              >
+                {option.label}
+              </SelectItem>
+            ))}
         </SelectContent>
       </Select>
     </div>
