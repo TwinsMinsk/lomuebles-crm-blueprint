@@ -1,11 +1,11 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/context/AuthContext";
 import { useTransactionCategories } from "@/hooks/finance/useTransactionCategories";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -66,7 +66,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const { user } = useAuth();
   const [files, setFiles] = useState<any[]>([]);
   
-  // Fetch related entities for dropdowns with proper error handling
+  // Fetch related entities with safe data handling
   const { data: contactsData = [] } = useQuery({
     queryKey: ["contacts-simple"],
     queryFn: async () => {
@@ -75,6 +75,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       return data || [];
     }
   });
+  // Ensure contacts is always an array
   const contacts = Array.isArray(contactsData) ? contactsData : [];
 
   const { data: ordersData = [] } = useQuery({
@@ -85,6 +86,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       return data || [];
     }
   });
+  // Ensure orders is always an array
   const orders = Array.isArray(ordersData) ? ordersData : [];
 
   const { data: suppliersData = [] } = useQuery({
@@ -95,6 +97,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       return data || [];
     }
   });
+  // Ensure suppliers is always an array
   const suppliers = Array.isArray(suppliersData) ? suppliersData : [];
 
   const { data: partnersData = [] } = useQuery({
@@ -105,6 +108,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       return data || [];
     }
   });
+  // Ensure partners is always an array
   const partners = Array.isArray(partnersData) ? partnersData : [];
 
   const { data: employeesData = [] } = useQuery({
@@ -115,11 +119,13 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       return data || [];
     }
   });
+  // Ensure employees is always an array
   const employees = Array.isArray(employeesData) ? employeesData : [];
 
-  // Get transaction categories with proper type checking
+  // Get transaction categories with strict type checking
   const { data: categoriesData = [] } = useTransactionCategories();
-  const categories = Array.isArray(categoriesData) ? categoriesData : [];
+  // Ensure categories is always an array with valid items
+  const categories = Array.isArray(categoriesData) ? categoriesData.filter(Boolean) : [];
 
   // Form initialization
   const form = useForm<TransactionFormValues>({
@@ -149,10 +155,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   // Get the current selected type to filter categories
   const currentType = form.watch("type");
   
-  // Filter categories based on selected type with strict checking for nulls and undefined values
-  const filteredCategories = categories.filter(
-    category => category && category.type === currentType
-  );
+  // Safely filter categories based on selected type
+  // This ensures we always have a valid array of filtered categories
+  const filteredCategories = categories
+    .filter(category => category && category.type === currentType);
 
   // Handle files change
   const handleFilesChange = (newFiles: any[]) => {
@@ -161,7 +167,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
 
   // Handle form submit
   const onSubmit = (data: TransactionFormValues) => {
-    // Convert form data to TransactionFormData expected by the onSuccess callback
     const fullData: TransactionFormData = {
       transaction_date: data.transaction_date,
       type: data.type,
@@ -178,7 +183,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       attached_files: files,
     };
     
-    // Call onSuccess callback with form data
     onSuccess(fullData);
   };
 
@@ -290,28 +294,25 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                           <CommandInput placeholder="Поиск категории..." />
                           <CommandEmpty>Категории не найдены</CommandEmpty>
                           <CommandGroup>
-                            {filteredCategories.map((category) => {
-                              if (!category) return null;
-                              return (
-                                <CommandItem
-                                  value={category.name}
-                                  key={category.id}
-                                  onSelect={() => {
-                                    form.setValue("category_id", category.id);
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      category.id === field.value
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                  {category.name}
-                                </CommandItem>
-                              );
-                            })}
+                            {filteredCategories.map((category) => (
+                              <CommandItem
+                                value={category.name}
+                                key={category.id}
+                                onSelect={() => {
+                                  form.setValue("category_id", category.id);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    category.id === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {category.name}
+                              </CommandItem>
+                            ))}
                           </CommandGroup>
                         </Command>
                       ) : (
@@ -428,9 +429,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                           <CommandInput placeholder="Поиск заказа..." />
                           <CommandEmpty>Заказы не найдены</CommandEmpty>
                           <CommandGroup>
-                            {orders.map((order) => {
-                              if (!order) return null;
-                              return (
+                            {orders.map((order) => (
+                              order && (
                                 <CommandItem
                                   value={order.order_number || ""}
                                   key={order.id}
@@ -448,8 +448,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                                   />
                                   {order.order_number} {order.order_name ? `- ${order.order_name}` : ''}
                                 </CommandItem>
-                              );
-                            })}
+                              )
+                            ))}
                           </CommandGroup>
                         </Command>
                       ) : (
