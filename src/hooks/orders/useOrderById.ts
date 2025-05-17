@@ -4,15 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Order } from "@/types/order";
 
 export const fetchOrderById = async (id: number): Promise<Order> => {
-  // Fixing the query by making the column references more explicit
+  // Make column references completely explicit to avoid ambiguity
   const { data, error } = await supabase
     .from("orders")
     .select(`
       *,
       contact:client_contact_id(contact_id, full_name, primary_phone, primary_email),
       company:client_company_id(company_id, company_name),
-      creator_user:creator_user_id(id, full_name),
-      assigned_user:assigned_user_id(id, full_name),
+      creator:creator_user_id(profiles:id(id, full_name)),
+      assignee:assigned_user_id(profiles:id(id, full_name)),
       partner_manufacturer:partner_manufacturer_id(partner_manufacturer_id, company_name),
       source_lead:source_lead_id(lead_id)
     `)
@@ -38,12 +38,12 @@ export const fetchOrderById = async (id: number): Promise<Order> => {
     // Define creator object correctly
     creator: {
       id: data.creator_user_id || "",
-      full_name: data.creator_user?.full_name || ""
+      full_name: data.creator?.profiles?.full_name || ""
     },
     // Define assigned user object correctly with null check
     assigned_user: data.assigned_user_id ? {
       id: data.assigned_user_id,
-      full_name: data.assigned_user?.full_name || ""
+      full_name: data.assignee?.profiles?.full_name || ""
     } : null,
     // Ensure other relational objects are properly defined
     contact: data.contact || null,
