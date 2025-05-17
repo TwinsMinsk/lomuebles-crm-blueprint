@@ -70,45 +70,70 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const { data: contactsData = [] } = useQuery({
     queryKey: ["contacts-simple"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("contacts").select("contact_id, full_name").order("full_name");
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data, error } = await supabase.from("contacts").select("contact_id, full_name").order("full_name");
+        if (error) throw error;
+        return data || [];
+      } catch (err) {
+        console.error("Error fetching contacts:", err);
+        return [];
+      }
     }
   });
   
   const { data: ordersData = [] } = useQuery({
     queryKey: ["orders-simple"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("orders").select("id, order_number, order_name").order("order_number", { ascending: false });
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data, error } = await supabase.from("orders").select("id, order_number, order_name").order("order_number", { ascending: false });
+        if (error) throw error;
+        return data || [];
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+        return [];
+      }
     }
   });
   
   const { data: suppliersData = [] } = useQuery({
     queryKey: ["suppliers-simple"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("suppliers").select("supplier_id, company_name").order("company_name");
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data, error } = await supabase.from("suppliers").select("supplier_id, company_name").order("company_name");
+        if (error) throw error;
+        return data || [];
+      } catch (err) {
+        console.error("Error fetching suppliers:", err);
+        return [];
+      }
     }
   });
   
   const { data: partnersData = [] } = useQuery({
     queryKey: ["partners-simple"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("partners_manufacturers").select("partner_manufacturer_id, company_name").order("company_name");
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data, error } = await supabase.from("partners_manufacturers").select("partner_manufacturer_id, company_name").order("company_name");
+        if (error) throw error;
+        return data || [];
+      } catch (err) {
+        console.error("Error fetching partners:", err);
+        return [];
+      }
     }
   });
   
   const { data: employeesData = [] } = useQuery({
     queryKey: ["employees-simple"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("profiles").select("id, full_name").order("full_name");
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data, error } = await supabase.from("profiles").select("id, full_name").order("full_name");
+        if (error) throw error;
+        return data || [];
+      } catch (err) {
+        console.error("Error fetching employees:", err);
+        return [];
+      }
     }
   });
 
@@ -153,8 +178,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   
   // Safely filter categories based on selected type
   // This ensures we always have a valid array of filtered categories
-  const filteredCategories = categories
-    .filter(category => category && category.type === currentType) || [];
+  const filteredCategories = Array.isArray(categories) 
+    ? categories.filter(category => category && category.type === currentType) 
+    : [];
 
   // Handle files change
   const handleFilesChange = (newFiles: any[]) => {
@@ -275,9 +301,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value && filteredCategories.length
+                          {field.value && filteredCategories.length > 0
                             ? filteredCategories.find(
-                                (category) => category.id === field.value
+                                (category) => category && category.id === field.value
                               )?.name || "Выберите категорию"
                             : "Выберите категорию"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -285,29 +311,31 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-[400px] p-0">
-                      {filteredCategories.length > 0 ? (
+                      {filteredCategories && filteredCategories.length > 0 ? (
                         <Command>
                           <CommandInput placeholder="Поиск категории..." />
                           <CommandEmpty>Категории не найдены</CommandEmpty>
                           <CommandGroup>
                             {filteredCategories.map((category) => (
-                              <CommandItem
-                                value={category.name}
-                                key={category.id}
-                                onSelect={() => {
-                                  form.setValue("category_id", category.id);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    category.id === field.value
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                {category.name}
-                              </CommandItem>
+                              category && (
+                                <CommandItem
+                                  value={category.name}
+                                  key={category.id}
+                                  onSelect={() => {
+                                    form.setValue("category_id", category.id);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      category.id === field.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {category.name}
+                                </CommandItem>
+                              )
                             ))}
                           </CommandGroup>
                         </Command>
@@ -412,37 +440,39 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value && orders.length
-                            ? orders.find((order) => order.id === field.value)?.order_number || "Выберите заказ"
+                          {field.value && orders && orders.length > 0
+                            ? orders.find((order) => order && order.id === field.value)?.order_number || "Выберите заказ"
                             : "Выберите заказ"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-[400px] p-0">
-                      {orders.length > 0 ? (
+                      {orders && orders.length > 0 ? (
                         <Command>
                           <CommandInput placeholder="Поиск заказа..." />
                           <CommandEmpty>Заказы не найдены</CommandEmpty>
                           <CommandGroup>
                             {orders.map((order) => (
-                              <CommandItem
-                                value={order.order_number || ""}
-                                key={order.id}
-                                onSelect={() => {
-                                  form.setValue("related_order_id", order.id);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    order.id === field.value
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                {order.order_number} {order.order_name ? `- ${order.order_name}` : ''}
-                              </CommandItem>
+                              order && (
+                                <CommandItem
+                                  value={order.order_number || ""}
+                                  key={order.id}
+                                  onSelect={() => {
+                                    form.setValue("related_order_id", order.id);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      order.id === field.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {order.order_number} {order.order_name ? `- ${order.order_name}` : ''}
+                                </CommandItem>
+                              )
                             ))}
                           </CommandGroup>
                         </Command>
