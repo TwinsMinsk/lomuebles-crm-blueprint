@@ -343,7 +343,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                         <Command>
                           <CommandInput placeholder="Поиск категории..." />
                           <CommandEmpty>Категории не найдены</CommandEmpty>
-                          <CommandGroup>
+                          <CommandGroup className="max-h-64 overflow-auto">
                             {filteredCategories.map((category) => (
                               category && (
                                 <CommandItem
@@ -480,7 +480,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                         <Command>
                           <CommandInput placeholder="Поиск заказа..." />
                           <CommandEmpty>Заказы не найдены</CommandEmpty>
-                          <CommandGroup>
+                          <CommandGroup className="max-h-64 overflow-auto">
                             {orders.map((order) => (
                               order && (
                                 <CommandItem
@@ -574,4 +574,3 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
 };
 
 export default TransactionForm;
-
