@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -136,6 +137,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     const fullData: TransactionFormData = {
       ...data,
       transaction_date: data.transaction_date,
+      type: data.type, // Ensure type is included in the fullData object
       category_id: Number(data.category_id),
       amount: Number(data.amount),
       related_order_id: data.related_order_id || null,
