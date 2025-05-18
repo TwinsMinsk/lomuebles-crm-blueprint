@@ -64,13 +64,13 @@ export interface TransactionsFilters {
   categoryId?: number;
 }
 
-// Update the TransactionFormData interface to make type required
+// Update the TransactionFormData interface to make currency required
 export interface TransactionFormData {
   transaction_date: Date | string;
-  type: 'income' | 'expense';  // Make this required
+  type: 'income' | 'expense';
   category_id: number | null;
   amount: number;
-  currency: string;
+  currency: string;  // Making this explicitly required
   description?: string | null;
   payment_method?: string | null;
   related_order_id?: number | null;
