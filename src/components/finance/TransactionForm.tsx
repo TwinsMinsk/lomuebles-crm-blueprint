@@ -136,20 +136,34 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     setFiles(newFiles);
   };
 
-  // Handle category selection with explicit event handling and type conversion
-  const handleCategorySelect = (category: any) => {
-    console.log('Attempting to select category:', category.name, category.id, typeof category.id);
-    // Explicitly convert id to number
+  // Dedicated handler functions for selection with explicit event handling
+  const handleCategorySelect = (category: any, event?: React.MouseEvent) => {
+    // Stop event propagation to prevent the Popover from closing prematurely
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
+    console.log('handleCategorySelect called with:', category.name, category.id, typeof category.id);
     form.setValue("category_id", Number(category.id), { shouldValidate: true });
-    setIsCategoryPopoverOpen(false);
+    
+    // Close the popover after selection
+    setTimeout(() => setIsCategoryPopoverOpen(false), 100);
   };
   
-  // Handle order selection with explicit event handling and type conversion
-  const handleOrderSelect = (order: any) => {
-    console.log('Attempting to select order:', order.order_number, order.id, typeof order.id);
-    // Explicitly convert id to number
+  // Dedicated handler for order selection
+  const handleOrderSelect = (order: any, event?: React.MouseEvent) => {
+    // Stop event propagation to prevent the Popover from closing prematurely
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
+    console.log('handleOrderSelect called with:', order.order_number, order.id, typeof order.id);
     form.setValue("related_order_id", Number(order.id), { shouldValidate: true });
-    setIsOrderPopoverOpen(false);
+    
+    // Close the popover after selection
+    setTimeout(() => setIsOrderPopoverOpen(false), 100);
   };
 
   const isDataLoading = isLoadingCategories || isLoadingContacts || isLoadingOrders;
@@ -213,13 +227,12 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-[100] pointer-events-auto" align="start">
+                    <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
                         initialFocus
-                        className="p-3 pointer-events-auto" 
                       />
                     </PopoverContent>
                   </Popover>
@@ -275,7 +288,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             "w-full justify-between",
                             !field.value && "text-muted-foreground"
                           )}
-                          disabled={isLoadingCategories || filteredCategories.length === 0 && !field.value}
+                          // Temporarily remove disabled state for testing
+                          // disabled={isLoadingCategories || filteredCategories.length === 0 && !field.value}
                           onClick={() => setIsCategoryPopoverOpen(true)}
                         >
                           {field.value
@@ -288,9 +302,15 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent 
-                      className="w-[calc(100vw-2rem)] md:w-[400px] p-0 z-[100] pointer-events-auto"
+                      className="w-[calc(100vw-2rem)] md:w-[400px] p-0"
                       align="start"
                       sideOffset={5}
+                      onInteractOutside={(e) => {
+                        // Only close on clicks outside of the popover content
+                        if (e.target === document.body) {
+                          e.preventDefault();
+                        }
+                      }}
                     >
                       <Command className="w-full">
                         <CommandInput placeholder="Поиск категории..." />
@@ -301,11 +321,19 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                               <CommandItem
                                 key={category.id}
                                 value={category.name || ''} 
-                                onSelect={() => handleCategorySelect(category)}
-                                className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                                onClick={() => handleCategorySelect(category)}
+                                className="cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                                 data-id={category.id}
                                 data-selected={category.id === Number(field.value)}
+                                onSelect={(currentValue) => {
+                                  // We completely ignore the currentValue from onSelect
+                                  // And use our category object directly
+                                  handleCategorySelect(category);
+                                }}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleCategorySelect(category, e);
+                                }}
                               >
                                 <Check
                                   className={cn(
@@ -414,7 +442,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             "w-full justify-between",
                             !field.value && "text-muted-foreground"
                           )}
-                          // We're temporarily removing the disabled state for testing
+                          // Temporarily remove disabled state for testing
                           // disabled={isLoadingOrders}
                           onClick={() => setIsOrderPopoverOpen(true)}
                         >
@@ -426,9 +454,15 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent 
-                      className="w-[calc(100vw-2rem)] md:w-[400px] p-0 z-[100] pointer-events-auto"
+                      className="w-[calc(100vw-2rem)] md:w-[400px] p-0"
                       align="start"
                       sideOffset={5}
+                      onInteractOutside={(e) => {
+                        // Only close on clicks outside of the popover content
+                        if (e.target === document.body) {
+                          e.preventDefault();
+                        }
+                      }}
                     >
                       <Command className="w-full">
                         <CommandInput placeholder="Поиск заказа..." />
@@ -439,11 +473,19 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                               <CommandItem
                                 key={order.id}
                                 value={`${order.order_number || ''} ${order.order_name || ''}`}
-                                onSelect={() => handleOrderSelect(order)}
-                                className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                                onClick={() => handleOrderSelect(order)}
+                                className="cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                                 data-id={order.id}
                                 data-selected={order.id === Number(field.value)}
+                                onSelect={(currentValue) => {
+                                  // We completely ignore the currentValue from onSelect
+                                  // And use our order object directly
+                                  handleOrderSelect(order);
+                                }}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleOrderSelect(order, e);
+                                }}
                               >
                                 <Check
                                   className={cn(
