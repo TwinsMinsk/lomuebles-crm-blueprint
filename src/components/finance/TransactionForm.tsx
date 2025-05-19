@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -67,7 +68,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const { user } = useAuth();
   const [files, setFiles] = useState<any[]>(transaction?.attached_files || initialData?.attached_files || []);
   
-  // Add state for Popover open/close
+  // State for Popover open/close with more descriptive names
   const [isCategoryPopoverOpen, setIsCategoryPopoverOpen] = useState(false);
   const [isOrderPopoverOpen, setIsOrderPopoverOpen] = useState(false);
 
@@ -128,6 +129,20 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
 
   const handleFilesChange = (newFiles: any[]) => {
     setFiles(newFiles);
+  };
+
+  // Handle category selection with explicit event handling
+  const handleCategorySelect = (category: any) => {
+    console.log('Attempting to select category:', category.name, category.id);
+    form.setValue("category_id", category.id, { shouldValidate: true });
+    setIsCategoryPopoverOpen(false);
+  };
+  
+  // Handle order selection with explicit event handling
+  const handleOrderSelect = (order: any) => {
+    console.log('Attempting to select order:', order.order_number, order.id);
+    form.setValue("related_order_id", order.id, { shouldValidate: true });
+    setIsOrderPopoverOpen(false);
   };
 
   const isDataLoading = isLoadingCategories || isLoadingContacts || isLoadingOrders;
@@ -197,6 +212,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                         selected={field.value}
                         onSelect={field.onChange}
                         initialFocus
+                        className="p-3 pointer-events-auto" 
                       />
                     </PopoverContent>
                   </Popover>
@@ -265,9 +281,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent 
-                      className="w-[calc(100vw-2rem)] md:w-[400px] p-0"
-                      style={{ pointerEvents: 'auto' }}
+                      className="w-[calc(100vw-2rem)] md:w-[400px] p-0 z-50"
                       align="start"
+                      sideOffset={5}
                     >
                       <Command>
                         <CommandInput placeholder="Поиск категории..." />
@@ -276,14 +292,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                           <CommandGroup className="max-h-64 overflow-auto">
                             {filteredCategories.map((category) => (
                               <CommandItem
-                                value={category.name || ''} 
                                 key={category.id}
-                                onSelect={() => {
-                                  console.log('Category selected:', category.name, category.id);
-                                  form.setValue("category_id", category.id, { shouldValidate: true });
-                                  setIsCategoryPopoverOpen(false);
-                                }}
-                                className="cursor-pointer"
+                                value={category.name || ''} 
+                                onSelect={() => handleCategorySelect(category)}
+                                className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                                onClick={() => handleCategorySelect(category)}
                               >
                                 <Check
                                   className={cn(
@@ -293,7 +306,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                                       : "opacity-0"
                                   )}
                                 />
-                                {category.name || ''}
+                                <span>{category.name || ''}</span>
                               </CommandItem>
                             ))}
                           </CommandGroup>
@@ -403,8 +416,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent 
-                      className="w-[calc(100vw-2rem)] md:w-[400px] p-0"
-                      style={{ pointerEvents: 'auto' }}
+                      className="w-[calc(100vw-2rem)] md:w-[400px] p-0 z-50"
                       align="start"
                       sideOffset={5}
                     >
@@ -415,14 +427,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                           <CommandGroup className="max-h-64 overflow-auto">
                             {orders.map((order) => (
                               <CommandItem
-                                value={`${order.order_number || ''} ${order.order_name || ''}`}
                                 key={order.id}
-                                onSelect={() => {
-                                  console.log('Order selected:', order.order_number, order.id);
-                                  form.setValue("related_order_id", order.id, { shouldValidate: true });
-                                  setIsOrderPopoverOpen(false);
-                                }}
-                                className="cursor-pointer"
+                                value={`${order.order_number || ''} ${order.order_name || ''}`}
+                                onSelect={() => handleOrderSelect(order)}
+                                className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                                onClick={() => handleOrderSelect(order)}
                               >
                                 <Check
                                   className={cn(
@@ -432,7 +441,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                                       : "opacity-0"
                                   )}
                                 />
-                                {order.order_number} {order.order_name ? `- ${order.order_name}` : ''}
+                                <span>{order.order_number} {order.order_name ? `- ${order.order_name}` : ''}</span>
                               </CommandItem>
                             ))}
                           </CommandGroup>
