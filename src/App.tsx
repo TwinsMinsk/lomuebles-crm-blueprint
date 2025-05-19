@@ -1,13 +1,7 @@
 
-// We would add the routes for our Finance module to the App.tsx file
-// Since we don't have access to the full App.tsx file, we'll create a template
-// that you can merge into your existing App.tsx
-
-// The below is an example structure for adding routes:
-
 import { Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/dashboard/DashboardPage";  // Updated import path
 import Leads from "./pages/Leads";
 import Contacts from "./pages/Contacts";
 import Companies from "./pages/Companies";
