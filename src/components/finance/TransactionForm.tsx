@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,7 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -21,6 +19,8 @@ import { Transaction, TransactionFormData } from "@/hooks/finance/useTransaction
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { FileUploadSection } from "@/components/common/FileUploadSection";
+import TransactionCategorySelector from "./form-selectors/TransactionCategorySelector";
+import TransactionOrderSelector from "./form-selectors/TransactionOrderSelector";
 
 // Define schema for the form
 const transactionFormSchema = z.object({
@@ -68,10 +68,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const { user } = useAuth();
   const [files, setFiles] = useState<any[]>(transaction?.attached_files || initialData?.attached_files || []);
   
-  // State for Popover open/close with more descriptive names
-  const [isCategoryPopoverOpen, setIsCategoryPopoverOpen] = useState(false);
-  const [isOrderPopoverOpen, setIsOrderPopoverOpen] = useState(false);
-
   // Fetch related entities
   const { data: contactsData, isLoading: isLoadingContacts } = useQuery({
     queryKey: ["contacts-simple-for-transaction"],
@@ -128,42 +124,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     }
   }, [currentType, form, categories]);
 
-  // Filter categories based on the selected transaction type
-  const filteredCategories = categories.filter(category => category.type === currentType);
-  console.log("Filtered categories:", filteredCategories);
-
   const handleFilesChange = (newFiles: any[]) => {
     setFiles(newFiles);
-  };
-
-  // Dedicated handler functions for selection with explicit event handling
-  const handleCategorySelect = (category: any, event?: React.MouseEvent) => {
-    // Stop event propagation to prevent the Popover from closing prematurely
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    
-    console.log('handleCategorySelect called with:', category.name, category.id, typeof category.id);
-    form.setValue("category_id", Number(category.id), { shouldValidate: true });
-    
-    // Close the popover after selection
-    setTimeout(() => setIsCategoryPopoverOpen(false), 100);
-  };
-  
-  // Dedicated handler for order selection
-  const handleOrderSelect = (order: any, event?: React.MouseEvent) => {
-    // Stop event propagation to prevent the Popover from closing prematurely
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    
-    console.log('handleOrderSelect called with:', order.order_number, order.id, typeof order.id);
-    form.setValue("related_order_id", Number(order.id), { shouldValidate: true });
-    
-    // Close the popover after selection
-    setTimeout(() => setIsOrderPopoverOpen(false), 100);
   };
 
   const isDataLoading = isLoadingCategories || isLoadingContacts || isLoadingOrders;
@@ -269,88 +231,25 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
               )}
             />
 
+            {/* Replace Popover+Command with the new CategorySelector */}
             <FormField
               control={form.control}
               name="category_id"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem>
                   <FormLabel>Категория*</FormLabel>
-                  <Popover 
-                    open={isCategoryPopoverOpen} 
-                    onOpenChange={setIsCategoryPopoverOpen}
-                  >
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className={cn(
-                            "w-full justify-between",
-                            !field.value && "text-muted-foreground"
-                          )}
-                          // Temporarily remove disabled state for testing
-                          // disabled={isLoadingCategories || filteredCategories.length === 0 && !field.value}
-                          onClick={() => setIsCategoryPopoverOpen(true)}
-                        >
-                          {field.value
-                            ? filteredCategories.find(
-                                (category) => category.id === Number(field.value)
-                              )?.name
-                            : "Выберите категорию"}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent 
-                      className="w-[calc(100vw-2rem)] md:w-[400px] p-0"
-                      align="start"
-                      sideOffset={5}
-                      onInteractOutside={(e) => {
-                        // Only close on clicks outside of the popover content
-                        if (e.target === document.body) {
-                          e.preventDefault();
-                        }
+                  <FormControl>
+                    <TransactionCategorySelector
+                      value={field.value}
+                      onChange={(value) => {
+                        console.log("TransactionCategorySelector onChange called with:", value);
+                        field.onChange(value);
                       }}
-                    >
-                      <Command className="w-full">
-                        <CommandInput placeholder="Поиск категории..." />
-                        <CommandList>
-                          <CommandEmpty>Категории не найдены для типа "{currentType === 'income' ? 'Доход' : 'Расход'}"</CommandEmpty>
-                          <CommandGroup className="max-h-64 overflow-auto">
-                            {filteredCategories.map((category) => (
-                              <CommandItem
-                                key={category.id}
-                                value={category.name || ''} 
-                                className="cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                                data-id={category.id}
-                                data-selected={category.id === Number(field.value)}
-                                onSelect={(currentValue) => {
-                                  // We completely ignore the currentValue from onSelect
-                                  // And use our category object directly
-                                  handleCategorySelect(category);
-                                }}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  handleCategorySelect(category, e);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    category.id === Number(field.value)
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                <span>{category.name || ''}</span>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                      categories={categories}
+                      type={currentType}
+                      isLoading={isLoadingCategories}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -423,86 +322,24 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Связанные объекты и описание</h3>
             
+            {/* Replace Popover+Command with the new OrderSelector */}
             <FormField
               control={form.control}
               name="related_order_id"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem>
                   <FormLabel>Связанный заказ</FormLabel>
-                  <Popover 
-                    open={isOrderPopoverOpen} 
-                    onOpenChange={setIsOrderPopoverOpen}
-                  >
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className={cn(
-                            "w-full justify-between",
-                            !field.value && "text-muted-foreground"
-                          )}
-                          // Temporarily remove disabled state for testing
-                          // disabled={isLoadingOrders}
-                          onClick={() => setIsOrderPopoverOpen(true)}
-                        >
-                          {field.value
-                            ? orders.find((order) => order.id === Number(field.value))?.order_number
-                            : "Выберите заказ"}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent 
-                      className="w-[calc(100vw-2rem)] md:w-[400px] p-0"
-                      align="start"
-                      sideOffset={5}
-                      onInteractOutside={(e) => {
-                        // Only close on clicks outside of the popover content
-                        if (e.target === document.body) {
-                          e.preventDefault();
-                        }
+                  <FormControl>
+                    <TransactionOrderSelector
+                      value={field.value}
+                      onChange={(value) => {
+                        console.log("TransactionOrderSelector onChange called with:", value);
+                        field.onChange(value);
                       }}
-                    >
-                      <Command className="w-full">
-                        <CommandInput placeholder="Поиск заказа..." />
-                        <CommandList>
-                          <CommandEmpty>Заказы не найдены.</CommandEmpty>
-                          <CommandGroup className="max-h-64 overflow-auto">
-                            {orders.map((order) => (
-                              <CommandItem
-                                key={order.id}
-                                value={`${order.order_number || ''} ${order.order_name || ''}`}
-                                className="cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                                data-id={order.id}
-                                data-selected={order.id === Number(field.value)}
-                                onSelect={(currentValue) => {
-                                  // We completely ignore the currentValue from onSelect
-                                  // And use our order object directly
-                                  handleOrderSelect(order);
-                                }}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  handleOrderSelect(order, e);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    order.id === Number(field.value)
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                <span>{order.order_number} {order.order_name ? `- ${order.order_name}` : ''}</span>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                      orders={orders}
+                      isLoading={isLoadingOrders}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
