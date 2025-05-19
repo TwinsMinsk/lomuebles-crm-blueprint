@@ -87,6 +87,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     queryFn: async () => {
       const { data, error } = await supabase.from("orders").select("id, order_number, order_name").order("order_number", { ascending: false });
       if (error) { console.error("Error fetching orders:", error); throw error; }
+      console.log("Fetched orders data:", data);
       return data || [];
     }
   });
@@ -97,6 +98,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const contacts = Array.isArray(contactsData) ? contactsData : [];
   const orders = Array.isArray(ordersData) ? ordersData : [];
   const categories = Array.isArray(categoriesData) ? categoriesData.filter(Boolean) : [];
+  
+  console.log("Orders array:", orders);
+  console.log("Categories array:", categories);
 
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionFormSchema),
@@ -126,22 +130,25 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
 
   // Filter categories based on the selected transaction type
   const filteredCategories = categories.filter(category => category.type === currentType);
+  console.log("Filtered categories:", filteredCategories);
 
   const handleFilesChange = (newFiles: any[]) => {
     setFiles(newFiles);
   };
 
-  // Handle category selection with explicit event handling
+  // Handle category selection with explicit event handling and type conversion
   const handleCategorySelect = (category: any) => {
-    console.log('Attempting to select category:', category.name, category.id);
-    form.setValue("category_id", category.id, { shouldValidate: true });
+    console.log('Attempting to select category:', category.name, category.id, typeof category.id);
+    // Explicitly convert id to number
+    form.setValue("category_id", Number(category.id), { shouldValidate: true });
     setIsCategoryPopoverOpen(false);
   };
   
-  // Handle order selection with explicit event handling
+  // Handle order selection with explicit event handling and type conversion
   const handleOrderSelect = (order: any) => {
-    console.log('Attempting to select order:', order.order_number, order.id);
-    form.setValue("related_order_id", order.id, { shouldValidate: true });
+    console.log('Attempting to select order:', order.order_number, order.id, typeof order.id);
+    // Explicitly convert id to number
+    form.setValue("related_order_id", Number(order.id), { shouldValidate: true });
     setIsOrderPopoverOpen(false);
   };
 
@@ -155,10 +162,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       category_id: Number(data.category_id),
       amount: Number(data.amount),
       currency: data.currency || 'EUR', // Ensure currency is always included with a default value
-      related_order_id: data.related_order_id || null,
-      related_contact_id: data.related_contact_id || null,
-      related_supplier_id: data.related_supplier_id || null,
-      related_partner_manufacturer_id: data.related_partner_manufacturer_id || null,
+      related_order_id: data.related_order_id ? Number(data.related_order_id) : null,
+      related_contact_id: data.related_contact_id ? Number(data.related_contact_id) : null,
+      related_supplier_id: data.related_supplier_id ? Number(data.related_supplier_id) : null,
+      related_partner_manufacturer_id: data.related_partner_manufacturer_id ? Number(data.related_partner_manufacturer_id) : null,
       related_user_id: data.related_user_id || null,
       attached_files: files,
     };
@@ -206,7 +213,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 z-[100] pointer-events-auto" align="start">
                       <Calendar
                         mode="single"
                         selected={field.value}
@@ -273,7 +280,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                         >
                           {field.value
                             ? filteredCategories.find(
-                                (category) => category.id === field.value
+                                (category) => category.id === Number(field.value)
                               )?.name
                             : "Выберите категорию"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -281,11 +288,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent 
-                      className="w-[calc(100vw-2rem)] md:w-[400px] p-0 z-50"
+                      className="w-[calc(100vw-2rem)] md:w-[400px] p-0 z-[100] pointer-events-auto"
                       align="start"
                       sideOffset={5}
                     >
-                      <Command>
+                      <Command className="w-full">
                         <CommandInput placeholder="Поиск категории..." />
                         <CommandList>
                           <CommandEmpty>Категории не найдены для типа "{currentType === 'income' ? 'Доход' : 'Расход'}"</CommandEmpty>
@@ -297,11 +304,13 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                                 onSelect={() => handleCategorySelect(category)}
                                 className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
                                 onClick={() => handleCategorySelect(category)}
+                                data-id={category.id}
+                                data-selected={category.id === Number(field.value)}
                               >
                                 <Check
                                   className={cn(
                                     "mr-2 h-4 w-4",
-                                    category.id === field.value
+                                    category.id === Number(field.value)
                                       ? "opacity-100"
                                       : "opacity-0"
                                   )}
@@ -405,22 +414,23 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                             "w-full justify-between",
                             !field.value && "text-muted-foreground"
                           )}
-                          disabled={isLoadingOrders}
+                          // We're temporarily removing the disabled state for testing
+                          // disabled={isLoadingOrders}
                           onClick={() => setIsOrderPopoverOpen(true)}
                         >
                           {field.value
-                            ? orders.find((order) => order.id === field.value)?.order_number
+                            ? orders.find((order) => order.id === Number(field.value))?.order_number
                             : "Выберите заказ"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent 
-                      className="w-[calc(100vw-2rem)] md:w-[400px] p-0 z-50"
+                      className="w-[calc(100vw-2rem)] md:w-[400px] p-0 z-[100] pointer-events-auto"
                       align="start"
                       sideOffset={5}
                     >
-                      <Command>
+                      <Command className="w-full">
                         <CommandInput placeholder="Поиск заказа..." />
                         <CommandList>
                           <CommandEmpty>Заказы не найдены.</CommandEmpty>
@@ -432,11 +442,13 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                                 onSelect={() => handleOrderSelect(order)}
                                 className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
                                 onClick={() => handleOrderSelect(order)}
+                                data-id={order.id}
+                                data-selected={order.id === Number(field.value)}
                               >
                                 <Check
                                   className={cn(
                                     "mr-2 h-4 w-4",
-                                    order.id === field.value
+                                    order.id === Number(field.value)
                                       ? "opacity-100"
                                       : "opacity-0"
                                   )}
