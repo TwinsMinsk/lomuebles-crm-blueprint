@@ -18,9 +18,6 @@ export const TaskFormProvider: React.FC<{ children: ReactNode }> = ({ children }
   return (
     <TaskFormContext.Provider value={{ isOpen, selectedTask, openModal, closeModal }}>
       {children}
-      
-      {/* We import TaskFormModalContainer here to avoid circular dependencies */}
-      {isOpen && <TaskFormModalContainer />}
     </TaskFormContext.Provider>
   );
 };
@@ -32,6 +29,3 @@ export const useTaskForm = () => {
   }
   return context;
 };
-
-// Import here to prevent circular dependencies
-import TaskFormModalContainer from "@/components/tasks/TaskFormModalContainer";

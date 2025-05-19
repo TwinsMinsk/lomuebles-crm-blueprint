@@ -1,8 +1,8 @@
 
 import React from "react";
-import { useAuth } from "@/context/AuthContext";
 import PageHeader from "@/components/common/PageHeader";
 import TasksCalendar from "@/components/calendar/TasksCalendar";
+import TaskFormModalContainer from "@/components/tasks/TaskFormModalContainer";
 
 const Calendar: React.FC = () => {
   return (
@@ -12,6 +12,7 @@ const Calendar: React.FC = () => {
         description="Просмотр и управление задачами в календаре"
       />
       <TasksCalendar />
+      <TaskFormModalContainer />
     </div>
   );
 };

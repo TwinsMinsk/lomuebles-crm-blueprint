@@ -6,6 +6,7 @@ import App from './App.tsx';
 import './index.css';
 import { AuthProvider } from './context/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { TaskFormProvider } from './context/TaskFormContext';
 
 const rootElement = document.getElementById("root");
 
@@ -28,7 +29,9 @@ createRoot(rootElement).render(
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <App />
+          <TaskFormProvider>
+            <App />
+          </TaskFormProvider>
         </AuthProvider>
       </QueryClientProvider>
     </BrowserRouter>
