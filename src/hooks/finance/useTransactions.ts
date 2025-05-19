@@ -45,7 +45,7 @@ export interface TransactionWithRelations extends Transaction {
   } | null;
   related_supplier?: {
     supplier_id: number;
-    company_name: string;
+    supplier_name: string; // Изменено с company_name на supplier_name
   } | null;
   related_partner_manufacturer?: {
     partner_manufacturer_id: number;
@@ -82,46 +82,107 @@ export interface TransactionFormData {
 }
 
 export const fetchTransactions = async (filters?: TransactionsFilters): Promise<TransactionWithRelations[]> => {
-  let query = supabase
-    .from("transactions")
-    .select(`
-      *,
-      category:transaction_categories!category_id(id, name, type),
-      related_order:related_order_id(id, order_number, order_name),
-      related_contact:related_contact_id(contact_id, full_name),
-      related_supplier:related_supplier_id(supplier_id, company_name),
-      related_partner_manufacturer:related_partner_manufacturer_id(partner_manufacturer_id, company_name),
-      related_user:related_user_id(id, full_name)
-    `)
-    .order('transaction_date', { ascending: false });
+  try {
+    // Сначала получаем основные данные транзакций
+    let query = supabase
+      .from("transactions")
+      .select(`
+        *,
+        category:transaction_categories!category_id(id, name, type)
+      `)
+      .order('transaction_date', { ascending: false });
 
-  // Apply filters
-  if (filters) {
-    if (filters.dateFrom) {
-      query = query.gte('transaction_date', filters.dateFrom);
+    // Применяем фильтры
+    if (filters) {
+      if (filters.dateFrom) {
+        query = query.gte('transaction_date', filters.dateFrom);
+      }
+      if (filters.dateTo) {
+        query = query.lte('transaction_date', filters.dateTo);
+      }
+      if (filters.type && filters.type !== 'all') {
+        query = query.eq('type', filters.type);
+      }
+      if (filters.categoryId) {
+        query = query.eq('category_id', filters.categoryId);
+      }
     }
-    if (filters.dateTo) {
-      query = query.lte('transaction_date', filters.dateTo);
+
+    const { data: transactionsData, error: transactionsError } = await query;
+
+    if (transactionsError) throw transactionsError;
+    if (!transactionsData || transactionsData.length === 0) return [];
+
+    // Создаем массив для хранения результатов с отношениями
+    const transactionsWithRelations: TransactionWithRelations[] = [];
+
+    // Обрабатываем каждую транзакцию и добавляем связанные данные
+    for (const transaction of transactionsData) {
+      const transactionWithRelations = { ...transaction } as unknown as TransactionWithRelations;
+
+      // Дозагружаем связанный заказ, если есть
+      if (transaction.related_order_id) {
+        const { data: orderData } = await supabase
+          .from("orders")
+          .select("id, order_number, order_name")
+          .eq("id", transaction.related_order_id)
+          .single();
+        
+        transactionWithRelations.related_order = orderData || null;
+      }
+
+      // Дозагружаем связанный контакт, если есть
+      if (transaction.related_contact_id) {
+        const { data: contactData } = await supabase
+          .from("contacts")
+          .select("contact_id, full_name")
+          .eq("contact_id", transaction.related_contact_id)
+          .single();
+        
+        transactionWithRelations.related_contact = contactData || null;
+      }
+
+      // Дозагружаем связанного поставщика, если есть
+      if (transaction.related_supplier_id) {
+        const { data: supplierData } = await supabase
+          .from("suppliers")
+          .select("supplier_id, supplier_name")
+          .eq("supplier_id", transaction.related_supplier_id)
+          .single();
+        
+        transactionWithRelations.related_supplier = supplierData || null;
+      }
+
+      // Дозагружаем связанного партнера/производителя, если есть
+      if (transaction.related_partner_manufacturer_id) {
+        const { data: partnerData } = await supabase
+          .from("partners_manufacturers")
+          .select("partner_manufacturer_id, company_name")
+          .eq("partner_manufacturer_id", transaction.related_partner_manufacturer_id)
+          .single();
+        
+        transactionWithRelations.related_partner_manufacturer = partnerData || null;
+      }
+
+      // Дозагружаем связанного пользователя, если есть
+      if (transaction.related_user_id) {
+        const { data: userData } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .eq("id", transaction.related_user_id)
+          .single();
+        
+        transactionWithRelations.related_user = userData || null;
+      }
+
+      transactionsWithRelations.push(transactionWithRelations);
     }
-    if (filters.type && filters.type !== 'all') {
-      query = query.eq('type', filters.type);
-    }
-    if (filters.categoryId) {
-      query = query.eq('category_id', filters.categoryId);
-    }
+
+    return transactionsWithRelations;
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    return [];
   }
-
-  const { data, error } = await query;
-
-  if (error) throw error;
-
-  // Transform data to match our interface
-  const transformedData: TransactionWithRelations[] = data.map(item => {
-    const transaction = item as unknown as TransactionWithRelations;
-    return transaction;
-  });
-
-  return transformedData;
 };
 
 export const useTransactions = (filters?: TransactionsFilters) => {

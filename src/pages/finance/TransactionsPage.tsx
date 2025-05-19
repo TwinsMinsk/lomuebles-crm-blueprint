@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { useTransactions, useAddTransaction, useUpdateTransaction, useDeleteTransaction, TransactionWithRelations, TransactionFormData, TransactionsFilters } from "@/hooks/finance/useTransactions";
@@ -64,7 +63,14 @@ const TransactionsPage = () => {
   };
   
   // Get transactions data
-  const { data: transactions = [], isLoading } = useTransactions(apiFilters);
+  const { data: transactions = [], isLoading, isError, error } = useTransactions(apiFilters);
+  
+  // For debugging errors
+  React.useEffect(() => {
+    if (isError) {
+      console.error("Error fetching transactions:", error);
+    }
+  }, [isError, error]);
   
   // Get categories for filters and forms
   const { data: categories = [] } = useTransactionCategories();
@@ -86,7 +92,7 @@ const TransactionsPage = () => {
       (transaction.category?.name?.toLowerCase().includes(searchLower) || false) ||
       (transaction.related_order?.order_number?.toLowerCase().includes(searchLower) || false) ||
       (transaction.related_contact?.full_name?.toLowerCase().includes(searchLower) || false) ||
-      (transaction.related_supplier?.company_name?.toLowerCase().includes(searchLower) || false) ||
+      (transaction.related_supplier?.supplier_name?.toLowerCase().includes(searchLower) || false) ||
       (transaction.related_partner_manufacturer?.company_name?.toLowerCase().includes(searchLower) || false) ||
       (transaction.related_user?.full_name?.toLowerCase().includes(searchLower) || false)
     );
@@ -159,7 +165,7 @@ const TransactionsPage = () => {
       return transaction.related_contact.full_name;
     }
     if (transaction.related_supplier) {
-      return transaction.related_supplier.company_name;
+      return transaction.related_supplier.supplier_name;
     }
     if (transaction.related_partner_manufacturer) {
       return transaction.related_partner_manufacturer.company_name;
@@ -272,6 +278,10 @@ const TransactionsPage = () => {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
+            </div>
+          ) : isError ? (
+            <div className="text-center p-8 text-destructive">
+              Ошибка загрузки операций. Попробуйте обновить страницу.
             </div>
           ) : filteredTransactions.length === 0 ? (
             <div className="text-center p-8 text-muted-foreground">
@@ -454,7 +464,7 @@ const TransactionsPage = () => {
                     <p><span className="font-medium">Контакт:</span> {selectedTransaction.related_contact.full_name}</p>
                   )}
                   {selectedTransaction.related_supplier && (
-                    <p><span className="font-medium">Поставщик:</span> {selectedTransaction.related_supplier.company_name}</p>
+                    <p><span className="font-medium">Поставщик:</span> {selectedTransaction.related_supplier.supplier_name}</p>
                   )}
                   {selectedTransaction.related_partner_manufacturer && (
                     <p><span className="font-medium">Партнер:</span> {selectedTransaction.related_partner_manufacturer.company_name}</p>
