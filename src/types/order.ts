@@ -84,7 +84,16 @@ export const orderSchema = z.object({
   deliveryAddressFull: z.string().optional().nullable(),
   notesHistory: z.string().optional().nullable(),
   closingDate: z.string().optional().nullable(),
-  clientLanguage: z.enum(["ES", "EN", "RU"]).default("RU")
+  clientLanguage: z.enum(["ES", "EN", "RU"]).default("RU"),
+  attachedFilesOrderDocs: z.array(
+    z.object({
+      name: z.string(),
+      url: z.string(),
+      uploaded_at: z.string(),
+      size: z.number().optional(),
+      type: z.string().optional(),
+    })
+  ).optional().nullable(),
 });
 
 // Values type for the order form

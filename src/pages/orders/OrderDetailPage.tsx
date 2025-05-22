@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useOrderById } from "@/hooks/orders/useOrderById";
 import { useDeleteOrder } from "@/hooks/orders/useDeleteOrder";
+import { useUpdateOrder } from "@/hooks/orders/useUpdateOrder";
 import { useAuth } from "@/context/AuthContext";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -38,6 +39,7 @@ const OrderDetailPage = () => {
 
   const { data: order, isLoading, error } = useOrderById(id ? parseInt(id) : undefined);
   const deleteOrder = useDeleteOrder();
+  const { updateOrder } = useUpdateOrder();
 
   if (isLoading) {
     return (
@@ -100,9 +102,23 @@ const OrderDetailPage = () => {
   const isAdmin = userRole === "Главный Администратор" || userRole === "Администратор";
 
   // Handle file upload changes
-  const handleFilesChange = (files: any[]) => {
-    // This would typically update the order with the new files
-    console.log("Files updated:", files);
+  const handleFilesChange = async (files: any[]) => {
+    if (!order) return;
+    
+    try {
+      // Update order with the new files array
+      await updateOrder({ 
+        orderId: order.id, 
+        orderData: { 
+          attached_files_order_docs: files 
+        } 
+      });
+      
+      toast.success("Файлы успешно обновлены");
+    } catch (error: any) {
+      toast.error(`Ошибка при обновлении файлов: ${error.message}`);
+      console.error("Error updating order files:", error);
+    }
   };
 
   return (
