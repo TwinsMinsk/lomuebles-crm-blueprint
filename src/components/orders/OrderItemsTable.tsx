@@ -17,7 +17,7 @@ const OrderItemsTable: React.FC<OrderItemsTableProps> = ({ orderId }) => {
       const { data, error } = await supabase
         .from("order_items")
         .select("*")
-        .eq("parent_deal_order_id", orderId);
+        .eq("parent_order_id", orderId); // Updated from parent_deal_order_id to parent_order_id
 
       if (error) throw error;
       return data as OrderItem[];

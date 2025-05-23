@@ -59,7 +59,7 @@ export interface Order {
 // OrderItem interface for OrderItemsTable
 export interface OrderItem {
   order_item_id: number;
-  parent_deal_order_id: number;
+  parent_order_id: number; // Updated from parent_deal_order_id to parent_order_id
   product_name_from_tilda: string;
   sku_from_tilda?: string | null;
   quantity: number;
