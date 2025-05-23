@@ -25,28 +25,13 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
   onClose,
   task,
 }) => {
-  const { isSubmitting, isSuccess } = useTaskForm(task);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const isNewTask = !task?.task_id;
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
-  // Close modal after successful submission
+  // Debug the modal rendering
   useEffect(() => {
-    if (isSuccess) {
-      console.log("Task form submission successful, closing modal");
-      onClose();
-    }
-  }, [isSuccess, onClose]);
-
-  const handleSubmitClick = () => {
-    console.log("Submit button clicked, triggering form submission");
-    // Find form and submit it programmatically
-    const form = document.getElementById("task-form") as HTMLFormElement;
-    if (form) {
-      form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
-    } else {
-      console.error("Could not find form with id 'task-form'");
-    }
-  };
+    console.log("TaskFormModal rendered", { isOpen: open, isNewTask });
+  }, [open, isNewTask]);
 
   return (
     <>
@@ -77,21 +62,14 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
               <Button 
                 variant="outline" 
                 onClick={onClose}
-                disabled={isSubmitting}
               >
                 Отмена
               </Button>
               <Button 
-                type="button"
-                onClick={handleSubmitClick}
-                disabled={isSubmitting}
+                type="submit"
+                form="task-form"
               >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Сохранение...
-                  </>
-                ) : isNewTask ? "Создать" : "Сохранить"}
+                {isNewTask ? "Создать" : "Сохранить"}
               </Button>
             </div>
           </DialogFooter>

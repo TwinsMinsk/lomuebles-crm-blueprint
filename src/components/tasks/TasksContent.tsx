@@ -30,6 +30,9 @@ const TasksContent: React.FC = () => {
 
   const { isOpen, selectedTask, openModal, closeModal } = useTaskFormModal();
 
+  // Debug modal state
+  console.log("TasksContent rendered", { isModalOpen: isOpen });
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row justify-between gap-4">
@@ -73,14 +76,17 @@ const TasksContent: React.FC = () => {
         </div>
       )}
 
-      <TaskFormModal 
-        open={isOpen} 
-        onClose={() => {
-          closeModal();
-          refetch();
-        }} 
-        task={selectedTask} 
-      />
+      {isOpen && (
+        <TaskFormModal 
+          open={isOpen} 
+          onClose={() => {
+            console.log("Closing task modal");
+            closeModal();
+            refetch();
+          }} 
+          task={selectedTask} 
+        />
+      )}
     </div>
   );
 };

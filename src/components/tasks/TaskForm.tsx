@@ -44,6 +44,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose }) => {
         <AssignmentFields />
         
         <RelatedEntitiesFields />
+
+        {/* Note: We're not adding a submit button here as it's in the modal footer */}
       </form>
     </Form>
   );
