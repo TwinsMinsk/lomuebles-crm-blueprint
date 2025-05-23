@@ -6,7 +6,7 @@ import CalendarComponent from "./CalendarComponent";
 import { useCalendarState } from "@/hooks/calendar/useCalendarState";
 import { useCalendarEvents } from "@/hooks/calendar/useCalendarEvents";
 import { convertTasksToEvents } from "./utils/taskToEventConverter";
-import { useTaskForm } from "@/context/TaskFormContext";
+import { useTaskFormContext } from "@/context/TaskFormContext";
 
 const TasksCalendar: React.FC = () => {
   const { 
@@ -19,7 +19,7 @@ const TasksCalendar: React.FC = () => {
     handleEventDrop 
   } = useCalendarState();
   
-  const { openModal } = useTaskForm();
+  const { openModal } = useTaskFormContext();
   const { handleEventClick, handleDateClick } = useCalendarEvents(tasks);
 
   // Convert tasks to calendar events
