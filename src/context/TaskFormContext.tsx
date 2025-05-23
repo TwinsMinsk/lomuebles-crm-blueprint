@@ -22,10 +22,11 @@ export const TaskFormProvider: React.FC<{ children: ReactNode }> = ({ children }
   );
 };
 
-export const useTaskForm = () => {
+// Rename this hook to avoid conflict with useTaskForm in hooks/tasks/useTaskForm.ts
+export const useTaskFormContext = () => {
   const context = useContext(TaskFormContext);
   if (!context) {
-    throw new Error("useTaskForm must be used within a TaskFormProvider");
+    throw new Error("useTaskFormContext must be used within a TaskFormProvider");
   }
   return context;
 };

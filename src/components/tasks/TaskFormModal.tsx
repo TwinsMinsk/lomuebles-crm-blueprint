@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -30,11 +30,23 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const isNewTask = !task?.task_id;
   
   // Close modal after successful submission
-  React.useEffect(() => {
+  useEffect(() => {
     if (isSuccess) {
+      console.log("Task form submission successful, closing modal");
       onClose();
     }
   }, [isSuccess, onClose]);
+
+  const handleSubmitClick = () => {
+    console.log("Submit button clicked, triggering form submission");
+    // Find form and submit it programmatically
+    const form = document.getElementById("task-form") as HTMLFormElement;
+    if (form) {
+      form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+    } else {
+      console.error("Could not find form with id 'task-form'");
+    }
+  };
 
   return (
     <>
@@ -70,8 +82,8 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 Отмена
               </Button>
               <Button 
-                type="submit"
-                form="task-form"
+                type="button"
+                onClick={handleSubmitClick}
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (

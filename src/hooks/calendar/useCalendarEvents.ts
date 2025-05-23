@@ -1,11 +1,11 @@
 
 import { Task } from "@/types/task";
 import { useAuth } from "@/context/AuthContext";
-import { useTaskForm } from "@/context/TaskFormContext";
+import { useTaskFormContext } from "@/context/TaskFormContext";
 
 export const useCalendarEvents = (tasks: Task[]) => {
   const { user } = useAuth();
-  const { openModal } = useTaskForm();
+  const { openModal } = useTaskFormContext();
 
   // Handle calendar event click (open task modal)
   const handleEventClick = (info: any) => {

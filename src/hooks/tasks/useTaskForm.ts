@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { taskFormSchema, TaskFormValues } from "@/components/tasks/schema/taskFormSchema";
@@ -49,7 +49,17 @@ export const useTaskForm = (
     defaultValues,
   });
 
+  // Log form state for debugging
+  useEffect(() => {
+    console.log("useTaskForm initialized", { 
+      isEditing: !!initialData?.task_id,
+      defaultValues
+    });
+  }, [initialData]);
+
   const onSubmit = async (data: TaskFormValues) => {
+    console.log("onSubmit called with data:", data);
+    
     if (!user) {
       toast.error("Необходимо авторизоваться");
       return;
@@ -77,24 +87,33 @@ export const useTaskForm = (
 
       // For existing tasks, update
       if (initialData?.task_id) {
-        const { error } = await supabase
+        const { data: updatedData, error } = await supabase
           .from('tasks')
           .update(taskData)
-          .eq('task_id', initialData.task_id);
+          .eq('task_id', initialData.task_id)
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase Task Update Error:", error);
+          throw error;
+        }
+        
+        console.log("Task updated successfully:", updatedData);
         toast.success("Задача успешно обновлена");
       } 
       // For new tasks, insert
       else {
-        const { error } = await supabase
+        const { data: insertedData, error } = await supabase
           .from('tasks')
-          .insert([taskData]);
+          .insert([taskData])
+          .select();
 
         if (error) {
           console.error("Supabase Task Insert Error:", error);
           throw error;
         }
+        
+        console.log("Task created successfully:", insertedData);
         toast.success("Задача успешно создана");
       }
 
@@ -108,6 +127,7 @@ export const useTaskForm = (
 
       // Call success callback if provided
       if (onSuccess) {
+        console.log("Calling onSuccess callback");
         onSuccess();
       }
     } catch (error: any) {
