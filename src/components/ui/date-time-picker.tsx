@@ -34,6 +34,8 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
   );
   
   const [isTimeOpen, setIsTimeOpen] = React.useState<boolean>(false);
+  // Add a ref to track internal updates to prevent infinite loops
+  const internalUpdate = React.useRef<boolean>(false);
 
   // Generate options for hours (00-23)
   const hourOptions = Array.from({ length: 24 }, (_, i) => {
@@ -49,18 +51,41 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
 
   // Update the parent component whenever date or time changes
   React.useEffect(() => {
+    // Skip if this change was triggered by value prop (internal update)
+    if (internalUpdate.current) {
+      return;
+    }
+
     if (date) {
       const newDate = new Date(date);
       newDate.setHours(parseInt(hours));
       newDate.setMinutes(parseInt(minutes));
+      
+      // Flag that we're performing an internal update
+      internalUpdate.current = true;
       onChange(newDate);
+      // Reset the flag after the update is processed
+      setTimeout(() => {
+        internalUpdate.current = false;
+      }, 0);
     } else {
+      // Flag that we're performing an internal update
+      internalUpdate.current = true;
       onChange(null);
+      // Reset the flag after the update is processed
+      setTimeout(() => {
+        internalUpdate.current = false;
+      }, 0);
     }
   }, [date, hours, minutes, onChange]);
 
   // Update internal state when value prop changes
   React.useEffect(() => {
+    // Skip if this change was triggered by our own state change
+    if (internalUpdate.current) {
+      return;
+    }
+
     if (value) {
       setDate(value);
       setHours(format(value, "HH"));
