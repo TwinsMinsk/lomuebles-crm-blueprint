@@ -174,16 +174,16 @@ export const fetchMyTasks = async (userId: string | null) => {
       let relatedEntityName = null;
       
       // If task is related to an order, fetch order details
-      if (task.related_deal_order_id) {
+      if (task.related_order_id) {
         const { data: orderData } = await supabase
           .from('orders')
           .select('order_number, order_name')
-          .eq('id', task.related_deal_order_id)
+          .eq('id', task.related_order_id)
           .single();
         
         relatedEntityName = orderData 
           ? `Заказ #${orderData.order_number}` 
-          : `Заказ #${task.related_deal_order_id}`;
+          : `Заказ #${task.related_order_id}`;
       }
       // If task is related to a lead, fetch lead details
       else if (task.related_lead_id) {
@@ -251,16 +251,16 @@ export const fetchAllTasks = async (filters: any = {}) => {
       let relatedEntityName = null;
       
       // If task is related to an order, fetch order details
-      if (task.related_deal_order_id) {
+      if (task.related_order_id) {
         const { data: orderData } = await supabase
           .from('orders')
           .select('order_number, order_name')
-          .eq('id', task.related_deal_order_id)
+          .eq('id', task.related_order_id)
           .single();
         
         relatedEntityName = orderData 
           ? `Заказ #${orderData.order_number}` 
-          : `Заказ #${task.related_deal_order_id}`;
+          : `Заказ #${task.related_order_id}`;
       }
       // If task is related to a lead, fetch lead details
       else if (task.related_lead_id) {

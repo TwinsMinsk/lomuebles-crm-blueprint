@@ -44,7 +44,7 @@ const TaskTableRow: React.FC<TaskTableRowProps> = ({ task, onTaskClick }) => {
       return <span>Лид: {task.related_lead_name}</span>;
     } else if (task.related_contact_id && task.related_contact_name) {
       return <span>Контакт: {task.related_contact_name}</span>;
-    } else if (task.related_deal_order_id && task.related_order_number) {
+    } else if (task.related_order_id && task.related_order_number) {
       return <span>Заказ: {task.related_order_number}</span>;
     } else if (task.related_partner_manufacturer_id && task.related_partner_name) {
       return <span>Партнер: {task.related_partner_name}</span>;

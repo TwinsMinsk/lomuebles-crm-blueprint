@@ -141,11 +141,11 @@ export function useTasks() {
           }
           
           // For orders
-          if (task.related_deal_order_id) {
+          if (task.related_order_id) {
             const { data: orderData } = await supabase
-              .from('deals_orders')
+              .from('orders')
               .select('order_number')
-              .eq('deal_order_id', task.related_deal_order_id)
+              .eq('id', task.related_order_id)
               .single();
               
             if (orderData) {
