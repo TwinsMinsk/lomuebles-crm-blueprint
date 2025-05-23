@@ -11,7 +11,7 @@ const RelatedEntitiesFields: React.FC = () => {
   const { watch, setValue } = useFormContext();
   
   // Get current values from form
-  const relatedOrderId = watch("related_deal_order_id");
+  const relatedOrderId = watch("related_order_id");
   const relatedLeadId = watch("related_lead_id");
   const relatedContactId = watch("related_contact_id");
   const relatedPartnerId = watch("related_partner_manufacturer_id");
@@ -31,7 +31,7 @@ const RelatedEntitiesFields: React.FC = () => {
         />
         <OrderSelector 
           value={relatedOrderId} 
-          onChange={(value) => setValue("related_deal_order_id", value)} 
+          onChange={(value) => setValue("related_order_id", value)} 
         />
         <PartnerSelector 
           value={relatedPartnerId} 

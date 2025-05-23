@@ -11,7 +11,7 @@ export const taskFormSchema = z.object({
   assigned_task_user_id: z.string().min(1, { message: "Ответственный исполнитель обязателен" }),
   related_lead_id: z.number().optional().nullable(),
   related_contact_id: z.number().optional().nullable(),
-  related_deal_order_id: z.number().optional().nullable(),
+  related_order_id: z.number().optional().nullable(),
   related_partner_manufacturer_id: z.number().optional().nullable(),
   related_custom_request_id: z.number().optional().nullable(),
 });

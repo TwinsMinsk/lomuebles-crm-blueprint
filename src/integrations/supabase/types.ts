@@ -744,8 +744,8 @@ export type Database = {
           priority: string | null
           related_contact_id: number | null
           related_custom_request_id: number | null
-          related_deal_order_id: number | null
           related_lead_id: number | null
+          related_order_id: number | null
           related_partner_manufacturer_id: number | null
           task_id: number
           task_name: string
@@ -763,8 +763,8 @@ export type Database = {
           priority?: string | null
           related_contact_id?: number | null
           related_custom_request_id?: number | null
-          related_deal_order_id?: number | null
           related_lead_id?: number | null
+          related_order_id?: number | null
           related_partner_manufacturer_id?: number | null
           task_id?: number
           task_name: string
@@ -782,8 +782,8 @@ export type Database = {
           priority?: string | null
           related_contact_id?: number | null
           related_custom_request_id?: number | null
-          related_deal_order_id?: number | null
           related_lead_id?: number | null
+          related_order_id?: number | null
           related_partner_manufacturer_id?: number | null
           task_id?: number
           task_name?: string
@@ -820,18 +820,18 @@ export type Database = {
             referencedColumns: ["custom_request_id"]
           },
           {
-            foreignKeyName: "tasks_related_deal_order_id_fkey"
-            columns: ["related_deal_order_id"]
-            isOneToOne: false
-            referencedRelation: "deals_orders"
-            referencedColumns: ["deal_order_id"]
-          },
-          {
             foreignKeyName: "tasks_related_lead_id_fkey"
             columns: ["related_lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
             referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "tasks_related_order_id_fkey"
+            columns: ["related_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "tasks_related_partner_manufacturer_id_fkey"

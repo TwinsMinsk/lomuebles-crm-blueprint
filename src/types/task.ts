@@ -18,7 +18,7 @@ export interface Task {
   related_lead_name?: string;
   related_contact_id?: number;
   related_contact_name?: string;
-  related_deal_order_id?: number;
+  related_order_id?: number;
   related_order_number?: string;
   related_custom_request_id?: number;
   related_request_name?: string;
