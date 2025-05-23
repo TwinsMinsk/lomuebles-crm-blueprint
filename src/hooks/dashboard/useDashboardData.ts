@@ -173,7 +173,7 @@ export const fetchMyTasks = async (userId: string | null) => {
       // Default entity information
       let relatedEntityName = null;
       
-      // If task is related to an order, fetch order details
+      // If task is related to an order, fetch order details (updated to use orders table)
       if (task.related_order_id) {
         const { data: orderData } = await supabase
           .from('orders')
@@ -250,7 +250,7 @@ export const fetchAllTasks = async (filters: any = {}) => {
       // Default entity information
       let relatedEntityName = null;
       
-      // If task is related to an order, fetch order details
+      // If task is related to an order, fetch order details (updated to use orders table)
       if (task.related_order_id) {
         const { data: orderData } = await supabase
           .from('orders')

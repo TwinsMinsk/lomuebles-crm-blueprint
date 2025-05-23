@@ -15,9 +15,9 @@ export function useContactDelete({ onDeleteSuccess }: { onDeleteSuccess: () => v
   // Check if contact has associated orders
   const checkAssociatedOrders = async (contactId: number) => {
     const { data, error } = await supabase
-      .from("deals_orders")
-      .select("deal_order_id")
-      .eq("associated_contact_id", contactId)
+      .from("orders")
+      .select("id")
+      .eq("client_contact_id", contactId)
       .limit(1);
     
     if (error) {

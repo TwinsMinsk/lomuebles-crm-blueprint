@@ -147,7 +147,7 @@ export type Database = {
           desired_completion_date: string | null
           desired_materials: string | null
           estimated_dimensions: string | null
-          linked_deal_order_id: number | null
+          linked_order_id: number | null
           preliminary_cost: number | null
           request_name: string | null
           request_status: string | null
@@ -164,7 +164,7 @@ export type Database = {
           desired_completion_date?: string | null
           desired_materials?: string | null
           estimated_dimensions?: string | null
-          linked_deal_order_id?: number | null
+          linked_order_id?: number | null
           preliminary_cost?: number | null
           request_name?: string | null
           request_status?: string | null
@@ -181,7 +181,7 @@ export type Database = {
           desired_completion_date?: string | null
           desired_materials?: string | null
           estimated_dimensions?: string | null
-          linked_deal_order_id?: number | null
+          linked_order_id?: number | null
           preliminary_cost?: number | null
           request_name?: string | null
           request_status?: string | null
@@ -216,11 +216,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "custom_requests_linked_deal_order_id_fkey"
-            columns: ["linked_deal_order_id"]
+            foreignKeyName: "custom_requests_linked_order_id_fkey"
+            columns: ["linked_order_id"]
             isOneToOne: false
-            referencedRelation: "deals_orders"
-            referencedColumns: ["deal_order_id"]
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -400,7 +400,7 @@ export type Database = {
         Row: {
           link_to_product_on_tilda: string | null
           order_item_id: number
-          parent_deal_order_id: number
+          parent_order_id: number
           price_per_item_from_tilda: number
           product_name_from_tilda: string
           quantity: number
@@ -410,7 +410,7 @@ export type Database = {
         Insert: {
           link_to_product_on_tilda?: string | null
           order_item_id?: number
-          parent_deal_order_id: number
+          parent_order_id: number
           price_per_item_from_tilda: number
           product_name_from_tilda: string
           quantity?: number
@@ -420,7 +420,7 @@ export type Database = {
         Update: {
           link_to_product_on_tilda?: string | null
           order_item_id?: number
-          parent_deal_order_id?: number
+          parent_order_id?: number
           price_per_item_from_tilda?: number
           product_name_from_tilda?: string
           quantity?: number
@@ -429,11 +429,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "order_items_parent_deal_order_id_fkey"
-            columns: ["parent_deal_order_id"]
+            foreignKeyName: "order_items_parent_order_id_fkey"
+            columns: ["parent_order_id"]
             isOneToOne: false
-            referencedRelation: "deals_orders"
-            referencedColumns: ["deal_order_id"]
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
           },
         ]
       }

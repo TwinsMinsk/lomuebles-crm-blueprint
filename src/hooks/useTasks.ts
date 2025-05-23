@@ -140,7 +140,7 @@ export function useTasks() {
             }
           }
           
-          // For orders
+          // For orders (updated to use orders table)
           if (task.related_order_id) {
             const { data: orderData } = await supabase
               .from('orders')

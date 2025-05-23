@@ -71,7 +71,7 @@ export const useTaskRelatedEntities = () => {
     enabled: !!user
   });
 
-  // Fetch orders
+  // Fetch orders (updated to use orders table instead of deals_orders)
   const { 
     data: orders = [],
     isLoading: isLoadingOrders 
@@ -79,13 +79,13 @@ export const useTaskRelatedEntities = () => {
     queryKey: ["task-form", "orders"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("deals_orders")
-        .select("deal_order_id, order_number, order_name")
-        .order("creation_date", { ascending: false });
+        .from("orders")
+        .select("id, order_number, order_name")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data.map(order => ({
-        id: order.deal_order_id,
+        id: order.id,
         name: order.order_name || order.order_number,
         label: `${order.order_number} - ${order.order_name || "Без названия"}`
       }));

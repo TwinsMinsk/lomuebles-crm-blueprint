@@ -51,45 +51,45 @@ const DbHeader = () => {
         </div>
 
         <div className="flex items-center text-slate-300">
-          <span>deals_orders</span>
+          <span>orders</span>
           <ArrowRight className="h-4 w-4 mx-2" />
           <span>contacts</span>
-          <p className="ml-4 text-slate-400">(связь через поле associated_contact_id)</p>
+          <p className="ml-4 text-slate-400">(связь через поле client_contact_id)</p>
         </div>
 
         <div className="flex items-center text-slate-300">
-          <span>deals_orders</span>
+          <span>orders</span>
           <ArrowRight className="h-4 w-4 mx-2" />
           <span>companies</span>
-          <p className="ml-4 text-slate-400">(связь через поле associated_company_id)</p>
+          <p className="ml-4 text-slate-400">(связь через поле client_company_id)</p>
         </div>
 
         <div className="flex items-center text-slate-300">
-          <span>deals_orders</span>
+          <span>orders</span>
           <ArrowRight className="h-4 w-4 mx-2" />
           <span>leads</span>
           <p className="ml-4 text-slate-400">(связь через поле source_lead_id)</p>
         </div>
 
         <div className="flex items-center text-slate-300">
-          <span>deals_orders</span>
+          <span>orders</span>
           <ArrowRight className="h-4 w-4 mx-2" />
           <span>profiles</span>
           <p className="ml-4 text-slate-400">(связь через поля assigned_user_id и creator_user_id)</p>
         </div>
 
         <div className="flex items-center text-slate-300">
-          <span>deals_orders</span>
+          <span>orders</span>
           <ArrowRight className="h-4 w-4 mx-2" />
           <span>partners_manufacturers</span>
-          <p className="ml-4 text-slate-400">(связь через поле associated_partner_manufacturer_id)</p>
+          <p className="ml-4 text-slate-400">(связь через поле partner_manufacturer_id)</p>
         </div>
 
         <div className="flex items-center text-slate-300">
           <span>order_items</span>
           <ArrowRight className="h-4 w-4 mx-2" />
-          <span>deals_orders</span>
-          <p className="ml-4 text-slate-400">(связь через поле parent_deal_order_id)</p>
+          <span>orders</span>
+          <p className="ml-4 text-slate-400">(связь через поле parent_order_id)</p>
         </div>
         
         <div className="flex items-center text-slate-300">
@@ -109,8 +109,8 @@ const DbHeader = () => {
         <div className="flex items-center text-slate-300">
           <span>custom_requests</span>
           <ArrowRight className="h-4 w-4 mx-2" />
-          <span>deals_orders</span>
-          <p className="ml-4 text-slate-400">(связь через поле linked_deal_order_id)</p>
+          <span>orders</span>
+          <p className="ml-4 text-slate-400">(связь через поле linked_order_id)</p>
         </div>
         
         <div className="flex items-center text-slate-300">
@@ -160,8 +160,8 @@ const DbHeader = () => {
         <div className="flex items-center text-slate-300">
           <span>tasks</span>
           <ArrowRight className="h-4 w-4 mx-2" />
-          <span>deals_orders</span>
-          <p className="ml-4 text-slate-400">(связь через поле related_deal_order_id)</p>
+          <span>orders</span>
+          <p className="ml-4 text-slate-400">(связь через поле related_order_id)</p>
         </div>
 
         <div className="flex items-center text-slate-300">
