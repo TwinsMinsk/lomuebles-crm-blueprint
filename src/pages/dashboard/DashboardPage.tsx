@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
@@ -18,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import PageHeader from "@/components/common/PageHeader";
+import FinancialSummaryPanel from "@/components/dashboard/FinancialSummaryPanel";
 import { 
   Calendar, 
   Clock, 
@@ -342,6 +342,11 @@ const DashboardPage: React.FC = () => {
 
     return (
       <>
+        {/* Financial Summary Panel */}
+        <div className="mb-6">
+          <FinancialSummaryPanel />
+        </div>
+
         {/* Recent Leads */}
         <Card className="shadow-lg border-0 bg-white mb-6">
           <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b">
@@ -469,7 +474,7 @@ const DashboardPage: React.FC = () => {
             {renderTeamTasksSection()}
           </div>
 
-          {/* Right Column - Recent Activities */}
+          {/* Right Column - Financial Summary + Recent Activities */}
           <div className="space-y-6">
             {renderRecentActivitiesSection()}
           </div>
