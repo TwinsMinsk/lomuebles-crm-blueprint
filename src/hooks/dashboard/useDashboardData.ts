@@ -58,10 +58,10 @@ export function useDashboardData() {
 
       if (error) throw error;
       
-      return data.map(task => ({
+      return data?.map(task => ({
         ...task,
         assigned_user_name: task.profiles?.full_name || null
-      }));
+      })) || [];
     },
   });
 
@@ -143,10 +143,7 @@ export function useMyTasks() {
           priority,
           related_order_id,
           related_contact_id,
-          related_lead_id,
-          orders(order_number),
-          contacts(full_name),
-          leads(name, email, phone)
+          related_lead_id
         `)
         .eq("assigned_task_user_id", user.id)
         .neq("task_status", "Выполнена")
@@ -155,11 +152,41 @@ export function useMyTasks() {
 
       if (error) throw error;
 
-      return data?.map(task => ({
-        ...task,
-        isOverdue: task.due_date && new Date(task.due_date) < new Date(),
-        relatedEntityName: task.orders?.order_number || task.contacts?.full_name || task.leads?.name || task.leads?.email || task.leads?.phone || null
-      })) || [];
+      // Fetch related entities separately to avoid deep type inference
+      const tasksWithRelated = await Promise.all((data || []).map(async (task) => {
+        let relatedEntityName = null;
+        
+        if (task.related_order_id) {
+          const { data: order } = await supabase
+            .from("orders")
+            .select("order_number")
+            .eq("id", task.related_order_id)
+            .single();
+          relatedEntityName = order?.order_number;
+        } else if (task.related_contact_id) {
+          const { data: contact } = await supabase
+            .from("contacts")
+            .select("full_name")
+            .eq("contact_id", task.related_contact_id)
+            .single();
+          relatedEntityName = contact?.full_name;
+        } else if (task.related_lead_id) {
+          const { data: lead } = await supabase
+            .from("leads")
+            .select("name, email, phone")
+            .eq("lead_id", task.related_lead_id)
+            .single();
+          relatedEntityName = lead?.name || lead?.email || lead?.phone;
+        }
+
+        return {
+          ...task,
+          isOverdue: task.due_date && new Date(task.due_date) < new Date(),
+          relatedEntityName
+        };
+      }));
+
+      return tasksWithRelated;
     },
     enabled: !!user?.id,
   });
@@ -184,10 +211,7 @@ export function useAllTasks() {
           related_order_id,
           related_contact_id,
           related_lead_id,
-          profiles!tasks_assigned_task_user_id_fkey(full_name),
-          orders(order_number),
-          contacts(full_name),
-          leads(name, email, phone)
+          assigned_task_user_id
         `)
         .neq("task_status", "Выполнена")
         .order("due_date", { ascending: true })
@@ -195,12 +219,54 @@ export function useAllTasks() {
 
       if (error) throw error;
 
-      return data?.map(task => ({
-        ...task,
-        assignedUserName: task.profiles?.full_name,
-        isOverdue: task.due_date && new Date(task.due_date) < new Date(),
-        relatedEntityName: task.orders?.order_number || task.contacts?.full_name || task.leads?.name || task.leads?.email || task.leads?.phone || null
-      })) || [];
+      // Fetch related entities and assigned user separately
+      const tasksWithRelated = await Promise.all((data || []).map(async (task) => {
+        let relatedEntityName = null;
+        let assignedUserName = null;
+        
+        // Get assigned user name
+        if (task.assigned_task_user_id) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", task.assigned_task_user_id)
+            .single();
+          assignedUserName = profile?.full_name;
+        }
+
+        // Get related entity name
+        if (task.related_order_id) {
+          const { data: order } = await supabase
+            .from("orders")
+            .select("order_number")
+            .eq("id", task.related_order_id)
+            .single();
+          relatedEntityName = order?.order_number;
+        } else if (task.related_contact_id) {
+          const { data: contact } = await supabase
+            .from("contacts")
+            .select("full_name")
+            .eq("contact_id", task.related_contact_id)
+            .single();
+          relatedEntityName = contact?.full_name;
+        } else if (task.related_lead_id) {
+          const { data: lead } = await supabase
+            .from("leads")
+            .select("name, email, phone")
+            .eq("lead_id", task.related_lead_id)
+            .single();
+          relatedEntityName = lead?.name || lead?.email || lead?.phone;
+        }
+
+        return {
+          ...task,
+          assignedUserName,
+          isOverdue: task.due_date && new Date(task.due_date) < new Date(),
+          relatedEntityName
+        };
+      }));
+
+      return tasksWithRelated;
     },
     enabled: isAdmin,
   });
@@ -222,17 +288,33 @@ export function useRecentLeads() {
           email,
           phone,
           creation_date,
-          profiles!leads_assigned_user_id_fkey(full_name)
+          assigned_user_id
         `)
         .order("creation_date", { ascending: false })
         .limit(5);
 
       if (error) throw error;
 
-      return data?.map(lead => ({
-        ...lead,
-        assignedUser: lead.profiles
-      })) || [];
+      // Fetch assigned users separately
+      const leadsWithUsers = await Promise.all((data || []).map(async (lead) => {
+        let assignedUser = null;
+        
+        if (lead.assigned_user_id) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", lead.assigned_user_id)
+            .single();
+          assignedUser = profile;
+        }
+
+        return {
+          ...lead,
+          assignedUser
+        };
+      }));
+
+      return leadsWithUsers;
     },
     enabled: isAdmin,
   });
@@ -254,14 +336,33 @@ export function useRecentOrders() {
           order_type,
           status,
           created_at,
-          contacts(full_name)
+          client_contact_id
         `)
         .order("created_at", { ascending: false })
         .limit(5);
 
       if (error) throw error;
 
-      return data || [];
+      // Fetch contact names separately
+      const ordersWithContacts = await Promise.all((data || []).map(async (order) => {
+        let contactName = null;
+        
+        if (order.client_contact_id) {
+          const { data: contact } = await supabase
+            .from("contacts")
+            .select("full_name")
+            .eq("contact_id", order.client_contact_id)
+            .single();
+          contactName = contact?.full_name;
+        }
+
+        return {
+          ...order,
+          contacts: contactName ? { full_name: contactName } : null
+        };
+      }));
+
+      return ordersWithContacts;
     },
     enabled: isAdmin,
   });
