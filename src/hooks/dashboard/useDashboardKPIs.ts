@@ -18,11 +18,39 @@ export const useDashboardKPIs = () => {
         .select('*', { count: 'exact', head: true })
         .gte('creation_date', today);
 
-      // Get active orders count
+      // Define active statuses for both order types
+      const activeReadyMadeStatuses = [
+        'Новый', 
+        'Ожидает подтверждения', 
+        'Ожидает оплаты', 
+        'Оплачен', 
+        'Передан на сборку', 
+        'Готов к отгрузке', 
+        'В доставке'
+      ];
+      
+      const activeCustomMadeStatuses = [
+        'Новый запрос',
+        'Предварительная оценка',
+        'Согласование ТЗ/Дизайна',
+        'Ожидает замера',
+        'Замер выполнен',
+        'Проектирование',
+        'Согласование проекта',
+        'Ожидает предоплаты',
+        'В производстве',
+        'Готов к монтажу',
+        'Монтаж'
+      ];
+
+      // Combine all active statuses
+      const allActiveStatuses = [...activeReadyMadeStatuses, ...activeCustomMadeStatuses];
+
+      // Get active orders count (excluding completed/cancelled orders)
       const { count: activeOrdersCount } = await supabase
         .from('orders')
         .select('*', { count: 'exact', head: true })
-        .in('status', ['Новый', 'В обработке', 'Подтвержден', 'В производстве']);
+        .in('status', allActiveStatuses);
 
       // Get today's tasks count
       const { count: todaysTasksCount } = await supabase

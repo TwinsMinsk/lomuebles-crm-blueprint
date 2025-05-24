@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
@@ -340,9 +341,9 @@ const DashboardPage: React.FC = () => {
     if (!isAdmin) return null;
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <>
         {/* Recent Leads */}
-        <Card className="shadow-lg border-0 bg-white">
+        <Card className="shadow-lg border-0 bg-white mb-6">
           <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-semibold text-gray-800">Последние Лиды</CardTitle>
@@ -445,7 +446,7 @@ const DashboardPage: React.FC = () => {
             )}
           </CardContent>
         </Card>
-      </div>
+      </>
     );
   };
 
