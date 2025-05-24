@@ -143,7 +143,8 @@ export function useMyTasks() {
     queryFn: async () => {
       if (!user?.id) return [];
 
-      const { data, error } = await supabase
+      // Simple query with explicit typing
+      const { data: rawTasks, error } = await supabase
         .from("tasks")
         .select("task_id, task_name, task_status, due_date, priority, related_order_id, related_contact_id, related_lead_id")
         .eq("assigned_task_user_id", user.id)
@@ -152,42 +153,59 @@ export function useMyTasks() {
         .limit(10);
 
       if (error) throw error;
+      if (!rawTasks) return [];
 
-      // Fetch related entities separately to avoid deep type inference
-      const tasksWithRelated = await Promise.all((data || []).map(async (task) => {
-        let relatedEntityName = null;
+      // Process tasks one by one to avoid complex type inference
+      const processedTasks = [];
+      
+      for (const task of rawTasks) {
+        let relatedEntityName: string | null = null;
         
-        if (task.related_order_id) {
-          const { data: order } = await supabase
-            .from("orders")
-            .select("order_number")
-            .eq("id", task.related_order_id)
-            .single();
-          relatedEntityName = order?.order_number;
-        } else if (task.related_contact_id) {
-          const { data: contact } = await supabase
-            .from("contacts")
-            .select("full_name")
-            .eq("contact_id", task.related_contact_id)
-            .single();
-          relatedEntityName = contact?.full_name;
-        } else if (task.related_lead_id) {
-          const { data: lead } = await supabase
-            .from("leads")
-            .select("name, email, phone")
-            .eq("lead_id", task.related_lead_id)
-            .single();
-          relatedEntityName = lead?.name || lead?.email || lead?.phone;
+        try {
+          if (task.related_order_id) {
+            const { data: order } = await supabase
+              .from("orders")
+              .select("order_number")
+              .eq("id", task.related_order_id)
+              .maybeSingle();
+            relatedEntityName = order?.order_number || null;
+          } else if (task.related_contact_id) {
+            const { data: contact } = await supabase
+              .from("contacts")
+              .select("full_name")
+              .eq("contact_id", task.related_contact_id)
+              .maybeSingle();
+            relatedEntityName = contact?.full_name || null;
+          } else if (task.related_lead_id) {
+            const { data: lead } = await supabase
+              .from("leads")
+              .select("name, email, phone")
+              .eq("lead_id", task.related_lead_id)
+              .maybeSingle();
+            relatedEntityName = lead?.name || lead?.email || lead?.phone || null;
+          }
+        } catch (error) {
+          console.error("Error fetching related entity:", error);
+          relatedEntityName = null;
         }
 
-        return {
-          ...task,
-          isOverdue: task.due_date && new Date(task.due_date) < new Date(),
-          relatedEntityName
-        };
-      }));
+        const isOverdue = task.due_date ? new Date(task.due_date) < new Date() : false;
 
-      return tasksWithRelated;
+        processedTasks.push({
+          task_id: task.task_id,
+          task_name: task.task_name,
+          task_status: task.task_status,
+          due_date: task.due_date,
+          priority: task.priority,
+          related_order_id: task.related_order_id,
+          related_contact_id: task.related_contact_id,
+          related_lead_id: task.related_lead_id,
+          isOverdue,
+          relatedEntityName
+        });
+      }
+
+      return processedTasks;
     },
     enabled: !!user?.id,
   });
@@ -201,7 +219,7 @@ export function useAllTasks() {
   return useQuery({
     queryKey: ["all-tasks"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: rawTasks, error } = await supabase
         .from("tasks")
         .select("task_id, task_name, task_status, due_date, priority, related_order_id, related_contact_id, related_lead_id, assigned_task_user_id")
         .neq("task_status", "Выполнена")
@@ -209,55 +227,72 @@ export function useAllTasks() {
         .limit(10);
 
       if (error) throw error;
+      if (!rawTasks) return [];
 
-      // Fetch related entities and assigned user separately
-      const tasksWithRelated = await Promise.all((data || []).map(async (task) => {
-        let relatedEntityName = null;
-        let assignedUserName = null;
+      // Process tasks with explicit typing
+      const processedTasks = [];
+      
+      for (const task of rawTasks) {
+        let relatedEntityName: string | null = null;
+        let assignedUserName: string | null = null;
         
-        // Get assigned user name
-        if (task.assigned_task_user_id) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("full_name")
-            .eq("id", task.assigned_task_user_id)
-            .single();
-          assignedUserName = profile?.full_name;
+        try {
+          // Get assigned user name
+          if (task.assigned_task_user_id) {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("full_name")
+              .eq("id", task.assigned_task_user_id)
+              .maybeSingle();
+            assignedUserName = profile?.full_name || null;
+          }
+
+          // Get related entity name
+          if (task.related_order_id) {
+            const { data: order } = await supabase
+              .from("orders")
+              .select("order_number")
+              .eq("id", task.related_order_id)
+              .maybeSingle();
+            relatedEntityName = order?.order_number || null;
+          } else if (task.related_contact_id) {
+            const { data: contact } = await supabase
+              .from("contacts")
+              .select("full_name")
+              .eq("contact_id", task.related_contact_id)
+              .maybeSingle();
+            relatedEntityName = contact?.full_name || null;
+          } else if (task.related_lead_id) {
+            const { data: lead } = await supabase
+              .from("leads")
+              .select("name, email, phone")
+              .eq("lead_id", task.related_lead_id)
+              .maybeSingle();
+            relatedEntityName = lead?.name || lead?.email || lead?.phone || null;
+          }
+        } catch (error) {
+          console.error("Error fetching related data:", error);
         }
 
-        // Get related entity name
-        if (task.related_order_id) {
-          const { data: order } = await supabase
-            .from("orders")
-            .select("order_number")
-            .eq("id", task.related_order_id)
-            .single();
-          relatedEntityName = order?.order_number;
-        } else if (task.related_contact_id) {
-          const { data: contact } = await supabase
-            .from("contacts")
-            .select("full_name")
-            .eq("contact_id", task.related_contact_id)
-            .single();
-          relatedEntityName = contact?.full_name;
-        } else if (task.related_lead_id) {
-          const { data: lead } = await supabase
-            .from("leads")
-            .select("name, email, phone")
-            .eq("lead_id", task.related_lead_id)
-            .single();
-          relatedEntityName = lead?.name || lead?.email || lead?.phone;
-        }
+        const isOverdue = task.due_date ? new Date(task.due_date) < new Date() : false;
 
-        return {
-          ...task,
+        processedTasks.push({
+          task_id: task.task_id,
+          task_name: task.task_name,
+          task_status: task.task_status,
+          due_date: task.due_date,
+          priority: task.priority,
+          related_order_id: task.related_order_id,
+          related_contact_id: task.related_contact_id,
+          related_lead_id: task.related_lead_id,
+          assigned_task_user_id: task.assigned_task_user_id,
           assignedUserName,
-          isOverdue: task.due_date && new Date(task.due_date) < new Date(),
+          isOverdue,
           relatedEntityName
-        };
-      }));
+        });
+      }
 
-      return tasksWithRelated;
+      return processedTasks;
     },
     enabled: isAdmin,
   });
