@@ -268,7 +268,7 @@ const DashboardPage: React.FC = () => {
       <Card className="shadow-lg border-0 bg-white">
         <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-xl font-semibold text-gray-800">Задачи Команды</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-800">Задачи Команды</CardTitle>
             <Link 
               to="/tasks" 
               className="text-sm text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors"
@@ -277,51 +277,47 @@ const DashboardPage: React.FC = () => {
             </Link>
           </div>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-4">
           {isLoadingAllTasks ? (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {[...Array(3)].map((_, i) => (
                 <div key={i} className="flex flex-col space-y-2">
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
                 </div>
               ))}
             </div>
           ) : !allTasks || allTasks.length === 0 ? (
-            <div className="text-gray-500 text-center py-8">
-              <CheckCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-              <p>Нет активных задач</p>
+            <div className="text-gray-500 text-center py-6">
+              <CheckCircle className="h-10 w-10 mx-auto mb-2 text-gray-300" />
+              <p className="text-sm">Нет активных задач</p>
             </div>
           ) : (
-            <ul className="space-y-4">
-              {allTasks.map((task: any) => (
-                <li key={task.task_id} className="border-b border-gray-100 pb-4 last:border-0">
+            <ul className="space-y-3">
+              {allTasks.slice(0, 4).map((task: any) => (
+                <li key={task.task_id} className="border-b border-gray-100 pb-3 last:border-0">
                   <div className="flex flex-col space-y-2">
                     <div className="flex items-center justify-between">
                       <Link 
                         to={`/tasks/${task.task_id}`}
-                        className="font-medium text-gray-900 hover:text-blue-600 hover:underline transition-colors"
+                        className="font-medium text-gray-900 hover:text-blue-600 hover:underline transition-colors text-sm"
                       >
                         {task.task_name}
                       </Link>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
                         {renderStatusBadge(task.task_status)}
-                        {renderPriorityBadge(task.priority)}
                       </div>
                     </div>
                     
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center justify-between text-xs">
                       <div className="flex flex-col xs:flex-row xs:gap-3 text-gray-600">
                         {task.assignedUserName && (
-                          <span>Исполнитель: {task.assignedUserName}</span>
-                        )}
-                        {task.relatedEntityName && (
-                          <span>{task.relatedEntityName}</span>
+                          <span>{task.assignedUserName}</span>
                         )}
                       </div>
                       
                       <div className="flex items-center gap-1 whitespace-nowrap">
-                        <Clock className="h-4 w-4 text-gray-400" />
+                        <Clock className="h-3 w-3 text-gray-400" />
                         <span className={`${task.isOverdue ? 'text-red-500 font-medium' : 'text-gray-600'}`}>
                           {task.due_date ? formatDate(task.due_date) : 'Срок не задан'}
                         </span>
@@ -354,32 +350,32 @@ const DashboardPage: React.FC = () => {
             </Link>
           </div>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-4">
           {isLoadingRecentLeads ? (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {[...Array(3)].map((_, i) => (
                 <div key={i} className="flex flex-col space-y-2">
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
                 </div>
               ))}
             </div>
           ) : !recentLeads || recentLeads.length === 0 ? (
-            <div className="text-gray-500 text-center py-8">
-              <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-              <p>Нет данных о лидах</p>
+            <div className="text-gray-500 text-center py-6">
+              <Users className="h-10 w-10 mx-auto mb-2 text-gray-300" />
+              <p className="text-sm">Нет данных о лидах</p>
             </div>
           ) : (
             <ul className="space-y-3">
-              {recentLeads.map((lead: any) => (
+              {recentLeads.slice(0, 4).map((lead: any) => (
                 <li key={lead.lead_id} className="border-b border-gray-100 pb-3 last:border-0">
                   <Link 
                     to={`/leads/${lead.lead_id}`}
-                    className="font-medium text-gray-900 hover:text-blue-600 hover:underline transition-colors"
+                    className="font-medium text-gray-900 hover:text-blue-600 hover:underline transition-colors text-sm"
                   >
                     {lead.name || lead.email || lead.phone || `Лид №${lead.lead_id}`}
                   </Link>
-                  <div className="flex items-center justify-between text-sm text-gray-600 mt-1">
+                  <div className="flex items-center justify-between text-xs text-gray-600 mt-1">
                     <span>{lead.assignedUser?.full_name || 'Не назначен'}</span>
                     <span>{formatDate(lead.creation_date)}</span>
                   </div>
@@ -409,37 +405,37 @@ const DashboardPage: React.FC = () => {
             </Link>
           </div>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-4">
           {isLoadingRecentOrders ? (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {[...Array(3)].map((_, i) => (
                 <div key={i} className="flex flex-col space-y-2">
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
                 </div>
               ))}
             </div>
           ) : !recentOrders || recentOrders.length === 0 ? (
-            <div className="text-gray-500 text-center py-8">
-              <Package className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-              <p>Нет данных о заказах</p>
+            <div className="text-gray-500 text-center py-6">
+              <Package className="h-10 w-10 mx-auto mb-2 text-gray-300" />
+              <p className="text-sm">Нет данных о заказах</p>
             </div>
           ) : (
             <ul className="space-y-3">
-              {recentOrders.map((order: any) => (
+              {recentOrders.slice(0, 4).map((order: any) => (
                 <li key={order.id} className="border-b border-gray-100 pb-3 last:border-0">
                   <Link 
                     to={`/orders/${order.id}`}
-                    className="font-medium text-gray-900 hover:text-purple-600 hover:underline transition-colors"
+                    className="font-medium text-gray-900 hover:text-purple-600 hover:underline transition-colors text-sm"
                   >
                     №{order.order_number} - {order.contacts?.full_name || 'Контакт не указан'}
                   </Link>
-                  <div className="flex items-center justify-between text-sm text-gray-600 mt-1">
+                  <div className="flex items-center justify-between text-xs text-gray-600 mt-1">
                     <div className="flex gap-2">
-                      <Badge variant="outline" className="text-xs">
-                        {order.order_type}
+                      <Badge variant="outline" className="text-xs px-1 py-0">
+                        {order.order_type === 'Готовая мебель (Tilda)' ? 'Готовая' : 'На заказ'}
                       </Badge>
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-xs px-1 py-0">
                         {order.status}
                       </Badge>
                     </div>
@@ -468,23 +464,16 @@ const DashboardPage: React.FC = () => {
         {/* Main Content */}
         {isAdmin ? (
           <div className="space-y-6">
-            {/* Financial Summary - Full Width */}
-            <div className="w-full">
-              <FinancialSummaryPanel />
+            {/* Top Row - Tasks and Orders */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {renderTeamTasksSection()}
+              {renderRecentOrdersSection()}
             </div>
 
-            {/* Two Column Layout for Admin */}
+            {/* Bottom Row - Financial Report and Leads */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column - Tasks */}
-              <div className="space-y-6">
-                {renderTeamTasksSection()}
-              </div>
-
-              {/* Right Column - Recent Activities */}
-              <div className="space-y-6">
-                {renderRecentLeadsSection()}
-                {renderRecentOrdersSection()}
-              </div>
+              <FinancialSummaryPanel />
+              {renderRecentLeadsSection()}
             </div>
           </div>
         ) : (
