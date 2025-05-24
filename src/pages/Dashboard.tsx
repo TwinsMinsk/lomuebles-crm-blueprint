@@ -5,6 +5,13 @@ import SchemaViewer from "@/components/SchemaViewer";
 import KPICardSkeleton from "@/components/ui/skeletons/KPICardSkeleton";
 import { useDashboardData } from "@/hooks/dashboard/useDashboardData";
 import { Skeleton } from "@/components/ui/skeleton";
+import { 
+  Users, 
+  Building2, 
+  ShoppingCart, 
+  TrendingUp,
+  ClipboardList
+} from "lucide-react";
 
 const Dashboard = () => {
   const { 
@@ -13,6 +20,22 @@ const Dashboard = () => {
     isLoadingKPI, 
     isLoadingTasks 
   } = useDashboardData();
+
+  // Function to get icon component by type
+  const getIcon = (iconType: string) => {
+    switch (iconType) {
+      case "users":
+        return <Users className="h-4 w-4 text-muted-foreground" />;
+      case "shopping-cart":
+        return <ShoppingCart className="h-4 w-4 text-muted-foreground" />;
+      case "building2":
+        return <Building2 className="h-4 w-4 text-muted-foreground" />;
+      case "trending-up":
+        return <TrendingUp className="h-4 w-4 text-muted-foreground" />;
+      default:
+        return <ClipboardList className="h-4 w-4 text-muted-foreground" />;
+    }
+  };
 
   return (
     <Container>
@@ -31,7 +54,7 @@ const Dashboard = () => {
                     <CardTitle className="text-sm font-medium">
                       {kpi.title}
                     </CardTitle>
-                    {kpi.icon}
+                    {getIcon(kpi.iconType)}
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{kpi.value}</div>

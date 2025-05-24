@@ -1,13 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  Users, 
-  Building2, 
-  ShoppingCart, 
-  TrendingUp,
-  ClipboardList
-} from "lucide-react";
 
 export function useDashboardData() {
   // Mock KPI data query - replace with real data fetching
@@ -22,25 +15,25 @@ export function useDashboardData() {
           title: "Всего лидов",
           value: "247",
           description: "+12% за месяц",
-          icon: <Users className="h-4 w-4 text-muted-foreground" />
+          iconType: "users"
         },
         {
           title: "Активные заказы",
           value: "89",
           description: "+3% за неделю",
-          icon: <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+          iconType: "shopping-cart"
         },
         {
           title: "Контакты",
           value: "156",
           description: "+8% за месяц",
-          icon: <Building2 className="h-4 w-4 text-muted-foreground" />
+          iconType: "building2"
         },
         {
           title: "Конверсия",
           value: "12.5%",
           description: "+2.1% за месяц",
-          icon: <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          iconType: "trending-up"
         }
       ];
     },
