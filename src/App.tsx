@@ -1,7 +1,7 @@
 
 import { Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
-import Dashboard from "./pages/dashboard/DashboardPage";  // Updated import path
+import DashboardPage from "./pages/dashboard/DashboardPage";  // Updated to use the correct file
 import Leads from "./pages/Leads";
 import Contacts from "./pages/Contacts";
 import Companies from "./pages/Companies";
@@ -49,8 +49,8 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Dashboard />} />
-        <Route path="dashboard" element={<Dashboard />} />
+        <Route index element={<DashboardPage />} />
+        <Route path="dashboard" element={<DashboardPage />} />
         <Route path="leads" element={<Leads />} />
         <Route path="contacts" element={<Contacts />} />
         <Route path="companies" element={<Companies />} />

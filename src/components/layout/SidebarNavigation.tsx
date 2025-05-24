@@ -1,76 +1,87 @@
 
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import { LayoutDashboard, Users, Building, Package, ListChecks, Calendar, ShoppingCart, Truck, Settings, UserCog, DollarSign } from "lucide-react";
+import { 
+  SidebarGroup, 
+  SidebarGroupContent, 
+  SidebarGroupLabel, 
+  SidebarMenu, 
+  SidebarMenuButton, 
+  SidebarMenuItem 
+} from "@/components/ui/sidebar";
+import { 
+  LayoutDashboard, 
+  Users, 
+  Building, 
+  Package, 
+  ListChecks, 
+  Calendar, 
+  ShoppingCart, 
+  Truck, 
+  Settings, 
+  UserCog, 
+  DollarSign,
+  BarChart3,
+  Target,
+  Briefcase,
+  Clock,
+  TrendingUp
+} from "lucide-react";
 import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 type MenuItem = {
   label: string;
   path: string;
   icon: React.ElementType;
   requiredRole?: string | string[];
-  childItems?: MenuItem[];
-  expanded?: boolean;
 };
 
-const menuItems: MenuItem[] = [
+type MenuGroup = {
+  label: string;
+  icon: React.ElementType;
+  items: MenuItem[];
+};
+
+const menuGroups: MenuGroup[] = [
   {
-    label: "CRM Панель",
-    path: "/dashboard",
-    icon: LayoutDashboard
+    label: "Аналитика",
+    icon: BarChart3,
+    items: [
+      { label: "CRM Панель", path: "/dashboard", icon: LayoutDashboard },
+    ]
   },
   {
-    label: "Лиды",
-    path: "/leads",
-    icon: Users
+    label: "Управление клиентами",
+    icon: Users,
+    items: [
+      { label: "Лиды", path: "/leads", icon: Target },
+      { label: "Контакты", path: "/contacts", icon: Users },
+      { label: "Компании", path: "/companies", icon: Building },
+    ]
   },
   {
-    label: "Контакты",
-    path: "/contacts",
-    icon: Users
+    label: "Продажи и заказы",
+    icon: Briefcase,
+    items: [
+      { label: "Заказы", path: "/orders", icon: Package },
+      { label: "Товары CRM", path: "/products", icon: ShoppingCart },
+      { label: "Поставщики", path: "/suppliers", icon: Truck },
+      { label: "Партнеры-Изготовители", path: "/partners", icon: Users },
+    ]
   },
   {
-    label: "Компании",
-    path: "/companies",
-    icon: Building
-  },
-  {
-    label: "Заказы",
-    path: "/orders",
-    icon: Package
-  },
-  {
-    label: "Задачи",
-    path: "/tasks",
-    icon: ListChecks
-  },
-  {
-    label: "Календарь",
-    path: "/calendar",
-    icon: Calendar
-  },
-  {
-    label: "Товары CRM",
-    path: "/products",
-    icon: ShoppingCart
-  },
-  {
-    label: "Поставщики",
-    path: "/suppliers",
-    icon: Truck
-  },
-  {
-    label: "Партнеры-Изготовители",
-    path: "/partners",
-    icon: Users
+    label: "Управление задачами",
+    icon: Clock,
+    items: [
+      { label: "Задачи", path: "/tasks", icon: ListChecks },
+      { label: "Календарь", path: "/calendar", icon: Calendar },
+    ]
   },
   {
     label: "Финансы",
-    path: "/finance",
-    icon: DollarSign,
-    requiredRole: ["Главный Администратор", "Администратор"],
-    childItems: [
+    icon: TrendingUp,
+    items: [
       {
         label: "Категории",
         path: "/finance/categories",
@@ -92,15 +103,17 @@ const menuItems: MenuItem[] = [
     ]
   },
   {
-    label: "Настройки",
-    path: "/settings",
-    icon: Settings
-  },
-  {
-    label: "Управление Пользователями",
-    path: "/admin/users",
-    icon: UserCog,
-    requiredRole: ["Главный Администратор", "Администратор"]
+    label: "Система",
+    icon: Settings,
+    items: [
+      { label: "Настройки", path: "/settings", icon: Settings },
+      {
+        label: "Управление Пользователями",
+        path: "/admin/users",
+        icon: UserCog,
+        requiredRole: ["Главный Администратор", "Администратор"]
+      }
+    ]
   }
 ];
 
@@ -108,7 +121,6 @@ const SidebarNavigation = () => {
   const { userRole } = useAuth();
   const location = useLocation();
 
-  // Check access to menu item based on user role
   const hasAccess = (item: MenuItem) => {
     if (!item.requiredRole) return true;
     if (!userRole) return false;
@@ -120,78 +132,38 @@ const SidebarNavigation = () => {
     return requiredRoles.includes(userRole);
   };
 
-  // Check if the current path is in a child item
-  const isChildActive = (item: MenuItem) => {
-    if (!item.childItems) return false;
-    return item.childItems.some(child => location.pathname === child.path);
+  const hasGroupAccess = (group: MenuGroup) => {
+    return group.items.some(item => hasAccess(item));
+  };
+
+  const isItemActive = (path: string) => {
+    return location.pathname === path;
   };
 
   const renderMenuItem = (item: MenuItem) => {
-    // Skip items user doesn't have access to
-    if (!hasAccess(item)) {
-      return null;
-    }
+    if (!hasAccess(item)) return null;
     
-    const isActive = location.pathname === item.path || isChildActive(item);
-    const hasChildren = item.childItems && item.childItems.length > 0;
-    
-    if (hasChildren) {
-      return (
-        <SidebarMenuItem key={item.path}>
-          <SidebarMenuButton 
-            isActive={isActive} 
-            tooltip={item.label} 
-            className={cn(
-              "bg-white",
-              isActive && "bg-light-green text-accent-green"
-            )}
-          >
-            <item.icon />
-            <span>{item.label}</span>
-          </SidebarMenuButton>
-          
-          {item.childItems.map(childItem => {
-            if (!hasAccess(childItem)) return null;
-            
-            const isChildItemActive = location.pathname === childItem.path;
-            
-            return (
-              <SidebarMenuItem key={childItem.path} className="pl-6">
-                <SidebarMenuButton 
-                  isActive={isChildItemActive} 
-                  asChild 
-                  tooltip={childItem.label} 
-                  className={cn(
-                    "bg-white",
-                    isChildItemActive && "bg-light-green text-accent-green"
-                  )}
-                >
-                  <Link to={childItem.path}>
-                    <childItem.icon />
-                    <span>{childItem.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            );
-          })}
-        </SidebarMenuItem>
-      );
-    }
+    const isActive = isItemActive(item.path);
     
     return (
       <SidebarMenuItem key={item.path}>
         <SidebarMenuButton 
           isActive={isActive} 
           asChild 
-          tooltip={item.label} 
+          tooltip={item.label}
           className={cn(
-            "bg-white",
-            isActive && "bg-light-green text-accent-green"
+            "w-full justify-start gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.02]",
+            isActive 
+              ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25" 
+              : "text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-600"
           )}
         >
-          <Link to={item.path}>
-            <item.icon />
-            <span>{item.label}</span>
+          <Link to={item.path} className="flex items-center gap-3">
+            <item.icon className={cn(
+              "h-5 w-5 transition-colors",
+              isActive ? "text-white" : "text-gray-500"
+            )} />
+            <span className="font-medium">{item.label}</span>
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -199,18 +171,26 @@ const SidebarNavigation = () => {
   };
 
   return (
-    <SidebarGroup className="bg-white my-[34px]">
-      <SidebarGroupLabel>Меню</SidebarGroupLabel>
-      <SidebarGroupContent>
-        <SidebarMenu>
-          {menuItems.map(renderMenuItem)}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
+    <div className="px-3 py-2">
+      {menuGroups.map((group) => {
+        if (!hasGroupAccess(group)) return null;
+        
+        return (
+          <SidebarGroup key={group.label} className="mb-6">
+            <SidebarGroupLabel className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+              <group.icon className="h-4 w-4" />
+              {group.label}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className="space-y-1">
+                {group.items.map(renderMenuItem)}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        );
+      })}
+    </div>
   );
 };
-
-// Add the import for cn utility
-import { cn } from "@/lib/utils";
 
 export default SidebarNavigation;
