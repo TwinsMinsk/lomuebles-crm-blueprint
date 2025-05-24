@@ -66,7 +66,7 @@ export const useAllTasks = () => {
           task_status,
           priority,
           due_date,
-          assignedUser:assigned_task_user_id(full_name)
+          assigned_task_user_id
         `)
         .neq('task_status', 'Выполнена')
         .order('due_date', { ascending: true })
@@ -74,11 +74,29 @@ export const useAllTasks = () => {
 
       if (error) throw error;
 
+      // Get user names for assigned users
+      const userIds = [...new Set((data || []).map(task => task.assigned_task_user_id).filter(Boolean))];
+      
+      let userNames: Record<string, string> = {};
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .in('id', userIds);
+        
+        if (profiles) {
+          userNames = profiles.reduce((acc, profile) => {
+            acc[profile.id] = profile.full_name || 'Не указано';
+            return acc;
+          }, {} as Record<string, string>);
+        }
+      }
+
       const today = new Date().toISOString().split('T')[0];
       
       return (data || []).map(task => ({
         ...task,
-        assignedUserName: task.assignedUser?.full_name || 'Не назначен',
+        assignedUserName: userNames[task.assigned_task_user_id] || 'Не назначен',
         isOverdue: task.due_date ? task.due_date < today : false,
         relatedEntityName: '', // Will be populated separately if needed
       }));

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
@@ -62,8 +61,8 @@ const DashboardPage: React.FC = () => {
     title: string,
     value: number,
     icon: React.ElementType,
-    change?: { value: number; isPositive: boolean },
-    gradient: string
+    gradient: string,
+    change?: { value: number; isPositive: boolean }
   ) => {
     const IconComponent = icon;
     
@@ -112,29 +111,29 @@ const DashboardPage: React.FC = () => {
           "Новые лиды",
           kpiData?.newLeadsCount || 0,
           Target,
-          { value: 12, isPositive: true },
-          "bg-gradient-to-br from-blue-500 to-blue-600"
+          "bg-gradient-to-br from-blue-500 to-blue-600",
+          { value: 12, isPositive: true }
         )}
         {renderKPICard(
           "Активные заказы",
           kpiData?.activeOrdersCount || 0,
           Package,
-          { value: 8, isPositive: true },
-          "bg-gradient-to-br from-purple-500 to-purple-600"
+          "bg-gradient-to-br from-purple-500 to-purple-600",
+          { value: 8, isPositive: true }
         )}
         {renderKPICard(
           "Задачи на сегодня",
           kpiData?.todaysTasksCount || 0,
           Calendar,
-          { value: 3, isPositive: false },
-          "bg-gradient-to-br from-green-500 to-green-600"
+          "bg-gradient-to-br from-green-500 to-green-600",
+          { value: 3, isPositive: false }
         )}
         {renderKPICard(
           "Просроченные задачи",
           kpiData?.overdueTasksCount || 0,
           AlertTriangle,
-          { value: 15, isPositive: false },
-          "bg-gradient-to-br from-red-500 to-red-600"
+          "bg-gradient-to-br from-red-500 to-red-600",
+          { value: 15, isPositive: false }
         )}
       </div>
     );
@@ -277,7 +276,6 @@ const DashboardPage: React.FC = () => {
           </div>
         </CardHeader>
         <CardContent className="p-6">
-          {/* Similar content structure as MyTasks but with allTasks data */}
           {isLoadingAllTasks ? (
             <div className="space-y-4">
               {[...Array(3)].map((_, i) => (
@@ -296,7 +294,6 @@ const DashboardPage: React.FC = () => {
             <ul className="space-y-4">
               {allTasks.map((task: any) => (
                 <li key={task.task_id} className="border-b border-gray-100 pb-4 last:border-0">
-                  {/* Same task rendering logic as above */}
                   <div className="flex flex-col space-y-2">
                     <div className="flex items-center justify-between">
                       <Link 
@@ -358,7 +355,6 @@ const DashboardPage: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent className="p-6">
-            {/* Recent leads content */}
             {isLoadingRecentLeads ? (
               <div className="space-y-4">
                 {[...Array(3)].map((_, i) => (
@@ -408,7 +404,6 @@ const DashboardPage: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent className="p-6">
-            {/* Recent orders content */}
             {isLoadingRecentOrders ? (
               <div className="space-y-4">
                 {[...Array(3)].map((_, i) => (
