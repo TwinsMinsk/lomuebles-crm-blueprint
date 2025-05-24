@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
@@ -259,7 +260,7 @@ const DashboardPage: React.FC = () => {
     );
   };
 
-  // Team tasks section for admin users
+  // Task section for admin users
   const renderTeamTasksSection = () => {
     if (!isAdmin) return null;
 
@@ -336,122 +337,120 @@ const DashboardPage: React.FC = () => {
     );
   };
 
-  // Recent activities section for admin users
-  const renderRecentActivitiesSection = () => {
+  // Recent Leads section for admin users
+  const renderRecentLeadsSection = () => {
     if (!isAdmin) return null;
 
     return (
-      <>
-        {/* Financial Summary Panel */}
-        <div className="mb-6">
-          <FinancialSummaryPanel />
-        </div>
-
-        {/* Recent Leads */}
-        <Card className="shadow-lg border-0 bg-white mb-6">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-semibold text-gray-800">Последние Лиды</CardTitle>
-              <Link 
-                to="/leads" 
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors"
-              >
-                Все лиды
-              </Link>
+      <Card className="shadow-lg border-0 bg-white">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-semibold text-gray-800">Последние Лиды</CardTitle>
+            <Link 
+              to="/leads" 
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors"
+            >
+              Все лиды
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          {isLoadingRecentLeads ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex flex-col space-y-2">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              ))}
             </div>
-          </CardHeader>
-          <CardContent className="p-6">
-            {isLoadingRecentLeads ? (
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="flex flex-col space-y-2">
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </div>
-                ))}
-              </div>
-            ) : !recentLeads || recentLeads.length === 0 ? (
-              <div className="text-gray-500 text-center py-8">
-                <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                <p>Нет данных о лидах</p>
-              </div>
-            ) : (
-              <ul className="space-y-3">
-                {recentLeads.map((lead: any) => (
-                  <li key={lead.lead_id} className="border-b border-gray-100 pb-3 last:border-0">
-                    <Link 
-                      to={`/leads/${lead.lead_id}`}
-                      className="font-medium text-gray-900 hover:text-blue-600 hover:underline transition-colors"
-                    >
-                      {lead.name || lead.email || lead.phone || `Лид №${lead.lead_id}`}
-                    </Link>
-                    <div className="flex items-center justify-between text-sm text-gray-600 mt-1">
-                      <span>{lead.assignedUser?.full_name || 'Не назначен'}</span>
-                      <span>{formatDate(lead.creation_date)}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Recent Orders */}
-        <Card className="shadow-lg border-0 bg-white">
-          <CardHeader className="bg-gradient-to-r from-purple-50 to-purple-100 border-b">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-semibold text-gray-800">Последние Заказы</CardTitle>
-              <Link 
-                to="/orders" 
-                className="text-sm text-purple-600 hover:text-purple-800 font-medium hover:underline transition-colors"
-              >
-                Все заказы
-              </Link>
+          ) : !recentLeads || recentLeads.length === 0 ? (
+            <div className="text-gray-500 text-center py-8">
+              <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+              <p>Нет данных о лидах</p>
             </div>
-          </CardHeader>
-          <CardContent className="p-6">
-            {isLoadingRecentOrders ? (
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="flex flex-col space-y-2">
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
+          ) : (
+            <ul className="space-y-3">
+              {recentLeads.map((lead: any) => (
+                <li key={lead.lead_id} className="border-b border-gray-100 pb-3 last:border-0">
+                  <Link 
+                    to={`/leads/${lead.lead_id}`}
+                    className="font-medium text-gray-900 hover:text-blue-600 hover:underline transition-colors"
+                  >
+                    {lead.name || lead.email || lead.phone || `Лид №${lead.lead_id}`}
+                  </Link>
+                  <div className="flex items-center justify-between text-sm text-gray-600 mt-1">
+                    <span>{lead.assignedUser?.full_name || 'Не назначен'}</span>
+                    <span>{formatDate(lead.creation_date)}</span>
                   </div>
-                ))}
-              </div>
-            ) : !recentOrders || recentOrders.length === 0 ? (
-              <div className="text-gray-500 text-center py-8">
-                <Package className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                <p>Нет данных о заказах</p>
-              </div>
-            ) : (
-              <ul className="space-y-3">
-                {recentOrders.map((order: any) => (
-                  <li key={order.id} className="border-b border-gray-100 pb-3 last:border-0">
-                    <Link 
-                      to={`/orders/${order.id}`}
-                      className="font-medium text-gray-900 hover:text-purple-600 hover:underline transition-colors"
-                    >
-                      №{order.order_number} - {order.contacts?.full_name || 'Контакт не указан'}
-                    </Link>
-                    <div className="flex items-center justify-between text-sm text-gray-600 mt-1">
-                      <div className="flex gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          {order.order_type}
-                        </Badge>
-                        <Badge variant="secondary" className="text-xs">
-                          {order.status}
-                        </Badge>
-                      </div>
-                      <span>{formatDate(order.created_at)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
+  // Recent Orders section for admin users
+  const renderRecentOrdersSection = () => {
+    if (!isAdmin) return null;
+
+    return (
+      <Card className="shadow-lg border-0 bg-white">
+        <CardHeader className="bg-gradient-to-r from-purple-50 to-purple-100 border-b">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-semibold text-gray-800">Последние Заказы</CardTitle>
+            <Link 
+              to="/orders" 
+              className="text-sm text-purple-600 hover:text-purple-800 font-medium hover:underline transition-colors"
+            >
+              Все заказы
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          {isLoadingRecentOrders ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex flex-col space-y-2">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : !recentOrders || recentOrders.length === 0 ? (
+            <div className="text-gray-500 text-center py-8">
+              <Package className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+              <p>Нет данных о заказах</p>
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {recentOrders.map((order: any) => (
+                <li key={order.id} className="border-b border-gray-100 pb-3 last:border-0">
+                  <Link 
+                    to={`/orders/${order.id}`}
+                    className="font-medium text-gray-900 hover:text-purple-600 hover:underline transition-colors"
+                  >
+                    №{order.order_number} - {order.contacts?.full_name || 'Контакт не указан'}
+                  </Link>
+                  <div className="flex items-center justify-between text-sm text-gray-600 mt-1">
+                    <div className="flex gap-2">
+                      <Badge variant="outline" className="text-xs">
+                        {order.order_type}
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        {order.status}
+                      </Badge>
                     </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-      </>
+                    <span>{formatDate(order.created_at)}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     );
   };
 
@@ -466,19 +465,34 @@ const DashboardPage: React.FC = () => {
         {/* KPI Cards */}
         {renderKPICards()}
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Tasks */}
-          <div className="lg:col-span-2 space-y-6">
-            {renderMyTasksSection()}
-            {renderTeamTasksSection()}
-          </div>
-
-          {/* Right Column - Financial Summary + Recent Activities */}
+        {/* Main Content */}
+        {isAdmin ? (
           <div className="space-y-6">
-            {renderRecentActivitiesSection()}
+            {/* Financial Summary - Full Width */}
+            <div className="w-full">
+              <FinancialSummaryPanel />
+            </div>
+
+            {/* Two Column Layout for Admin */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - Tasks */}
+              <div className="space-y-6">
+                {renderTeamTasksSection()}
+              </div>
+
+              {/* Right Column - Recent Activities */}
+              <div className="space-y-6">
+                {renderRecentLeadsSection()}
+                {renderRecentOrdersSection()}
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          /* Single Column Layout for Non-Admin Users */
+          <div className="max-w-4xl mx-auto">
+            {renderMyTasksSection()}
+          </div>
+        )}
       </div>
     </div>
   );
