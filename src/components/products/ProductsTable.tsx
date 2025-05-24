@@ -9,7 +9,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import ProductTableRow from "./ProductTableRow";
-import TableSkeleton from "@/components/ui/skeletons/TableSkeleton";
 import { Product } from "@/types/product";
 
 interface ProductsTableProps {
@@ -25,10 +24,6 @@ const ProductsTable: React.FC<ProductsTableProps> = ({
   onProductClick,
   onDeleteClick,
 }) => {
-  if (loading) {
-    return <TableSkeleton columns={8} rows={6} />;
-  }
-
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -45,7 +40,13 @@ const ProductsTable: React.FC<ProductsTableProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {products.length > 0 ? (
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={8} className="text-center py-4">
+                Загрузка...
+              </TableCell>
+            </TableRow>
+          ) : products.length > 0 ? (
             products.map((product) => (
               <ProductTableRow
                 key={product.product_id}

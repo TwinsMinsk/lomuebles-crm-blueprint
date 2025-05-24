@@ -9,7 +9,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import LeadTableRow, { LeadWithProfile } from "./LeadTableRow";
-import TableSkeleton from "@/components/ui/skeletons/TableSkeleton";
 
 interface LeadsTableProps {
   leads: LeadWithProfile[];
@@ -24,10 +23,6 @@ const LeadsTable: React.FC<LeadsTableProps> = ({
   onLeadClick, 
   onLeadDelete 
 }) => {
-  if (loading) {
-    return <TableSkeleton columns={10} rows={6} />;
-  }
-
   return (
     <div className="overflow-x-auto">
       <Table>

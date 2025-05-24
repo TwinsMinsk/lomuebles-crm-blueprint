@@ -9,7 +9,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import PartnerTableRow from "./PartnerTableRow";
-import TableSkeleton from "@/components/ui/skeletons/TableSkeleton";
 import { Partner } from "@/types/partner";
 
 interface PartnersTableProps {
@@ -25,10 +24,6 @@ const PartnersTable: React.FC<PartnersTableProps> = ({
   onPartnerClick,
   onDeleteClick,
 }) => {
-  if (loading) {
-    return <TableSkeleton columns={9} rows={6} />;
-  }
-
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -46,7 +41,13 @@ const PartnersTable: React.FC<PartnersTableProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {partners.length > 0 ? (
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={9} className="text-center py-4">
+                Загрузка...
+              </TableCell>
+            </TableRow>
+          ) : partners.length > 0 ? (
             partners.map((partner) => (
               <PartnerTableRow
                 key={partner.partner_manufacturer_id}
