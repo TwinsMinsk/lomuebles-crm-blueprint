@@ -46,22 +46,32 @@ export function useDashboardData() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tasks")
-        .select(`
-          task_id,
-          task_name,
-          task_status,
-          due_date,
-          profiles!tasks_assigned_task_user_id_fkey(full_name)
-        `)
+        .select("task_id, task_name, task_status, due_date, assigned_task_user_id")
         .order("creation_date", { ascending: false })
         .limit(5);
 
       if (error) throw error;
       
-      return data?.map(task => ({
-        ...task,
-        assigned_user_name: task.profiles?.full_name || null
-      })) || [];
+      // Fetch user names separately to avoid deep type inference
+      const tasksWithUsers = await Promise.all((data || []).map(async (task) => {
+        let assigned_user_name = null;
+        
+        if (task.assigned_task_user_id) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", task.assigned_task_user_id)
+            .single();
+          assigned_user_name = profile?.full_name || null;
+        }
+
+        return {
+          ...task,
+          assigned_user_name
+        };
+      }));
+
+      return tasksWithUsers;
     },
   });
 
@@ -135,16 +145,7 @@ export function useMyTasks() {
 
       const { data, error } = await supabase
         .from("tasks")
-        .select(`
-          task_id,
-          task_name,
-          task_status,
-          due_date,
-          priority,
-          related_order_id,
-          related_contact_id,
-          related_lead_id
-        `)
+        .select("task_id, task_name, task_status, due_date, priority, related_order_id, related_contact_id, related_lead_id")
         .eq("assigned_task_user_id", user.id)
         .neq("task_status", "Выполнена")
         .order("due_date", { ascending: true })
@@ -202,17 +203,7 @@ export function useAllTasks() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tasks")
-        .select(`
-          task_id,
-          task_name,
-          task_status,
-          due_date,
-          priority,
-          related_order_id,
-          related_contact_id,
-          related_lead_id,
-          assigned_task_user_id
-        `)
+        .select("task_id, task_name, task_status, due_date, priority, related_order_id, related_contact_id, related_lead_id, assigned_task_user_id")
         .neq("task_status", "Выполнена")
         .order("due_date", { ascending: true })
         .limit(10);
@@ -282,14 +273,7 @@ export function useRecentLeads() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("leads")
-        .select(`
-          lead_id,
-          name,
-          email,
-          phone,
-          creation_date,
-          assigned_user_id
-        `)
+        .select("lead_id, name, email, phone, creation_date, assigned_user_id")
         .order("creation_date", { ascending: false })
         .limit(5);
 
@@ -330,14 +314,7 @@ export function useRecentOrders() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select(`
-          id,
-          order_number,
-          order_type,
-          status,
-          created_at,
-          client_contact_id
-        `)
+        .select("id, order_number, order_type, status, created_at, client_contact_id")
         .order("created_at", { ascending: false })
         .limit(5);
 
