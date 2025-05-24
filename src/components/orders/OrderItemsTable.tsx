@@ -3,7 +3,7 @@ import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
+import TableSkeleton from "@/components/ui/skeletons/TableSkeleton";
 import { OrderItem } from "@/types/order";
 
 interface OrderItemsTableProps {
@@ -26,13 +26,7 @@ const OrderItemsTable: React.FC<OrderItemsTableProps> = ({ orderId }) => {
   });
 
   if (isLoading) {
-    return (
-      <div className="space-y-3">
-        <Skeleton className="h-8 w-full" />
-        <Skeleton className="h-8 w-full" />
-        <Skeleton className="h-8 w-full" />
-      </div>
-    );
+    return <TableSkeleton columns={5} rows={3} />;
   }
 
   if (error) {

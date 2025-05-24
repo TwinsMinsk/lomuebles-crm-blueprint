@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import ContactTableRow, { ContactWithRelations } from "./ContactTableRow";
+import TableSkeleton from "@/components/ui/skeletons/TableSkeleton";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface ContactsTableProps {
@@ -56,6 +57,10 @@ const ContactsTable: React.FC<ContactsTableProps> = ({
       </TableHead>
     );
   };
+
+  if (loading) {
+    return <TableSkeleton columns={8} rows={6} />;
+  }
 
   return (
     <div className="overflow-x-auto">

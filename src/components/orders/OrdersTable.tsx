@@ -15,9 +15,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Loader2, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import OrderViewPopup from "./OrderViewPopup";
+import TableSkeleton from "@/components/ui/skeletons/TableSkeleton";
 
 const OrdersTable: React.FC = () => {
   const { data: orders, isLoading, error } = useOrders();
@@ -25,11 +26,7 @@ const OrdersTable: React.FC = () => {
   const [selectedOrderIdForView, setSelectedOrderIdForView] = useState<number | null>(null);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-6">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-      </div>
-    );
+    return <TableSkeleton columns={9} rows={6} />;
   }
 
   if (error) {

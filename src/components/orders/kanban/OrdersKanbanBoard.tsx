@@ -4,6 +4,7 @@ import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
 import { useOrdersKanban } from "@/hooks/orders/useOrdersKanban";
 import { useFilterOptions } from "@/hooks/orders/useFilterOptions";
 import OrderCard from "./OrderCard";
+import KanbanSkeleton from "@/components/ui/skeletons/KanbanSkeleton";
 import { 
   Select, 
   SelectContent, 
@@ -53,8 +54,13 @@ const OrdersKanbanBoard: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      <div className="space-y-4">
+        <div className="flex justify-end">
+          <div className="w-64">
+            <div className="h-10 bg-muted rounded-md animate-pulse" />
+          </div>
+        </div>
+        <KanbanSkeleton columns={5} cardsPerColumn={4} />
       </div>
     );
   }

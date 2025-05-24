@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import SupplierTableRow from "./SupplierTableRow";
+import TableSkeleton from "@/components/ui/skeletons/TableSkeleton";
 import { Supplier } from "@/types/supplier";
 
 interface SuppliersTableProps {
@@ -24,6 +25,10 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({
   onSupplierClick,
   onDeleteClick,
 }) => {
+  if (loading) {
+    return <TableSkeleton columns={8} rows={6} />;
+  }
+
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -40,13 +45,7 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {loading ? (
-            <TableRow>
-              <TableCell colSpan={8} className="text-center py-4">
-                Загрузка...
-              </TableCell>
-            </TableRow>
-          ) : suppliers.length > 0 ? (
+          {suppliers.length > 0 ? (
             suppliers.map((supplier) => (
               <SupplierTableRow
                 key={supplier.supplier_id}
