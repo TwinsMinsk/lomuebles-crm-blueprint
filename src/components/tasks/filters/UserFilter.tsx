@@ -18,16 +18,22 @@ interface UserFilterProps {
 const UserFilter: React.FC<UserFilterProps> = ({ value, onUserFilterChange }) => {
   // Fetch users for the user filter dropdown
   const { data: users = [] } = useQuery({
-    queryKey: ["users"],
+    queryKey: ["users-filter"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name")
+        .select("id, full_name, email")
         .eq("is_active", true)
         .order("full_name");
 
       if (error) throw error;
-      return data;
+      
+      return data
+        .filter(user => user.id) // Убираем пользователей без ID
+        .map((user) => ({
+          id: user.id,
+          full_name: user.full_name || user.email || `Пользователь ${user.id?.slice(0, 8)}`,
+        }));
     },
   });
 

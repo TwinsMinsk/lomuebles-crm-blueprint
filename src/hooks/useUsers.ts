@@ -25,7 +25,13 @@ export function useUsers() {
         throw error;
       }
 
-      return data as User[];
+      // Фильтруем пользователей без ID и заполняем отсутствующие имена
+      return data
+        .filter(user => user.id)
+        .map(user => ({
+          ...user,
+          full_name: user.full_name || user.email || `Пользователь ${user.id?.slice(0, 8)}`
+        })) as User[];
     },
   });
 
