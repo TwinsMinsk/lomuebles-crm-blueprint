@@ -61,7 +61,7 @@ const ModernTasksTable: React.FC<ModernTasksTableProps> = ({
       case 'Отменена':
         return 'danger';
       default:
-        return 'default';
+        return 'secondary';
     }
   };
 
