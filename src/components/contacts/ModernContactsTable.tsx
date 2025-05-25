@@ -26,6 +26,20 @@ const ModernContactsTable: React.FC<ModernContactsTableProps> = ({
     return format(new Date(dateString), "dd MMM yyyy", { locale: ru })
   }
 
+  // Helper function to build full address
+  const buildFullAddress = (contact: ContactWithRelations) => {
+    const parts = [
+      contact.delivery_address_street,
+      contact.delivery_address_number,
+      contact.delivery_address_apartment,
+      contact.delivery_address_city,
+      contact.delivery_address_postal_code,
+      contact.delivery_address_country
+    ].filter(Boolean)
+    
+    return parts.length > 0 ? parts.join(", ") : null
+  }
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -129,7 +143,7 @@ const ModernContactsTable: React.FC<ModernContactsTableProps> = ({
                 <div className="flex items-center gap-1">
                   <Building2 className="h-3 w-3 text-gray-400" />
                   <span className="text-sm">
-                    {contact.company?.company_name || "—"}
+                    {contact.companies?.company_name || "—"}
                   </span>
                 </div>
               }
@@ -142,7 +156,7 @@ const ModernContactsTable: React.FC<ModernContactsTableProps> = ({
                 <div className="flex items-center gap-1">
                   <MapPin className="h-3 w-3 text-gray-400" />
                   <span className="text-sm">
-                    {contact.address_full || "—"}
+                    {buildFullAddress(contact) || "—"}
                   </span>
                 </div>
               }
@@ -153,7 +167,7 @@ const ModernContactsTable: React.FC<ModernContactsTableProps> = ({
               label="Ответственный"
               value={
                 <span className="text-sm">
-                  {contact.owner?.full_name || "Не назначен"}
+                  {contact.profiles?.full_name || "Не назначен"}
                 </span>
               }
             />
@@ -163,7 +177,7 @@ const ModernContactsTable: React.FC<ModernContactsTableProps> = ({
               label="Дата создания"
               value={
                 <span className="text-sm text-gray-600">
-                  {formatDate(contact.created_at)}
+                  {formatDate(contact.creation_date)}
                 </span>
               }
             />
