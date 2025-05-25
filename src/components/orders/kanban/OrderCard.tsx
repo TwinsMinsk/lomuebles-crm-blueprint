@@ -28,12 +28,12 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, index }) => {
               <Card 
                 className={`
                   shadow-md cursor-pointer border-l-4 border-l-accent-green transition-all duration-200
-                  ${snapshot.isDragging ? "shadow-lg ring-2 ring-accent-green" : ""}
-                  hover:shadow-lg hover:border-[#8bd60e] hover:-translate-y-0.5
+                  ${snapshot.isDragging ? "shadow-xl ring-2 ring-accent-green transform scale-105" : ""}
+                  hover:shadow-lg hover:border-[#8bd60e] hover:-translate-y-1
                 `}
               >
                 <CardHeader className="p-3 pb-2">
-                  <CardTitle className="text-sm font-medium">
+                  <CardTitle className="text-base font-semibold text-gray-900">
                     {order.order_number}
                   </CardTitle>
                 </CardHeader>
@@ -42,7 +42,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, index }) => {
                   <>
                     <Separator className="mx-3" />
                     <CardContent className="p-3 pt-2 pb-1">
-                      <p className="text-sm font-medium truncate">{order.order_name}</p>
+                      <p className="text-sm font-medium text-gray-800 truncate">{order.order_name}</p>
                     </CardContent>
                   </>
                 )}
@@ -52,7 +52,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, index }) => {
                     <Separator className="mx-3" />
                     <CardContent className="p-3 pt-2 pb-1">
                       <p className="text-xs text-muted-foreground truncate">
-                        {order.contact.full_name}
+                        Клиент: {order.contact.full_name}
                       </p>
                     </CardContent>
                   </>
@@ -62,13 +62,13 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, index }) => {
                 <CardFooter className="p-3 pt-2 flex justify-between items-center">
                   <div className="text-xs flex-1 min-w-0">
                     {order.assigned_user && (
-                      <span className="bg-muted px-2 py-1 rounded text-muted-foreground truncate inline-block max-w-full">
+                      <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-md text-xs font-medium truncate inline-block max-w-full border">
                         {order.assigned_user.full_name}
                       </span>
                     )}
                   </div>
                   {order.final_amount !== null && (
-                    <div className="text-sm font-medium text-green-600 ml-2 flex-shrink-0">
+                    <div className="text-sm font-bold text-green-600 ml-2 flex-shrink-0">
                       {formatCurrency(order.final_amount)}
                     </div>
                   )}

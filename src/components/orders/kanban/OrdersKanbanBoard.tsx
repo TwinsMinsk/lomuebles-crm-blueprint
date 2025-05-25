@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, FilePlus, ClipboardList, FileCheck, Clock, CheckCircle, XCircle, Compass, Wrench, Package, Truck } from "lucide-react";
+import { ModernEmptyState } from "@/components/ui/modern-empty-state";
+import { Package } from "lucide-react";
 
 // Function to get the appropriate icon for each status
 const getStatusIcon = (status: string) => {
@@ -242,21 +244,22 @@ const OrdersKanbanBoard: React.FC = () => {
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 overflow-x-auto pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 overflow-x-auto pb-6">
           {kanbanData.columns.map((column) => {
             const { bgClass, textClass } = getStatusColumnStyles(column.id, selectedOrderType);
             const statusIcon = getStatusIcon(column.id);
+            const hasOrders = column.orderIds.length > 0;
             
             return (
               <div key={column.id} className="flex flex-col">
-                <div className={`${bgClass} ${textClass} p-3 rounded-t-md`}>
-                  <div className="flex items-center gap-2 mb-2">
+                <div className={`${bgClass} ${textClass} p-4 rounded-t-md`}>
+                  <div className="flex items-center gap-2 mb-3">
                     {statusIcon}
-                    <h3 className="font-medium text-sm">{column.title}</h3>
+                    <h3 className="font-semibold text-sm">{column.title}</h3>
                   </div>
                   <Badge 
                     variant="secondary" 
-                    className="text-xs bg-white/20 text-current border-current/20 hover:bg-white/30"
+                    className="text-xs bg-white/30 text-current border-current/20 hover:bg-white/40 font-medium"
                   >
                     {column.orderIds.length} заказ(ов)
                   </Badge>
@@ -268,21 +271,33 @@ const OrdersKanbanBoard: React.FC = () => {
                       ref={provided.innerRef}
                       {...provided.droppableProps}
                       className={`
-                        flex-1 p-2 min-h-[150px] rounded-b-md
-                        ${snapshot.isDraggingOver ? "bg-accent/50" : "bg-muted/50"}
+                        flex-1 p-3 min-h-[200px] rounded-b-md
+                        ${snapshot.isDraggingOver ? "bg-accent/50" : "bg-muted/30"}
+                        transition-colors duration-200
                       `}
                       style={{ maxHeight: "calc(100vh - 280px)", overflowY: "auto" }}
                     >
-                      {column.orderIds.map((orderId, index) => {
-                        const order = kanbanData.ordersMap[orderId];
-                        return order ? (
-                          <OrderCard 
-                            key={order.id} 
-                            order={order} 
-                            index={index} 
+                      {hasOrders ? (
+                        column.orderIds.map((orderId, index) => {
+                          const order = kanbanData.ordersMap[orderId];
+                          return order ? (
+                            <OrderCard 
+                              key={order.id} 
+                              order={order} 
+                              index={index} 
+                            />
+                          ) : null;
+                        })
+                      ) : (
+                        <div className="flex justify-center items-center h-full py-8">
+                          <ModernEmptyState
+                            icon={Package}
+                            title="Нет заказов"
+                            description="В этом статусе пока нет заказов"
+                            className="py-4"
                           />
-                        ) : null;
-                      })}
+                        </div>
+                      )}
                       {provided.placeholder}
                     </div>
                   )}
@@ -296,7 +311,7 @@ const OrdersKanbanBoard: React.FC = () => {
       {isUpdating && (
         <div className="fixed bottom-4 right-4 bg-black/80 text-white px-3 py-1 rounded-md shadow-lg z-50 flex items-center">
           <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          Updating...
+          Обновление...
         </div>
       )}
     </div>
