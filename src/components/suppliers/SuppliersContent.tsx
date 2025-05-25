@@ -1,12 +1,13 @@
 
 import React, { useState } from "react";
-import { Card } from "@/components/ui/card";
-import SuppliersTable from "./SuppliersTable";
+import { ModernCard, ModernCardContent, ModernCardHeader, ModernCardTitle } from "@/components/ui/modern-card";
+import ModernSuppliersTable from "./ModernSuppliersTable";
 import SupplierFilters from "./SupplierFilters";
 import SupplierFormModal from "./SupplierFormModal";
 import DeleteSupplierDialog from "./DeleteSupplierDialog";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import { Plus, Truck } from "lucide-react";
 import { useSuppliersState } from "@/hooks/useSuppliersState";
 import SuppliersPagination from "./SuppliersPagination";
 import { Supplier } from "@/types/supplier";
@@ -73,39 +74,68 @@ const SuppliersContent = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <Button onClick={handleCreateClick} className="flex items-center gap-1">
-            <Plus className="h-4 w-4" />
-            <span>Добавить поставщика</span>
-          </Button>
-        </div>
-      </div>
-      
-      <Card>
-        <SupplierFilters 
-          filters={filters} 
-          setFilters={setFilters} 
-        />
-      </Card>
+    <div className="space-y-6">
+      <ModernCard variant="glass">
+        <ModernCardHeader>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <ModernCardTitle className="flex items-center gap-2">
+                <Truck className="h-5 w-5" />
+                Фильтры поставщиков
+              </ModernCardTitle>
+              <p className="text-gray-600 mt-1">
+                Поиск и фильтрация поставщиков
+              </p>
+            </div>
+            <div className="hidden lg:block">
+              <Button onClick={handleCreateClick} className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Добавить поставщика
+              </Button>
+            </div>
+          </div>
+        </ModernCardHeader>
+        <ModernCardContent>
+          <SupplierFilters 
+            filters={filters} 
+            setFilters={setFilters} 
+          />
+        </ModernCardContent>
+      </ModernCard>
 
-      <Card className="p-0">
-        <SuppliersTable 
-          suppliers={suppliers} 
-          loading={loading} 
-          onSupplierClick={handleSupplierClick}
-          onDeleteClick={handleDeleteClick}
-        />
-      </Card>
+      <ModernCard>
+        <ModernCardHeader>
+          <ModernCardTitle className="flex items-center gap-2">
+            <Truck className="h-5 w-5" />
+            Список поставщиков
+          </ModernCardTitle>
+        </ModernCardHeader>
+        <ModernCardContent className="p-0">
+          <ModernSuppliersTable 
+            suppliers={suppliers} 
+            loading={loading} 
+            onSupplierClick={handleSupplierClick}
+            onDeleteClick={handleDeleteClick}
+          />
+        </ModernCardContent>
+      </ModernCard>
       
       {totalPages > 1 && (
-        <SuppliersPagination 
-          page={page}
-          totalPages={totalPages}
-          setPage={setPage}
-        />
+        <div className="flex justify-center">
+          <SuppliersPagination 
+            page={page}
+            totalPages={totalPages}
+            setPage={setPage}
+          />
+        </div>
       )}
+
+      {/* Mobile FAB */}
+      <FloatingActionButton
+        onClick={handleCreateClick}
+        icon={<Plus className="h-6 w-6" />}
+        label="Добавить поставщика"
+      />
 
       <SupplierFormModal
         isOpen={isFormOpen}

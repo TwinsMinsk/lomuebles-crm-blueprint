@@ -3,8 +3,8 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { ModernCard, ModernCardContent, ModernCardHeader, ModernCardTitle } from "@/components/ui/modern-card";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
-import TasksTable from "./TasksTable";
-import TaskFilters from "./TaskFilters";
+import ModernTasksTable from "./ModernTasksTable";
+import CollapsibleTaskFilters from "./CollapsibleTaskFilters";
 import TasksPagination from "./TasksPagination";
 import { useTasksState } from "@/hooks/tasks/useTasksState";
 import { PlusCircle, CheckSquare } from "lucide-react";
@@ -34,16 +34,22 @@ const TasksContent: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <ModernCard variant="glass">
+      <CollapsibleTaskFilters 
+        filters={filters}
+        setFilters={setFilters}
+        resetFilters={resetFilters}
+      />
+
+      <ModernCard>
         <ModernCardHeader>
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <ModernCardTitle className="flex items-center gap-2">
                 <CheckSquare className="h-5 w-5" />
-                Управление задачами
+                Список задач
               </ModernCardTitle>
               <p className="text-gray-600 mt-1">
-                Фильтрация и создание новых задач
+                Управление задачами и отслеживание их выполнения
               </p>
             </div>
             <div className="hidden lg:block">
@@ -54,18 +60,8 @@ const TasksContent: React.FC = () => {
             </div>
           </div>
         </ModernCardHeader>
-        <ModernCardContent>
-          <TaskFilters 
-            filters={filters}
-            setFilters={setFilters}
-            resetFilters={resetFilters}
-          />
-        </ModernCardContent>
-      </ModernCard>
-
-      <ModernCard>
         <ModernCardContent className="p-0">
-          <TasksTable
+          <ModernTasksTable
             tasks={tasks}
             loading={isLoading}
             sortColumn={sortColumn}
