@@ -13,7 +13,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Loader2, FilePlus, ClipboardList, FileCheck, Clock, CheckCircle, XCircle, Compass, Wrench, Package, Truck } from "lucide-react";
 import { ModernEmptyState } from "@/components/ui/modern-empty-state";
-import { Package } from "lucide-react";
 
 // Function to get the appropriate icon for each status
 const getStatusIcon = (status: string) => {
