@@ -73,8 +73,10 @@ const ModernTransactionsTable: React.FC<ModernTransactionsTableProps> = ({
       <ModernEmptyState
         title="Операции не найдены"
         description="Нет операций, соответствующих выбранным фильтрам"
-        actionLabel="Добавить операцию"
-        onAction={() => {}}
+        action={{
+          label: "Добавить операцию",
+          onClick: () => {}
+        }}
       />
     );
   }
