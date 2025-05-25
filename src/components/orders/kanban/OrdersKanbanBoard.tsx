@@ -1,4 +1,3 @@
-
 import React from "react";
 import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
 import { useOrdersKanban } from "@/hooks/orders/useOrdersKanban";
@@ -11,7 +10,61 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, FilePlus, ClipboardList, FileCheck, Clock, CheckCircle, XCircle, Compass, Wrench, Package, Truck } from "lucide-react";
+
+// Function to get the appropriate icon for each status
+const getStatusIcon = (status: string) => {
+  const iconProps = { className: "h-4 w-4" };
+  
+  switch (status) {
+    case "Новый запрос":
+    case "Новый":
+      return <FilePlus {...iconProps} />;
+    
+    case "Предварительная оценка":
+    case "Ожидает подтверждения":
+      return <ClipboardList {...iconProps} />;
+    
+    case "Согласование ТЗ/Дизайна":
+    case "Согласование проекта":
+      return <FileCheck {...iconProps} />;
+    
+    case "Ожидает замера":
+    case "Ожидает оплаты":
+    case "Ожидает предоплаты":
+      return <Clock {...iconProps} />;
+    
+    case "Замер выполнен":
+    case "Оплачен":
+      return <CheckCircle {...iconProps} />;
+    
+    case "Проектирование":
+      return <Compass {...iconProps} />;
+    
+    case "В производстве":
+    case "Передан на сборку":
+      return <Wrench {...iconProps} />;
+    
+    case "Готов к монтажу":
+    case "Готов к отгрузке":
+      return <Package {...iconProps} />;
+    
+    case "Монтаж":
+    case "В доставке":
+      return <Truck {...iconProps} />;
+    
+    case "Завершен":
+    case "Выполнен":
+      return <CheckCircle {...iconProps} />;
+    
+    case "Отменен":
+      return <XCircle {...iconProps} />;
+    
+    default:
+      return <FilePlus {...iconProps} />;
+  }
+};
 
 // Function to get column header styling based on status and order type
 const getStatusColumnStyles = (status: string, orderType: string) => {
@@ -24,39 +77,39 @@ const getStatusColumnStyles = (status: string, orderType: string) => {
       // Initial stages (neutral)
       case "Новый запрос":
         bgClass = "bg-slate-100";
-        textClass = "text-slate-700";
+        textClass = "text-gray-800";
         break;
       
-      // Planning stages (light green)
+      // Planning stages (light green with dark text)
       case "Предварительная оценка":
       case "Согласование ТЗ/Дизайна":
         bgClass = "bg-emerald-50";
-        textClass = "text-emerald-700";
+        textClass = "text-gray-800";
         break;
       
-      // Preparation stages (green tones)
+      // Preparation stages (green tones with dark text)
       case "Ожидает замера":
       case "Замер выполнен":
         bgClass = "bg-green-100";
-        textClass = "text-green-700";
+        textClass = "text-gray-800";
         break;
       
-      // Work stages (more saturated green)
+      // Work stages (more saturated green with dark text)
       case "Проектирование":
       case "Согласование проекта":
       case "Ожидает предоплаты":
         bgClass = "bg-green-200";
-        textClass = "text-green-800";
+        textClass = "text-gray-900";
         break;
       
-      // Production stages (bright green)
+      // Production stages (bright green with white text)
       case "В производстве":
       case "Готов к монтажу":
         bgClass = "bg-green-400";
         textClass = "text-white";
         break;
       
-      // Completion stages (brand green)
+      // Completion stages (brand green with white text)
       case "Монтаж":
       case "Завершен":
         bgClass = "bg-[#8bd60e]";
@@ -74,36 +127,36 @@ const getStatusColumnStyles = (status: string, orderType: string) => {
       // Initial stages (neutral)
       case "Новый":
         bgClass = "bg-slate-100";
-        textClass = "text-slate-700";
+        textClass = "text-gray-800";
         break;
       
-      // Planning stages (light blue-green)
+      // Planning stages (light blue-green with dark text)
       case "Ожидает подтверждения":
         bgClass = "bg-emerald-50";
-        textClass = "text-emerald-700";
+        textClass = "text-gray-800";
         break;
       
-      // Payment stages (green tones)
+      // Payment stages (green tones with dark text)
       case "Ожидает оплаты":
       case "Оплачен":
         bgClass = "bg-green-100";
-        textClass = "text-green-700";
+        textClass = "text-gray-800";
         break;
       
-      // Assembly stages (more saturated green)
+      // Assembly stages (more saturated green with dark text)
       case "Передан на сборку":
         bgClass = "bg-green-200";
-        textClass = "text-green-800";
+        textClass = "text-gray-900";
         break;
       
-      // Delivery stages (bright green)
+      // Delivery stages (bright green with white text)
       case "Готов к отгрузке":
       case "В доставке":
         bgClass = "bg-green-400";
         textClass = "text-white";
         break;
       
-      // Completion stages (brand green)
+      // Completion stages (brand green with white text)
       case "Выполнен":
         bgClass = "bg-[#8bd60e]";
         textClass = "text-white";
@@ -192,14 +245,21 @@ const OrdersKanbanBoard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 overflow-x-auto pb-6">
           {kanbanData.columns.map((column) => {
             const { bgClass, textClass } = getStatusColumnStyles(column.id, selectedOrderType);
+            const statusIcon = getStatusIcon(column.id);
             
             return (
               <div key={column.id} className="flex flex-col">
-                <div className={`${bgClass} ${textClass} p-2 rounded-t-md`}>
-                  <h3 className="font-medium text-sm">{column.title}</h3>
-                  <div className="text-xs opacity-75">
-                    {column.orderIds.length} заказ(ов)
+                <div className={`${bgClass} ${textClass} p-3 rounded-t-md`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    {statusIcon}
+                    <h3 className="font-medium text-sm">{column.title}</h3>
                   </div>
+                  <Badge 
+                    variant="secondary" 
+                    className="text-xs bg-white/20 text-current border-current/20 hover:bg-white/30"
+                  >
+                    {column.orderIds.length} заказ(ов)
+                  </Badge>
                 </div>
                 
                 <Droppable droppableId={column.id}>
