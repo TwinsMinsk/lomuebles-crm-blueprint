@@ -7,7 +7,7 @@ import { ResponsiveTable, ResponsiveRow, ResponsiveRowItem } from "@/components/
 import { Button } from "@/components/ui/button";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { ModernEmptyState } from "@/components/ui/modern-empty-state";
-import { Trash2, Package, Euro, Tag, Image } from "lucide-react";
+import { Trash2, Package, Tag, Euro, Palette } from "lucide-react";
 
 interface ModernProductsTableProps {
   products: Product[];
@@ -28,8 +28,11 @@ const ModernProductsTable: React.FC<ModernProductsTableProps> = ({
   };
 
   const formatPrice = (price: number | null) => {
-    if (!price) return "—";
-    return `€${price.toFixed(2)}`;
+    if (price === null) return "—";
+    return new Intl.NumberFormat('ru-RU', { 
+      style: 'currency', 
+      currency: 'EUR' 
+    }).format(price);
   };
 
   if (loading) {
@@ -54,7 +57,7 @@ const ModernProductsTable: React.FC<ModernProductsTableProps> = ({
       <ModernEmptyState
         icon={Package}
         title="Товары не найдены"
-        description="Добавьте первый товар в каталог, чтобы начать работу"
+        description="Добавьте первый товар в каталог CRM, чтобы начать работу"
       />
     );
   }
@@ -65,9 +68,9 @@ const ModernProductsTable: React.FC<ModernProductsTableProps> = ({
       <thead className="hidden lg:table-header-group">
         <tr className="border-b bg-gray-50/50">
           <th className="text-left p-4 font-medium text-gray-700">Товар</th>
-          <th className="text-left p-4 font-medium text-gray-700">SKU</th>
           <th className="text-left p-4 font-medium text-gray-700">Категория</th>
           <th className="text-left p-4 font-medium text-gray-700">Цена</th>
+          <th className="text-left p-4 font-medium text-gray-700">Тип</th>
           <th className="text-left p-4 font-medium text-gray-700">Дата создания</th>
           <th className="w-[50px] p-4"></th>
         </tr>
@@ -84,39 +87,24 @@ const ModernProductsTable: React.FC<ModernProductsTableProps> = ({
             <ResponsiveRowItem
               label="Товар"
               value={
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <div className="font-medium text-gray-900">
                     {product.internal_product_name}
                   </div>
+                  {product.internal_sku && (
+                    <div className="text-sm text-gray-500 flex items-center gap-1">
+                      <Tag className="h-3 w-3" />
+                      SKU: {product.internal_sku}
+                    </div>
+                  )}
                   {product.description && (
                     <div className="text-sm text-gray-500 line-clamp-2">
                       {product.description}
                     </div>
                   )}
-                  <div className="flex items-center gap-2">
-                    {product.is_custom_template && (
-                      <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded flex items-center gap-1">
-                        <Image className="h-3 w-3" />
-                        Шаблон
-                      </div>
-                    )}
-                  </div>
                 </div>
               }
               fullWidth
-            />
-
-            {/* SKU */}
-            <ResponsiveRowItem
-              label="SKU"
-              value={
-                <div className="flex items-center gap-1">
-                  <Tag className="h-3 w-3 text-gray-400" />
-                  <span className="text-sm font-mono">
-                    {product.internal_sku || "—"}
-                  </span>
-                </div>
-              }
             />
 
             {/* Category */}
@@ -124,7 +112,7 @@ const ModernProductsTable: React.FC<ModernProductsTableProps> = ({
               label="Категория"
               value={
                 <div className="flex items-center gap-1">
-                  <Package className="h-3 w-3 text-gray-400" />
+                  <Palette className="h-3 w-3 text-gray-400" />
                   <span className="text-sm">
                     {product.category || "—"}
                   </span>
@@ -138,9 +126,23 @@ const ModernProductsTable: React.FC<ModernProductsTableProps> = ({
               value={
                 <div className="flex items-center gap-1">
                   <Euro className="h-3 w-3 text-gray-400" />
-                  <span className="text-sm font-medium">
+                  <span className="text-sm font-medium text-green-600">
                     {formatPrice(product.base_price)}
                   </span>
+                </div>
+              }
+            />
+
+            {/* Type */}
+            <ResponsiveRowItem
+              label="Тип"
+              value={
+                <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                  product.is_custom_template 
+                    ? 'bg-purple-100 text-purple-800' 
+                    : 'bg-blue-100 text-blue-800'
+                }`}>
+                  {product.is_custom_template ? 'Шаблон на заказ' : 'Готовый товар'}
                 </div>
               }
             />

@@ -1,15 +1,17 @@
 
 import React, { useState } from "react";
-import { Card } from "@/components/ui/card";
-import ProductsTable from "./ProductsTable";
+import { ModernCard, ModernCardContent, ModernCardHeader, ModernCardTitle } from "@/components/ui/modern-card";
+import ModernProductsTable from "./ModernProductsTable";
 import ProductFilters from "./ProductFilters";
 import ProductFormModal from "./ProductFormModal";
 import DeleteProductDialog from "./DeleteProductDialog";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import { Plus, Package } from "lucide-react";
 import { useProductsState } from "@/hooks/useProductsState";
 import ProductsPagination from "./ProductsPagination";
 import { Product } from "@/types/product";
+import { useProductDelete } from "@/hooks/useProductDelete";
 
 const ProductsContent = () => {
   const {
@@ -26,6 +28,10 @@ const ProductsContent = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const { deleteProduct, loading: deleteLoading } = useProductDelete(() => {
+    handleDeleteSuccess();
+  });
 
   const handleCreateClick = () => {
     setSelectedProduct(null);
@@ -61,40 +67,75 @@ const ProductsContent = () => {
     setSelectedProduct(null);
   };
 
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <Button onClick={handleCreateClick} className="flex items-center gap-1">
-            <Plus className="h-4 w-4" />
-            <span>Добавить товар</span>
-          </Button>
-        </div>
-      </div>
-      
-      <Card>
-        <ProductFilters 
-          filters={filters} 
-          setFilters={setFilters} 
-        />
-      </Card>
+  const handleConfirmDelete = () => {
+    if (selectedProduct) {
+      deleteProduct(selectedProduct.product_id);
+    }
+  };
 
-      <Card className="p-0">
-        <ProductsTable 
-          products={products} 
-          loading={loading} 
-          onProductClick={handleProductClick}
-          onDeleteClick={handleDeleteClick}
-        />
-      </Card>
+  return (
+    <div className="space-y-6">
+      <ModernCard variant="glass">
+        <ModernCardHeader>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <ModernCardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Фильтры товаров
+              </ModernCardTitle>
+              <p className="text-gray-600 mt-1">
+                Поиск и фильтрация товаров в каталоге CRM
+              </p>
+            </div>
+            <div className="hidden lg:block">
+              <Button onClick={handleCreateClick} className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Добавить товар
+              </Button>
+            </div>
+          </div>
+        </ModernCardHeader>
+        <ModernCardContent>
+          <ProductFilters 
+            filters={filters} 
+            setFilters={setFilters} 
+          />
+        </ModernCardContent>
+      </ModernCard>
+
+      <ModernCard>
+        <ModernCardHeader>
+          <ModernCardTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            Каталог товаров CRM
+          </ModernCardTitle>
+        </ModernCardHeader>
+        <ModernCardContent className="p-0">
+          <ModernProductsTable 
+            products={products} 
+            loading={loading} 
+            onProductClick={handleProductClick}
+            onDeleteClick={handleDeleteClick}
+          />
+        </ModernCardContent>
+      </ModernCard>
       
       {totalPages > 1 && (
-        <ProductsPagination 
-          page={page}
-          totalPages={totalPages}
-          setPage={setPage}
-        />
+        <div className="flex justify-center">
+          <ProductsPagination 
+            page={page}
+            totalPages={totalPages}
+            setPage={setPage}
+          />
+        </div>
       )}
+
+      {/* Mobile FAB */}
+      <FloatingActionButton
+        onClick={handleCreateClick}
+        icon={<Plus className="h-6 w-6" />}
+        label="Добавить товар"
+      />
 
       <ProductFormModal
         isOpen={isFormOpen}
@@ -106,7 +147,7 @@ const ProductsContent = () => {
       <DeleteProductDialog
         isOpen={isDeleteDialogOpen}
         onClose={handleDeleteDialogClose}
-        onConfirm={handleDeleteSuccess}
+        onConfirm={handleConfirmDelete}
         product={selectedProduct}
       />
     </div>
