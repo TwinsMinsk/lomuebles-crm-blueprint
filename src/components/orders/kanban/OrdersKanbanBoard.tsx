@@ -3,6 +3,7 @@ import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
 import { useOrdersKanban } from "@/hooks/orders/useOrdersKanban";
 import { useFilterOptions } from "@/hooks/orders/useFilterOptions";
 import OrderCard from "./OrderCard";
+import CompactEmptyState from "./CompactEmptyState";
 import { 
   Select, 
   SelectContent, 
@@ -12,7 +13,6 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, FilePlus, ClipboardList, FileCheck, Clock, CheckCircle, XCircle, Compass, Wrench, Package, Truck } from "lucide-react";
-import { ModernEmptyState } from "@/components/ui/modern-empty-state";
 
 // Function to get the appropriate icon for each status
 const getStatusIcon = (status: string) => {
@@ -270,11 +270,15 @@ const OrdersKanbanBoard: React.FC = () => {
                       ref={provided.innerRef}
                       {...provided.droppableProps}
                       className={`
-                        flex-1 p-3 min-h-[200px] rounded-b-md
+                        flex-1 p-3 rounded-b-md
+                        ${hasOrders ? "min-h-[200px]" : "min-h-[120px]"}
                         ${snapshot.isDraggingOver ? "bg-accent/50" : "bg-muted/30"}
                         transition-colors duration-200
                       `}
-                      style={{ maxHeight: "calc(100vh - 280px)", overflowY: "auto" }}
+                      style={{ 
+                        maxHeight: hasOrders ? "calc(100vh - 280px)" : "auto", 
+                        overflowY: hasOrders ? "auto" : "visible" 
+                      }}
                     >
                       {hasOrders ? (
                         column.orderIds.map((orderId, index) => {
@@ -288,12 +292,11 @@ const OrdersKanbanBoard: React.FC = () => {
                           ) : null;
                         })
                       ) : (
-                        <div className="flex justify-center items-center h-full py-8">
-                          <ModernEmptyState
+                        <div className="flex justify-center items-center h-full">
+                          <CompactEmptyState
                             icon={Package}
                             title="Нет заказов"
                             description="В этом статусе пока нет заказов"
-                            className="py-4"
                           />
                         </div>
                       )}
