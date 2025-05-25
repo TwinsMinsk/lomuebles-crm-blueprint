@@ -4,6 +4,7 @@ import { SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, Side
 import { LayoutDashboard, Users, Building, Package, ListChecks, Calendar, ShoppingCart, Truck, Settings, UserCog, DollarSign, BarChart3, Target, Briefcase, Clock, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+
 type MenuItem = {
   label: string;
   path: string;
@@ -15,6 +16,7 @@ type MenuGroup = {
   icon: React.ElementType;
   items: MenuItem[];
 };
+
 const menuGroups: MenuGroup[] = [{
   label: "Аналитика",
   icon: BarChart3,
@@ -104,6 +106,7 @@ const menuGroups: MenuGroup[] = [{
     requiredRole: ["Главный Администратор", "Администратор"]
   }]
 }];
+
 const SidebarNavigation = () => {
   const {
     userRole
@@ -125,7 +128,7 @@ const SidebarNavigation = () => {
     if (!hasAccess(item)) return null;
     const isActive = isItemActive(item.path);
     return <SidebarMenuItem key={item.path}>
-        <SidebarMenuButton isActive={isActive} asChild tooltip={item.label} className={cn("w-full justify-start gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.02]", isActive ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25" : "text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-600")}>
+        <SidebarMenuButton isActive={isActive} asChild tooltip={item.label} className={cn("w-full justify-start gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.02]", isActive ? "bg-gradient-to-r from-green-600 to-accent-green text-white shadow-lg shadow-green-500/25" : "text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-light-green hover:text-green-600")}>
           <Link to={item.path} className="flex items-center gap-3">
             <item.icon className={cn("h-5 w-5 transition-colors", isActive ? "text-white" : "text-gray-500")} />
             <span className="font-medium">{item.label}</span>
