@@ -1,14 +1,16 @@
 
 import React, { useState } from "react";
-import PageHeader from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useLeads } from "@/hooks/useLeads";
-import LeadsTable from "@/components/leads/LeadsTable";
+import ModernLeadsTable from "@/components/leads/ModernLeadsTable";
 import LeadFormModal from "@/components/leads/LeadFormModal";
 import LeadsPagination from "@/components/leads/LeadsPagination";
 import { LeadWithProfile } from "@/components/leads/LeadTableRow";
 import DeleteLeadDialog from "@/components/leads/DeleteLeadDialog";
 import { useLeadDelete } from "@/hooks/useLeadDelete";
+import { ModernHeader } from "@/components/ui/modern-header";
+import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import { Plus, Users } from "lucide-react";
 
 const Leads: React.FC = () => {
   const { leads, loading, page, totalPages, setPage, refreshLeads } = useLeads();
@@ -44,27 +46,48 @@ const Leads: React.FC = () => {
     }
   };
 
+  const breadcrumbs = [
+    { label: "CRM", href: "/dashboard" },
+    { label: "Лиды" }
+  ];
+
   return (
-    <div className="container mx-auto py-4">
-      <PageHeader
+    <div className="container mx-auto py-6 px-4 lg:px-6">
+      <ModernHeader
         title="Лиды"
         description="Управление потенциальными клиентами"
+        breadcrumbs={breadcrumbs}
         action={
-          <Button onClick={handleAddNewClick}>Новый лид</Button>
+          <Button 
+            onClick={handleAddNewClick}
+            className="hidden lg:flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Новый лид
+          </Button>
         }
       />
 
-      <LeadsTable
-        leads={leads}
-        loading={loading}
-        onLeadClick={handleLeadClick}
-        onLeadDelete={handleDeleteLead}
-      />
+      <div className="space-y-6">
+        <ModernLeadsTable
+          leads={leads}
+          loading={loading}
+          onLeadClick={handleLeadClick}
+          onLeadDelete={handleDeleteLead}
+        />
 
-      <LeadsPagination
-        page={page}
-        totalPages={totalPages}
-        setPage={setPage}
+        <LeadsPagination
+          page={page}
+          totalPages={totalPages}
+          setPage={setPage}
+        />
+      </div>
+
+      {/* Mobile FAB */}
+      <FloatingActionButton
+        onClick={handleAddNewClick}
+        icon={<Plus className="h-6 w-6" />}
+        label="Новый лид"
       />
 
       <LeadFormModal
