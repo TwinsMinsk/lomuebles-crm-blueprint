@@ -1,14 +1,15 @@
 
 import React from "react";
-import PageHeader from "@/components/common/PageHeader";
 import ContactFormModal from "@/components/contacts/ContactFormModal";
 import DeleteContactDialog from "@/components/contacts/DeleteContactDialog";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus } from "lucide-react";
+import { ModernCard, ModernCardContent, ModernCardHeader, ModernCardTitle } from "@/components/ui/modern-card";
+import { ModernHeader } from "@/components/ui/modern-header";
+import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import { Plus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useContactsState } from "@/hooks/useContactsState";
 import ContactFilters from "@/components/contacts/ContactFilters";
-import ContactsContent from "@/components/contacts/ContactsContent";
+import ModernContactsTable from "@/components/contacts/ModernContactsTable";
 
 const Contacts = () => {
   const {
@@ -45,25 +46,38 @@ const Contacts = () => {
     handleCloseDeleteDialog
   } = useContactsState();
 
+  const breadcrumbs = [
+    { label: "CRM", href: "/dashboard" },
+    { label: "Контакты" }
+  ];
+
   return (
-    <div className="space-y-4">
-      <PageHeader
+    <div className="container mx-auto py-6 px-4 lg:px-6">
+      <ModernHeader
         title="Контакты"
         description="Управление контактами клиентов"
+        breadcrumbs={breadcrumbs}
         action={
-          <Button onClick={handleAddContact} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" /> Добавить контакт
+          <Button 
+            onClick={handleAddContact}
+            className="hidden lg:flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Добавить контакт
           </Button>
         }
       />
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+      <ModernCard variant="glass">
+        <ModernCardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Список контактов</CardTitle>
-            <CardDescription>
+            <ModernCardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Список контактов
+            </ModernCardTitle>
+            <p className="text-gray-600 mt-1">
               Управление информацией о клиентах и их контактных данных
-            </CardDescription>
+            </p>
           </div>
           <ContactFilters
             searchTerm={searchTerm}
@@ -78,22 +92,25 @@ const Contacts = () => {
             companies={companies}
             users={users}
           />
-        </CardHeader>
-        <CardContent>
-          <ContactsContent
+        </ModernCardHeader>
+        <ModernCardContent>
+          <ModernContactsTable
             contacts={contacts}
             loading={loading}
-            totalPages={totalPages}
-            currentPage={currentPage}
-            handlePageChange={handlePageChange}
-            sortColumn={sortColumn}
-            sortDirection={sortDirection}
-            handleSort={handleSort}
             onEditContact={handleEditContact}
             onDeleteContact={handleDeleteContact}
           />
-        </CardContent>
-      </Card>
+
+          {/* Pagination would go here if needed */}
+        </ModernCardContent>
+      </ModernCard>
+
+      {/* Mobile FAB */}
+      <FloatingActionButton
+        onClick={handleAddContact}
+        icon={<Plus className="h-6 w-6" />}
+        label="Добавить контакт"
+      />
       
       {/* Contact form modal */}
       <ContactFormModal 

@@ -1,11 +1,13 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { ModernCard, ModernCardContent, ModernCardHeader, ModernCardTitle } from "@/components/ui/modern-card";
+import { FloatingActionButton } from "@/components/ui/floating-action-button";
 import TasksTable from "./TasksTable";
 import TaskFilters from "./TaskFilters";
 import TasksPagination from "./TasksPagination";
 import { useTasksState } from "@/hooks/tasks/useTasksState";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, CheckSquare } from "lucide-react";
 import TaskFormModal from "./TaskFormModal";
 import { useTaskFormModal } from "@/hooks/tasks/useTaskFormModal";
 
@@ -30,44 +32,59 @@ const TasksContent: React.FC = () => {
 
   const { isOpen, selectedTask, openModal, closeModal } = useTaskFormModal();
 
-  // Debug modal state
-  console.log("TasksContent rendered", { isModalOpen: isOpen });
-
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col md:flex-row justify-between gap-4">
-        <div className="flex-grow">
+    <div className="space-y-6">
+      <ModernCard variant="glass">
+        <ModernCardHeader>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <ModernCardTitle className="flex items-center gap-2">
+                <CheckSquare className="h-5 w-5" />
+                Управление задачами
+              </ModernCardTitle>
+              <p className="text-gray-600 mt-1">
+                Фильтрация и создание новых задач
+              </p>
+            </div>
+            <div className="hidden lg:block">
+              <Button onClick={() => openModal()} className="flex items-center gap-2">
+                <PlusCircle className="h-4 w-4" />
+                Новая задача
+              </Button>
+            </div>
+          </div>
+        </ModernCardHeader>
+        <ModernCardContent>
           <TaskFilters 
             filters={filters}
             setFilters={setFilters}
             resetFilters={resetFilters}
           />
-        </div>
-        <div className="md:self-start">
-          <Button onClick={() => openModal()}>
-            <PlusCircle className="mr-2 h-4 w-4" /> Новая задача
-          </Button>
-        </div>
-      </div>
-      
-      <TasksTable
-        tasks={tasks}
-        loading={isLoading}
-        sortColumn={sortColumn}
-        sortDirection={sortDirection}
-        onSort={(column) => {
-          if (sortColumn === column) {
-            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-          } else {
-            setSortColumn(column);
-            setSortDirection('asc');
-          }
-        }}
-        onTaskClick={(task) => openModal(task)}
-      />
+        </ModernCardContent>
+      </ModernCard>
+
+      <ModernCard>
+        <ModernCardContent className="p-0">
+          <TasksTable
+            tasks={tasks}
+            loading={isLoading}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={(column) => {
+              if (sortColumn === column) {
+                setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+              } else {
+                setSortColumn(column);
+                setSortDirection('asc');
+              }
+            }}
+            onTaskClick={(task) => openModal(task)}
+          />
+        </ModernCardContent>
+      </ModernCard>
       
       {pageCount > 1 && (
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-center">
           <TasksPagination
             currentPage={currentPage}
             totalPages={pageCount}
@@ -76,11 +93,17 @@ const TasksContent: React.FC = () => {
         </div>
       )}
 
+      {/* Mobile FAB */}
+      <FloatingActionButton
+        onClick={() => openModal()}
+        icon={<PlusCircle className="h-6 w-6" />}
+        label="Новая задача"
+      />
+
       {isOpen && (
         <TaskFormModal 
           open={isOpen} 
           onClose={() => {
-            console.log("Closing task modal");
             closeModal();
             refetch();
           }} 
