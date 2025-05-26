@@ -4,7 +4,6 @@ import { SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, Side
 import { LayoutDashboard, Users, Building, Package, ListChecks, Calendar, ShoppingCart, Truck, Settings, UserCog, DollarSign, BarChart3, Target, Briefcase, Clock, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-
 type MenuItem = {
   label: string;
   path: string;
@@ -16,7 +15,6 @@ type MenuGroup = {
   icon: React.ElementType;
   items: MenuItem[];
 };
-
 const menuGroups: MenuGroup[] = [{
   label: "Аналитика",
   icon: BarChart3,
@@ -106,7 +104,6 @@ const menuGroups: MenuGroup[] = [{
     requiredRole: ["Главный Администратор", "Администратор"]
   }]
 }];
-
 const SidebarNavigation = () => {
   const {
     userRole
@@ -136,7 +133,7 @@ const SidebarNavigation = () => {
         </SidebarMenuButton>
       </SidebarMenuItem>;
   };
-  return <div className="px-3 py-[29px]">
+  return <div className="px-3 py-[71px]">
       {menuGroups.map(group => {
       if (!hasGroupAccess(group)) return null;
       return <SidebarGroup key={group.label} className="mb-6">
