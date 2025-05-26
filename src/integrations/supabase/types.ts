@@ -1003,6 +1003,20 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_distinct_values: {
+        Args: { table_name: string; column_name: string }
+        Returns: {
+          value: string
+        }[]
+      }
+      get_financial_summary: {
+        Args: { date_from: string; date_to: string }
+        Returns: Json
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: string
