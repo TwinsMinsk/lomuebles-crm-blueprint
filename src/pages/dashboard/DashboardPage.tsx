@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
@@ -19,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import PageHeader from "@/components/common/PageHeader";
 import FinancialSummaryPanel from "@/components/dashboard/FinancialSummaryPanel";
+import { ModernKPICard } from "@/components/ui/modern-kpi-card";
 import { 
   Calendar, 
   Clock, 
@@ -28,10 +28,6 @@ import {
   CheckCircle,
   Clock as ClockIcon,
   AlertCircle,
-  ArrowUp,
-  ArrowDown,
-  TrendingUp,
-  DollarSign,
   Target
 } from "lucide-react";
 
@@ -59,84 +55,56 @@ const DashboardPage: React.FC = () => {
     return format(new Date(dateString), "dd MMM yyyy", { locale: ru });
   };
 
-  const renderKPICard = (
-    title: string,
-    value: number,
-    icon: React.ElementType,
-    gradient: string,
-    change?: { value: number; isPositive: boolean }
-  ) => {
-    const IconComponent = icon;
-    
-    return (
-      <Card className={`relative overflow-hidden border-0 shadow-xl ${gradient}`}>
-        <div className="absolute inset-0 bg-gradient-to-br opacity-90"></div>
-        <CardContent className="relative p-6 text-white">
-          <div className="flex items-center justify-between mb-4">
-            <IconComponent className="h-8 w-8 text-white/80" />
-            {change && (
-              <div className={`flex items-center gap-1 text-sm font-medium ${
-                change.isPositive ? 'text-green-200' : 'text-red-200'
-              }`}>
-                {change.isPositive ? (
-                  <ArrowUp className="h-4 w-4" />
-                ) : (
-                  <ArrowDown className="h-4 w-4" />
-                )}
-                {Math.abs(change.value)}%
-              </div>
-            )}
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium text-white/80">{title}</h3>
-            <div className="text-3xl font-bold">
-              {isLoadingKPIs ? (
-                <Skeleton className="h-8 w-16 bg-white/20" />
-              ) : isErrorKPIs ? (
-                <span className="text-red-200">Error</span>
-              ) : (
-                value.toLocaleString()
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
   const renderKPICards = () => {
-    if (!kpiData && !isLoadingKPIs) return null;
-
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {renderKPICard(
-          "Новые лиды",
-          kpiData?.newLeadsCount || 0,
-          Target,
-          "bg-gradient-to-br from-blue-500 to-blue-600",
-          { value: 12, isPositive: true }
-        )}
-        {renderKPICard(
-          "Активные заказы",
-          kpiData?.activeOrdersCount || 0,
-          Package,
-          "bg-gradient-to-br from-purple-500 to-purple-600",
-          { value: 8, isPositive: true }
-        )}
-        {renderKPICard(
-          "Задачи на сегодня",
-          kpiData?.todaysTasksCount || 0,
-          Calendar,
-          "bg-gradient-to-br from-green-500 to-green-600",
-          { value: 3, isPositive: false }
-        )}
-        {renderKPICard(
-          "Просроченные задачи",
-          kpiData?.overdueTasksCount || 0,
-          AlertTriangle,
-          "bg-gradient-to-br from-red-500 to-red-600",
-          { value: 15, isPositive: false }
-        )}
+        <ModernKPICard
+          title="Новые лиды"
+          value={isLoadingKPIs ? "..." : (isErrorKPIs ? "Ошибка" : (kpiData?.newLeadsCount || 0).toLocaleString())}
+          description="Лиды, созданные сегодня"
+          detailsLink="/leads"
+          detailsLinkText="Все лиды"
+          icon={Target}
+          iconColor="text-blue-600"
+          gradient="bg-gradient-to-br from-blue-50 to-blue-100"
+          loading={isLoadingKPIs}
+        />
+        
+        <ModernKPICard
+          title="Активные заказы"
+          value={isLoadingKPIs ? "..." : (isErrorKPIs ? "Ошибка" : (kpiData?.activeOrdersCount || 0).toLocaleString())}
+          description="Заказы в процессе выполнения"
+          detailsLink="/orders"
+          detailsLinkText="Все заказы"
+          icon={Package}
+          iconColor="text-purple-600"
+          gradient="bg-gradient-to-br from-purple-50 to-purple-100"
+          loading={isLoadingKPIs}
+        />
+        
+        <ModernKPICard
+          title="Задачи на сегодня"
+          value={isLoadingKPIs ? "..." : (isErrorKPIs ? "Ошибка" : (kpiData?.todaysTasksCount || 0).toLocaleString())}
+          description="Задачи с дедлайном сегодня"
+          detailsLink="/tasks"
+          detailsLinkText="Все задачи"
+          icon={Calendar}
+          iconColor="text-green-600"
+          gradient="bg-gradient-to-br from-green-50 to-green-100"
+          loading={isLoadingKPIs}
+        />
+        
+        <ModernKPICard
+          title="Просроченные задачи"
+          value={isLoadingKPIs ? "..." : (isErrorKPIs ? "Ошибка" : (kpiData?.overdueTasksCount || 0).toLocaleString())}
+          description="Задачи с истекшим дедлайном"
+          detailsLink="/tasks"
+          detailsLinkText="Просмотреть"
+          icon={AlertTriangle}
+          iconColor="text-red-600"
+          gradient="bg-gradient-to-br from-red-50 to-red-100"
+          loading={isLoadingKPIs}
+        />
       </div>
     );
   };
