@@ -65,8 +65,9 @@ const DashboardPage: React.FC = () => {
           detailsLink="/leads"
           detailsLinkText="Все лиды"
           icon={Target}
-          iconColor="text-blue-600"
-          gradient="bg-gradient-to-br from-blue-50 to-blue-100"
+          iconColor="text-white"
+          gradient="bg-blue-500"
+          isDarkBackground={true}
           loading={isLoadingKPIs}
         />
         
@@ -77,8 +78,9 @@ const DashboardPage: React.FC = () => {
           detailsLink="/orders"
           detailsLinkText="Все заказы"
           icon={Package}
-          iconColor="text-purple-600"
-          gradient="bg-gradient-to-br from-purple-50 to-purple-100"
+          iconColor="text-white"
+          gradient="bg-purple-500"
+          isDarkBackground={true}
           loading={isLoadingKPIs}
         />
         
@@ -89,8 +91,9 @@ const DashboardPage: React.FC = () => {
           detailsLink="/tasks"
           detailsLinkText="Все задачи"
           icon={Calendar}
-          iconColor="text-green-600"
-          gradient="bg-gradient-to-br from-green-50 to-green-100"
+          iconColor="text-white"
+          gradient="bg-green-500"
+          isDarkBackground={true}
           loading={isLoadingKPIs}
         />
         
@@ -101,8 +104,9 @@ const DashboardPage: React.FC = () => {
           detailsLink="/tasks"
           detailsLinkText="Просмотреть"
           icon={AlertTriangle}
-          iconColor="text-red-600"
-          gradient="bg-gradient-to-br from-red-50 to-red-100"
+          iconColor="text-white"
+          gradient="bg-red-500"
+          isDarkBackground={true}
           loading={isLoadingKPIs}
         />
       </div>
