@@ -66,12 +66,14 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
 
   if (isLoading) {
     return (
-      <div className="p-4 space-y-4">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-6 w-24" />
-          <Skeleton className="h-8 w-20" />
+      <div className="w-80 max-h-96">
+        <div className="p-4 border-b bg-gray-50/50">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-6 w-24" />
+            <Skeleton className="h-8 w-20" />
+          </div>
         </div>
-        <div className="space-y-3">
+        <div className="p-4 space-y-3">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="space-y-2">
               <Skeleton className="h-4 w-full" />
@@ -84,9 +86,9 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
   }
 
   return (
-    <div className="max-h-96">
-      {/* Header */}
-      <div className="p-4 border-b bg-gray-50/50">
+    <div className="w-80 flex flex-col max-h-96">
+      {/* Header - Fixed */}
+      <div className="p-4 border-b bg-gray-50/50 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bell className="h-5 w-5 text-gray-600" />
@@ -112,8 +114,8 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
         </div>
       </div>
 
-      {/* Notifications List */}
-      <ScrollArea className="max-h-80">
+      {/* Scrollable Content */}
+      <div className="flex-1 min-h-0">
         {notifications.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
@@ -121,39 +123,41 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
             <p className="text-xs text-gray-400 mt-1">Новые уведомления появятся здесь</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-100">
-            {notifications.map((notification) => (
-              <div
-                key={notification.id}
-                className={`p-4 transition-all duration-200 cursor-pointer ${
-                  !notification.is_read 
-                    ? 'bg-blue-50/70 hover:bg-blue-50 border-l-4 border-l-blue-400' 
-                    : 'hover:bg-gray-50'
-                }`}
-                onClick={() => handleNotificationClick(notification)}
-              >
-                {notification.action_url ? (
-                  <Link 
-                    to={notification.action_url}
-                    className="block"
-                    onClick={() => onClose()}
-                  >
+          <ScrollArea className="h-full">
+            <div className="divide-y divide-gray-100">
+              {notifications.map((notification) => (
+                <div
+                  key={notification.id}
+                  className={`p-4 transition-all duration-200 cursor-pointer ${
+                    !notification.is_read 
+                      ? 'bg-blue-50/70 hover:bg-blue-50 border-l-4 border-l-blue-400' 
+                      : 'hover:bg-gray-50'
+                  }`}
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  {notification.action_url ? (
+                    <Link 
+                      to={notification.action_url}
+                      className="block"
+                      onClick={() => onClose()}
+                    >
+                      <NotificationContent 
+                        notification={notification} 
+                        onMarkAsRead={handleMarkAsRead}
+                      />
+                    </Link>
+                  ) : (
                     <NotificationContent 
                       notification={notification} 
                       onMarkAsRead={handleMarkAsRead}
                     />
-                  </Link>
-                ) : (
-                  <NotificationContent 
-                    notification={notification} 
-                    onMarkAsRead={handleMarkAsRead}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
         )}
-      </ScrollArea>
+      </div>
     </div>
   );
 };
