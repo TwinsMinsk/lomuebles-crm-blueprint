@@ -17,10 +17,13 @@ export interface Notification {
   read_at?: string;
 }
 
+// Base query key for all notification-related queries
+const NOTIFICATIONS_QUERY_KEY = ['notifications'] as const;
+
 // Hook to fetch notifications for the current user
 export const useNotifications = (limit?: number) => {
   return useQuery({
-    queryKey: ['notifications', limit],
+    queryKey: limit ? [...NOTIFICATIONS_QUERY_KEY, 'limited', limit] : NOTIFICATIONS_QUERY_KEY,
     queryFn: async () => {
       console.log("Fetching notifications...", limit ? `(limit: ${limit})` : "(no limit)");
       let query = supabase
@@ -42,15 +45,15 @@ export const useNotifications = (limit?: number) => {
       console.log(`Fetched ${data?.length || 0} notifications`);
       return data as Notification[];
     },
-    staleTime: 30000, // Consider data stale after 30 seconds
-    refetchInterval: 60000, // Refetch every minute as fallback
+    staleTime: 30000,
+    refetchInterval: 60000,
   });
 };
 
 // Hook to fetch unread notifications count
 export const useUnreadNotificationsCount = () => {
   return useQuery({
-    queryKey: ['notifications', 'unread-count'],
+    queryKey: [...NOTIFICATIONS_QUERY_KEY, 'unread-count'],
     queryFn: async () => {
       console.log("Fetching unread notifications count...");
       const { count, error } = await supabase
@@ -66,12 +69,12 @@ export const useUnreadNotificationsCount = () => {
       console.log(`Unread notifications count: ${count || 0}`);
       return count || 0;
     },
-    staleTime: 10000, // Consider data stale after 10 seconds
-    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 10000,
+    refetchInterval: 30000,
   });
 };
 
-// Hook to mark notification as read with improved optimistic updates
+// Hook to mark notification as read
 export const useMarkNotificationAsRead = () => {
   const queryClient = useQueryClient();
 
@@ -91,66 +94,19 @@ export const useMarkNotificationAsRead = () => {
         throw error;
       }
     },
-    onMutate: async (notificationId) => {
-      console.log("Optimistically marking notification as read:", notificationId);
-      
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['notifications'] });
-      await queryClient.cancelQueries({ queryKey: ['notifications', 'unread-count'] });
-
-      // Snapshot the previous values
-      const previousNotifications = queryClient.getQueryData(['notifications']) as Notification[] | undefined;
-      const previousUnreadCount = queryClient.getQueryData(['notifications', 'unread-count']) as number | undefined;
-
-      // Find the notification and check if it was unread
-      const targetNotification = previousNotifications?.find(n => n.id === notificationId);
-      const wasUnread = targetNotification && !targetNotification.is_read;
-
-      // Optimistically update the notifications list
-      if (previousNotifications) {
-        queryClient.setQueryData(['notifications'], 
-          previousNotifications.map(notification => 
-            notification.id === notificationId 
-              ? { ...notification, is_read: true, read_at: new Date().toISOString() }
-              : notification
-          )
-        );
-      }
-
-      // Optimistically update unread count if the notification was unread
-      if (wasUnread && previousUnreadCount !== undefined) {
-        queryClient.setQueryData(['notifications', 'unread-count'], 
-          Math.max(0, previousUnreadCount - 1)
-        );
-      }
-
-      return { previousNotifications, previousUnreadCount, wasUnread };
+    onSuccess: () => {
+      // Invalidate all notification queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
+      console.log("Successfully marked notification as read");
     },
-    onError: (error, notificationId, context) => {
-      console.error('Error marking notification as read, rolling back optimistic update:', error);
-      
-      // Rollback the optimistic updates
-      if (context?.previousNotifications) {
-        queryClient.setQueryData(['notifications'], context.previousNotifications);
-      }
-      if (context?.previousUnreadCount !== undefined) {
-        queryClient.setQueryData(['notifications', 'unread-count'], context.previousUnreadCount);
-      }
-      
+    onError: (error) => {
+      console.error('Error marking notification as read:', error);
       toast.error('Не удалось отметить уведомление как прочитанное');
-    },
-    onSuccess: (_, notificationId) => {
-      console.log("Successfully marked notification as read:", notificationId);
-    },
-    onSettled: () => {
-      // Always refetch after success or error to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
     },
   });
 };
 
-// Hook to mark all notifications as read with improved optimistic updates
+// Hook to mark all notifications as read
 export const useMarkAllNotificationsAsRead = () => {
   const queryClient = useQueryClient();
 
@@ -170,56 +126,15 @@ export const useMarkAllNotificationsAsRead = () => {
         throw error;
       }
     },
-    onMutate: async () => {
-      console.log("Optimistically marking all notifications as read");
-      
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['notifications'] });
-      await queryClient.cancelQueries({ queryKey: ['notifications', 'unread-count'] });
-
-      // Snapshot the previous values
-      const previousNotifications = queryClient.getQueryData(['notifications']) as Notification[] | undefined;
-      const previousUnreadCount = queryClient.getQueryData(['notifications', 'unread-count']) as number | undefined;
-
-      // Optimistically update all notifications to read
-      if (previousNotifications) {
-        queryClient.setQueryData(['notifications'], 
-          previousNotifications.map(notification => 
-            notification.is_read ? notification : { 
-              ...notification, 
-              is_read: true, 
-              read_at: new Date().toISOString() 
-            }
-          )
-        );
-      }
-
-      // Set unread count to 0
-      queryClient.setQueryData(['notifications', 'unread-count'], 0);
-
-      return { previousNotifications, previousUnreadCount };
-    },
-    onError: (error, _, context) => {
-      console.error('Error marking all notifications as read, rolling back optimistic update:', error);
-      
-      // Rollback the optimistic updates
-      if (context?.previousNotifications) {
-        queryClient.setQueryData(['notifications'], context.previousNotifications);
-      }
-      if (context?.previousUnreadCount !== undefined) {
-        queryClient.setQueryData(['notifications', 'unread-count'], context.previousUnreadCount);
-      }
-      
-      toast.error('Не удалось отметить все уведомления как прочитанные');
-    },
     onSuccess: () => {
+      // Invalidate all notification queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
       console.log("Successfully marked all notifications as read");
       toast.success('Все уведомления отмечены как прочитанные');
     },
-    onSettled: () => {
-      // Always refetch after success or error to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
+    onError: (error) => {
+      console.error('Error marking all notifications as read:', error);
+      toast.error('Не удалось отметить все уведомления как прочитанные');
     },
   });
 };

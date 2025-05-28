@@ -30,7 +30,6 @@ interface NotificationListProps {
 }
 
 export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) => {
-  // Remove limit to show all notifications
   const { data: notifications = [], isLoading } = useNotifications();
   const markAsReadMutation = useMarkNotificationAsRead();
   const markAllAsReadMutation = useMarkAllNotificationsAsRead();
@@ -79,7 +78,7 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
 
   if (isLoading) {
     return (
-      <div className="w-80 max-h-96 bg-white">
+      <div className="w-80 bg-white border rounded-lg shadow-lg">
         <div className="p-4 border-b bg-gray-50/50">
           <div className="flex items-center justify-between">
             <Skeleton className="h-6 w-24" />
@@ -99,9 +98,9 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
   }
 
   return (
-    <div className="w-80 flex flex-col max-h-96 bg-white border rounded-lg shadow-lg">
-      {/* Header - Fixed */}
-      <div className="p-4 border-b bg-gray-50/50 flex-shrink-0 rounded-t-lg">
+    <div className="w-80 bg-white border rounded-lg shadow-lg">
+      {/* Fixed Header */}
+      <div className="p-4 border-b bg-gray-50/50 rounded-t-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bell className="h-5 w-5 text-gray-600" />
@@ -127,8 +126,8 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
         </div>
       </div>
 
-      {/* Scrollable Content - Improved styling */}
-      <div className="flex-1 min-h-0">
+      {/* Scrollable Content */}
+      <div className="max-h-80 overflow-hidden">
         {notifications.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
@@ -136,7 +135,7 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
             <p className="text-xs text-gray-400 mt-1">Новые уведомления появятся здесь</p>
           </div>
         ) : (
-          <ScrollArea className="h-full max-h-80">
+          <ScrollArea className="h-80">
             <div className="divide-y divide-gray-100">
               {notifications.map((notification) => (
                 <NotificationItem
@@ -156,7 +155,7 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
   );
 };
 
-// Separate component for individual notification items to improve performance
+// Separate component for individual notification items
 const NotificationItem: React.FC<{
   notification: Notification;
   onMarkAsRead: (e: React.MouseEvent, notificationId: string) => void;
