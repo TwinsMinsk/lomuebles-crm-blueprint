@@ -1,13 +1,11 @@
-
 import React from "react"
-import { format } from "date-fns"
-import { ru } from "date-fns/locale"
 import { LeadWithProfile } from "./LeadTableRow"
 import { ResponsiveTable, ResponsiveRow, ResponsiveRowItem } from "@/components/ui/responsive-table"
 import { ModernStatusBadge } from "@/components/ui/modern-status-badge"
 import { Button } from "@/components/ui/button"
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton"
 import { Trash2, Phone, Mail, Globe } from "lucide-react"
+import { formatDateInMadrid } from "@/utils/timezone"
 
 interface ModernLeadsTableProps {
   leads: LeadWithProfile[]
@@ -24,7 +22,7 @@ const ModernLeadsTable: React.FC<ModernLeadsTableProps> = ({
 }) => {
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "—"
-    return format(new Date(dateString), "dd MMM yyyy", { locale: ru })
+    return formatDateInMadrid(dateString)
   }
 
   const getLanguageIcon = (language: string | null) => {

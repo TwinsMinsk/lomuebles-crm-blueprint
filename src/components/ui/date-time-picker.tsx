@@ -1,7 +1,5 @@
 
 import * as React from "react";
-import { format } from "date-fns";
-import { CalendarIcon, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -17,6 +15,8 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { CalendarIcon, Clock } from "lucide-react";
+import { formatInMadridTime, fromMadridTimeToUTC, toMadridTime } from "@/utils/timezone";
 
 interface DateTimePickerProps {
   value: Date | null | undefined;
@@ -25,16 +25,18 @@ interface DateTimePickerProps {
 }
 
 export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProps) {
-  const [date, setDate] = React.useState<Date | null>(value || null);
+  // Convert UTC value to Madrid time for display
+  const madridDate = value ? toMadridTime(value) : null;
+  
+  const [date, setDate] = React.useState<Date | null>(madridDate);
   const [hours, setHours] = React.useState<string>(
-    value ? format(value, "HH") : "12"
+    madridDate ? formatInMadridTime(madridDate, "HH") : "12"
   );
   const [minutes, setMinutes] = React.useState<string>(
-    value ? format(value, "mm") : "00"
+    madridDate ? formatInMadridTime(madridDate, "mm") : "00"
   );
   
   const [isTimeOpen, setIsTimeOpen] = React.useState<boolean>(false);
-  // Add a ref to track internal updates to prevent infinite loops
   const internalUpdate = React.useRef<boolean>(false);
 
   // Generate options for hours (00-23)
@@ -51,28 +53,29 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
 
   // Update the parent component whenever date or time changes
   React.useEffect(() => {
-    // Skip if this change was triggered by value prop (internal update)
     if (internalUpdate.current) {
       return;
     }
 
     if (date) {
-      const newDate = new Date(date);
-      newDate.setHours(parseInt(hours));
-      newDate.setMinutes(parseInt(minutes));
+      // Create a new date in Madrid timezone
+      const madridDateTime = new Date(date);
+      madridDateTime.setHours(parseInt(hours));
+      madridDateTime.setMinutes(parseInt(minutes));
+      madridDateTime.setSeconds(0);
+      madridDateTime.setMilliseconds(0);
       
-      // Flag that we're performing an internal update
+      // Convert Madrid time to UTC for storage
+      const utcDateTime = fromMadridTimeToUTC(madridDateTime);
+      
       internalUpdate.current = true;
-      onChange(newDate);
-      // Reset the flag after the update is processed
+      onChange(utcDateTime);
       setTimeout(() => {
         internalUpdate.current = false;
       }, 0);
     } else {
-      // Flag that we're performing an internal update
       internalUpdate.current = true;
       onChange(null);
-      // Reset the flag after the update is processed
       setTimeout(() => {
         internalUpdate.current = false;
       }, 0);
@@ -81,15 +84,15 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
 
   // Update internal state when value prop changes
   React.useEffect(() => {
-    // Skip if this change was triggered by our own state change
     if (internalUpdate.current) {
       return;
     }
 
     if (value) {
-      setDate(value);
-      setHours(format(value, "HH"));
-      setMinutes(format(value, "mm"));
+      const madridTime = toMadridTime(value);
+      setDate(madridTime);
+      setHours(formatInMadridTime(madridTime, "HH"));
+      setMinutes(formatInMadridTime(madridTime, "mm"));
     } else {
       setDate(null);
     }
@@ -98,12 +101,10 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
   // Format the time string for display
   const timeString = `${hours}:${minutes}`;
 
-  // Handler for hour selection that prevents popup from closing
   const handleHourChange = (value: string) => {
     setHours(value);
   };
 
-  // Handler for minute selection that prevents popup from closing
   const handleMinuteChange = (value: string) => {
     setMinutes(value);
   };
@@ -122,7 +123,7 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
             disabled={disabled}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, "dd.MM.yyyy") : <span>Выберите дату</span>}
+            {date ? formatInMadridTime(date, "dd.MM.yyyy") : <span>Выберите дату</span>}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -161,36 +162,11 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
                 value={hours}
                 onValueChange={handleHourChange}
                 disabled={!date || disabled}
-                onOpenChange={(open) => {
-                  // Prevent closing the parent popover when opening the select
-                  if (open) {
-                    // Make sure we retain focus in the popover
-                    setTimeout(() => {
-                      document.querySelector('[data-state="open"]')?.addEventListener(
-                        'click',
-                        (e) => e.stopPropagation(),
-                        { once: true }
-                      );
-                    }, 0);
-                  }
-                }}
               >
-                <SelectTrigger 
-                  className="w-[70px]"
-                  onPointerDown={(e) => {
-                    // Prevent the popover from closing when clicking on select trigger
-                    e.stopPropagation();
-                  }}
-                >
+                <SelectTrigger className="w-[70px]">
                   <SelectValue placeholder="Час" />
                 </SelectTrigger>
-                <SelectContent 
-                  position="popper"
-                  onCloseAutoFocus={(e) => {
-                    // Prevent auto focus behavior from closing the parent popover
-                    e.preventDefault();
-                  }}
-                >
+                <SelectContent position="popper">
                   {hourOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -207,36 +183,11 @@ export function DateTimePicker({ value, onChange, disabled }: DateTimePickerProp
                 value={minutes} 
                 onValueChange={handleMinuteChange}
                 disabled={!date || disabled}
-                onOpenChange={(open) => {
-                  // Prevent closing the parent popover when opening the select
-                  if (open) {
-                    // Make sure we retain focus in the popover
-                    setTimeout(() => {
-                      document.querySelector('[data-state="open"]')?.addEventListener(
-                        'click',
-                        (e) => e.stopPropagation(),
-                        { once: true }
-                      );
-                    }, 0);
-                  }
-                }}
               >
-                <SelectTrigger 
-                  className="w-[70px]"
-                  onPointerDown={(e) => {
-                    // Prevent the popover from closing when clicking on select trigger
-                    e.stopPropagation();
-                  }}
-                >
+                <SelectTrigger className="w-[70px]">
                   <SelectValue placeholder="Мин" />
                 </SelectTrigger>
-                <SelectContent 
-                  position="popper"
-                  onCloseAutoFocus={(e) => {
-                    // Prevent auto focus behavior from closing the parent popover
-                    e.preventDefault();
-                  }}
-                >
+                <SelectContent position="popper">
                   {minuteOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}

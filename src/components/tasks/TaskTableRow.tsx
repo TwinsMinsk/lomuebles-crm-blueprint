@@ -2,8 +2,7 @@
 import React, { useState } from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Task } from "@/types/task";
-import { format, isAfter, parseISO } from "date-fns";
-import { ru } from "date-fns/locale";
+import { isAfter, parseISO } from "date-fns";
 import { MoreHorizontal, Trash } from "lucide-react";
 import {
   DropdownMenu,
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import DeleteTaskDialog from "./DeleteTaskDialog";
+import { formatDateTimeInMadrid, formatDateInMadrid } from "@/utils/timezone";
 
 interface TaskTableRowProps {
   task: Task;
@@ -22,13 +22,13 @@ interface TaskTableRowProps {
 const TaskTableRow: React.FC<TaskTableRowProps> = ({ task, onTaskClick }) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
-  // Format dates
+  // Format dates using Madrid timezone
   const formattedDueDate = task.due_date
-    ? format(new Date(task.due_date), "dd.MM.yyyy HH:mm", { locale: ru })
+    ? formatDateTimeInMadrid(task.due_date)
     : "—";
   
   const formattedCreationDate = task.creation_date
-    ? format(new Date(task.creation_date), "dd.MM.yyyy", { locale: ru })
+    ? formatDateInMadrid(task.creation_date)
     : "—";
   
   // Check if task is overdue

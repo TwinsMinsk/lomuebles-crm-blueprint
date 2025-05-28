@@ -1,7 +1,4 @@
-
 import React from "react";
-import { format } from "date-fns";
-import { ru } from "date-fns/locale";
 import { Task } from "@/types/task";
 import { ResponsiveTable, ResponsiveRow, ResponsiveRowItem } from "@/components/ui/responsive-table";
 import { Button } from "@/components/ui/button";
@@ -9,6 +6,7 @@ import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { ModernStatusBadge } from "@/components/ui/modern-status-badge";
 import { ModernEmptyState } from "@/components/ui/modern-empty-state";
 import { CheckSquare, Calendar, User, AlertCircle, ExternalLink } from "lucide-react";
+import { formatDateInMadrid, formatDateTimeInMadrid } from "@/utils/timezone";
 
 interface ModernTasksTableProps {
   tasks: Task[];
@@ -29,12 +27,12 @@ const ModernTasksTable: React.FC<ModernTasksTableProps> = ({
 }) => {
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "—";
-    return format(new Date(dateString), "dd MMM yyyy", { locale: ru });
+    return formatDateInMadrid(dateString);
   };
 
   const formatDateTime = (dateString: string | null) => {
     if (!dateString) return "—";
-    return format(new Date(dateString), "dd MMM yyyy HH:mm", { locale: ru });
+    return formatDateTimeInMadrid(dateString);
   };
 
   const getPriorityColor = (priority: string | null) => {

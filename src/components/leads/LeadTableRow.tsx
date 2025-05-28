@@ -1,10 +1,10 @@
 
 import React from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { format } from "date-fns";
 import { Tables } from "@/integrations/supabase/types";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { formatDateTimeInMadrid } from "@/utils/timezone";
 
 // Define the Lead type with profile information
 export interface ProfileData {
@@ -22,10 +22,10 @@ interface LeadTableRowProps {
 }
 
 const LeadTableRow: React.FC<LeadTableRowProps> = ({ lead, onClick, onDelete }) => {
-  // Format date for display
+  // Format date for display using Madrid timezone
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "";
-    return format(new Date(dateString), "dd.MM.yyyy HH:mm");
+    return formatDateTimeInMadrid(dateString);
   };
 
   const handleDelete = (e: React.MouseEvent) => {

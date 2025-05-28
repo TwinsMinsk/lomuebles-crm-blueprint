@@ -1,10 +1,14 @@
 
 import { Task } from "@/types/task";
+import { toMadridTime } from "@/utils/timezone";
 
 export const convertTasksToEvents = (tasks: Task[]) => {
   return tasks.map((task) => {
     // Skip tasks without a due date
     if (!task.due_date) return null;
+
+    // Convert UTC due date to Madrid time for display
+    const madridDueDate = toMadridTime(task.due_date);
 
     // Determine color based on priority
     let backgroundColor = "#3788d8"; // default blue
@@ -31,7 +35,7 @@ export const convertTasksToEvents = (tasks: Task[]) => {
     return {
       id: task.task_id.toString(),
       title: task.task_name,
-      start: task.due_date,
+      start: madridDueDate, // Use Madrid time for calendar display
       allDay: false,
       backgroundColor,
       borderColor,
