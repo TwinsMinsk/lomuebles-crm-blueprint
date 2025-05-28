@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/popover";
 import { useUnreadNotificationsCount } from "@/hooks/useNotifications";
 import { NotificationList } from "./NotificationList";
+import { cn } from "@/lib/utils";
 
 export const NotificationBell: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,14 +22,26 @@ export const NotificationBell: React.FC = () => {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="relative p-2"
+          className={cn(
+            "relative p-2 hover:bg-gray-100 transition-all duration-200",
+            unreadCount > 0 && "hover:bg-blue-50"
+          )}
           aria-label={`Уведомления ${unreadCount > 0 ? `(${unreadCount} непрочитанных)` : ''}`}
         >
-          <Bell className="h-5 w-5" />
+          <Bell 
+            className={cn(
+              "h-5 w-5 transition-all duration-200",
+              unreadCount > 0 ? "text-blue-600 animate-pulse" : "text-gray-600"
+            )} 
+          />
           {unreadCount > 0 && (
             <Badge 
               variant="destructive" 
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              className={cn(
+                "absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs",
+                "bg-blue-500 hover:bg-blue-600 border-2 border-white",
+                "animate-scale-in"
+              )}
             >
               {unreadCount > 99 ? '99+' : unreadCount}
             </Badge>
@@ -36,7 +49,7 @@ export const NotificationBell: React.FC = () => {
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-80 p-0" 
+        className="w-80 p-0 shadow-lg border-0 bg-white" 
         align="end"
         sideOffset={8}
       >

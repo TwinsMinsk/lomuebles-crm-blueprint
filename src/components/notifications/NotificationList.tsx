@@ -9,7 +9,8 @@ import {
   AlertCircle, 
   Info, 
   AlertTriangle,
-  CheckCheck
+  CheckCheck,
+  Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -46,13 +47,15 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
   };
 
   const handleNotificationClick = (notification: Notification) => {
-    if (!notification.is_read) {
-      markAsReadMutation.mutate(notification.id);
-    }
-    
     if (notification.action_url) {
       onClose();
     }
+  };
+
+  const handleMarkAsRead = (e: React.MouseEvent, notificationId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    markAsReadMutation.mutate(notificationId);
   };
 
   const handleMarkAllAsRead = () => {
@@ -83,13 +86,13 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
   return (
     <div className="max-h-96">
       {/* Header */}
-      <div className="p-4 border-b">
+      <div className="p-4 border-b bg-gray-50/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Bell className="h-5 w-5" />
-            <h3 className="font-semibold">Уведомления</h3>
+            <Bell className="h-5 w-5 text-gray-600" />
+            <h3 className="font-semibold text-gray-900">Уведомления</h3>
             {unreadCount > 0 && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
                 {unreadCount}
               </Badge>
             )}
@@ -100,7 +103,7 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
               size="sm"
               onClick={handleMarkAllAsRead}
               disabled={markAllAsReadMutation.isPending}
-              className="text-xs p-2"
+              className="text-xs p-2 hover:bg-blue-50 text-blue-600"
             >
               <CheckCheck className="h-4 w-4 mr-1" />
               Все прочитано
@@ -112,17 +115,20 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
       {/* Notifications List */}
       <ScrollArea className="max-h-80">
         {notifications.length === 0 ? (
-          <div className="p-6 text-center text-gray-500">
-            <Bell className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-            <p className="text-sm">Нет уведомлений</p>
+          <div className="p-8 text-center text-gray-500">
+            <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+            <p className="text-sm font-medium text-gray-600">Нет уведомлений</p>
+            <p className="text-xs text-gray-400 mt-1">Новые уведомления появятся здесь</p>
           </div>
         ) : (
-          <div className="divide-y">
+          <div className="divide-y divide-gray-100">
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
-                  !notification.is_read ? 'bg-blue-50/50' : ''
+                className={`p-4 transition-all duration-200 cursor-pointer ${
+                  !notification.is_read 
+                    ? 'bg-blue-50/70 hover:bg-blue-50 border-l-4 border-l-blue-400' 
+                    : 'hover:bg-gray-50'
                 }`}
                 onClick={() => handleNotificationClick(notification)}
               >
@@ -132,10 +138,16 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
                     className="block"
                     onClick={() => onClose()}
                   >
-                    <NotificationContent notification={notification} />
+                    <NotificationContent 
+                      notification={notification} 
+                      onMarkAsRead={handleMarkAsRead}
+                    />
                   </Link>
                 ) : (
-                  <NotificationContent notification={notification} />
+                  <NotificationContent 
+                    notification={notification} 
+                    onMarkAsRead={handleMarkAsRead}
+                  />
                 )}
               </div>
             ))}
@@ -146,7 +158,10 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
   );
 };
 
-const NotificationContent: React.FC<{ notification: Notification }> = ({ notification }) => {
+const NotificationContent: React.FC<{ 
+  notification: Notification;
+  onMarkAsRead: (e: React.MouseEvent, notificationId: string) => void;
+}> = ({ notification, onMarkAsRead }) => {
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
       case 'success':
@@ -161,26 +176,41 @@ const NotificationContent: React.FC<{ notification: Notification }> = ({ notific
   };
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-start gap-3">
-        <div className="mt-0.5">
-          {getNotificationIcon(notification.type)}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <p className={`text-sm font-medium ${!notification.is_read ? 'text-gray-900' : 'text-gray-600'}`}>
+    <div className="flex items-start gap-3">
+      <div className="mt-0.5 flex-shrink-0">
+        {getNotificationIcon(notification.type)}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1">
+            <p className={`text-sm font-medium leading-5 ${
+              !notification.is_read ? 'text-gray-900' : 'text-gray-600'
+            }`}>
               {notification.title}
             </p>
+            <p className="text-sm text-gray-600 mt-1 leading-5">
+              {notification.message}
+            </p>
+            <p className="text-xs text-gray-400 mt-2">
+              {format(new Date(notification.created_at), "dd MMM yyyy, HH:mm", { locale: ru })}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
             {!notification.is_read && (
-              <div className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => onMarkAsRead(e, notification.id)}
+                  className="p-1 h-6 w-6 hover:bg-blue-100 text-blue-600"
+                  title="Отметить как прочитанное"
+                >
+                  <Check className="h-3 w-3" />
+                </Button>
+                <div className="h-2 w-2 rounded-full bg-blue-500" />
+              </>
             )}
           </div>
-          <p className="text-sm text-gray-600 mt-1">
-            {notification.message}
-          </p>
-          <p className="text-xs text-gray-400 mt-2">
-            {format(new Date(notification.created_at), "dd MMM yyyy, HH:mm", { locale: ru })}
-          </p>
         </div>
       </div>
     </div>
