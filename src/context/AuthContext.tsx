@@ -8,9 +8,13 @@ import { AuthContextType } from "@/types/auth";
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  console.log("AuthProvider: Rendering");
+  
   const { user, session, isLoading } = useSession();
   const { signUp, signIn, signOut, resetPassword } = useAuthActions();
   const userRole = useUserRole(user);
+
+  console.log("AuthProvider: Current state", { user: user?.id, isLoading, userRole });
 
   const value: AuthContextType = {
     user,
