@@ -33,10 +33,10 @@ const Header = () => {
         <div className="flex items-center space-x-4">
           <SidebarTrigger />
           <Link to="/dashboard" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded bg-blue-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">LM</span>
+            <div className="h-8 w-8 rounded bg-accent-green flex items-center justify-center">
+              <span className="text-white font-bold text-sm">LO</span>
             </div>
-            <span className="font-bold text-xl">lomuebles.es</span>
+            <span className="font-bold text-xl text-accent-green">Lugar & Olivia CRM</span>
           </Link>
         </div>
         
