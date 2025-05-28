@@ -1,20 +1,24 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { LeadWithProfile } from '@/components/leads/LeadTableRow';
 import { toast } from '@/hooks/use-toast';
 
-export const useLeads = () => {
-  const [leads, setLeads] = useState<LeadWithProfile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const pageSize = 10; // Number of leads per page
+interface UseLeadsParams {
+  page?: number;
+  pageSize?: number;
+}
 
-  const fetchLeads = useCallback(async () => {
-    try {
-      setLoading(true);
+export const useLeads = ({ page = 1, pageSize = 10 }: UseLeadsParams = {}) => {
+  const {
+    data: leadsData,
+    isLoading: loading,
+    error,
+    refetch: refreshLeads
+  } = useQuery({
+    queryKey: ['leads', page, pageSize],
+    queryFn: async () => {
+      console.log(`Fetching leads for page ${page}, pageSize ${pageSize}`);
       
       // Calculate the range for pagination
       const from = (page - 1) * pageSize;
@@ -25,21 +29,24 @@ export const useLeads = () => {
         .from('leads')
         .select('*', { count: 'exact', head: true });
       
-      if (countError) throw countError;
+      if (countError) {
+        console.error('Error fetching leads count:', countError);
+        throw countError;
+      }
       
-      // Set total pages based on count
-      setTotalPages(Math.ceil((count || 0) / pageSize));
-      
-      // Fetch leads for the current page - without trying to join with profiles yet
+      // Fetch leads for the current page
       const { data: leadsData, error: leadsError } = await supabase
         .from('leads')
         .select('*')
         .order('creation_date', { ascending: false })
         .range(from, to);
 
-      if (leadsError) throw leadsError;
+      if (leadsError) {
+        console.error('Error fetching leads:', leadsError);
+        throw leadsError;
+      }
       
-      // Now for each lead, if assigned_user_id exists, fetch the profile separately
+      // For each lead, if assigned_user_id exists, fetch the profile separately
       const leadsWithProfiles = await Promise.all(
         leadsData.map(async (lead) => {
           let profileData = null;
@@ -63,34 +70,33 @@ export const useLeads = () => {
         })
       );
       
-      setLeads(leadsWithProfiles);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching leads:', err);
-      setError(err instanceof Error ? err : new Error('Unknown error occurred'));
+      console.log(`Successfully fetched ${leadsWithProfiles.length} leads`);
       
-      // Show error toast
-      toast({
-        title: "Ошибка",
-        description: "Не удалось загрузить список лидов",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+      return {
+        leads: leadsWithProfiles,
+        totalCount: count || 0,
+        totalPages: Math.ceil((count || 0) / pageSize)
+      };
+    },
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    retry: 1,
+    meta: {
+      onError: (error: Error) => {
+        console.error('Error in useLeads query:', error);
+        toast({
+          title: "Ошибка",
+          description: "Не удалось загрузить список лидов",
+          variant: "destructive"
+        });
+      }
     }
-  }, [page, pageSize]);
+  });
 
-  useEffect(() => {
-    fetchLeads();
-  }, [fetchLeads]);
-
-  return { 
-    leads, 
-    loading, 
-    error, 
-    page, 
-    setPage, 
-    totalPages,
-    refreshLeads: fetchLeads 
+  return {
+    leads: leadsData?.leads || [],
+    loading,
+    error,
+    totalPages: leadsData?.totalPages || 1,
+    refreshLeads
   };
 };

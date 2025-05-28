@@ -8,6 +8,7 @@ export const useLeadDelete = () => {
 
   const { mutate: deleteLead, isPending: isDeleting } = useMutation({
     mutationFn: async (leadId: number) => {
+      console.log('Deleting lead with ID:', leadId);
       const { error } = await supabase
         .from("leads")
         .delete()
@@ -17,9 +18,14 @@ export const useLeadDelete = () => {
         console.error('Supabase Lead Delete Error:', error);
         throw new Error(error.message);
       }
+      
+      console.log('Lead deleted successfully');
     },
     onSuccess: () => {
+      // Invalidate all leads queries to trigger a refetch
       queryClient.invalidateQueries({ queryKey: ["leads"] });
+      console.log('Invalidated leads queries after successful deletion');
+      
       toast({
         title: "Успех",
         description: "Лид успешно удален",

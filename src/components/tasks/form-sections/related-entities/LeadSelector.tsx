@@ -10,7 +10,8 @@ interface LeadSelectorProps {
 
 export const LeadSelector = ({ value, onChange }: LeadSelectorProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const { leads, loading: isLoading } = useLeads();
+  // Fetch all leads without pagination for the selector
+  const { leads, loading: isLoading } = useLeads({ page: 1, pageSize: 1000 });
 
   // Format lead data for the entity selector
   const formattedLeads = leads.map((lead) => ({

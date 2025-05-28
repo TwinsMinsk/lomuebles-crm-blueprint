@@ -13,7 +13,8 @@ import { FloatingActionButton } from "@/components/ui/floating-action-button";
 import { Plus, Users } from "lucide-react";
 
 const Leads: React.FC = () => {
-  const { leads, loading, page, totalPages, setPage, refreshLeads } = useLeads();
+  const [page, setPage] = useState(1);
+  const { leads, loading, totalPages, refreshLeads } = useLeads({ page, pageSize: 10 });
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<LeadWithProfile | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
