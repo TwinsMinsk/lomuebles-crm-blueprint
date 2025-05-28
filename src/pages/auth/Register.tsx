@@ -47,9 +47,19 @@ const Register = () => {
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
-    const result = await signUp(data.email, data.password, data.fullName);
-    if (!result) {
-      navigate("/auth/login");
+    try {
+      const result = await signUp(data.email, data.password, data.fullName);
+      
+      // If registration was successful (no error returned)
+      if (!result) {
+        console.log("Registration successful, redirecting to dashboard");
+        navigate("/dashboard");
+      }
+      // If there was an error, the useAuthActions hook will show the error toast
+      // and we don't need to do anything else here
+    } catch (error) {
+      console.error("Unexpected error during registration:", error);
+      // The useAuthActions hook should handle most errors, but this is a fallback
     }
   };
 
@@ -158,7 +168,7 @@ const Register = () => {
               <div className="text-center mt-4">
                 <p className="text-sm text-gray-600">
                   Уже есть учетная запись?{" "}
-                  <Link to="/auth/login" className="text-blue-600 hover:text-blue-800">
+                  <Link to="/login" className="text-blue-600 hover:text-blue-800">
                     Войти
                   </Link>
                 </p>
