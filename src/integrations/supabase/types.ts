@@ -1049,6 +1049,10 @@ export type Database = {
         }
         Returns: string
       }
+      delete_old_read_notifications: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       generate_new_order_number: {
         Args: Record<PropertyKey, never>
         Returns: string

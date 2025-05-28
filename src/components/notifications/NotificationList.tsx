@@ -10,18 +10,19 @@ import {
   Info, 
   AlertTriangle,
   CheckCheck,
-  Check
+  Check,
+  Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { 
   useNotifications, 
   useMarkNotificationAsRead, 
   useMarkAllNotificationsAsRead,
   type Notification
 } from "@/hooks/useNotifications";
+import { useDeleteNotification } from "@/hooks/useDeleteNotification";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface NotificationListProps {
@@ -32,6 +33,7 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
   const { data: notifications = [], isLoading } = useNotifications();
   const markAsReadMutation = useMarkNotificationAsRead();
   const markAllAsReadMutation = useMarkAllNotificationsAsRead();
+  const deleteNotificationMutation = useDeleteNotification();
 
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
@@ -58,6 +60,12 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
     markAsReadMutation.mutate(notificationId);
   };
 
+  const handleDeleteNotification = (e: React.MouseEvent, notificationId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    deleteNotificationMutation.mutate(notificationId);
+  };
+
   const handleMarkAllAsRead = () => {
     markAllAsReadMutation.mutate();
   };
@@ -66,7 +74,7 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
 
   if (isLoading) {
     return (
-      <div className="w-80 max-h-96">
+      <div className="w-80 max-h-96 bg-white">
         <div className="p-4 border-b bg-gray-50/50">
           <div className="flex items-center justify-between">
             <Skeleton className="h-6 w-24" />
@@ -86,9 +94,9 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
   }
 
   return (
-    <div className="w-80 flex flex-col max-h-96">
+    <div className="w-80 flex flex-col max-h-96 bg-white border rounded-lg shadow-lg">
       {/* Header - Fixed */}
-      <div className="p-4 border-b bg-gray-50/50 flex-shrink-0">
+      <div className="p-4 border-b bg-gray-50/50 flex-shrink-0 rounded-t-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bell className="h-5 w-5 text-gray-600" />
@@ -115,7 +123,7 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 overflow-hidden">
         {notifications.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
@@ -144,12 +152,14 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
                       <NotificationContent 
                         notification={notification} 
                         onMarkAsRead={handleMarkAsRead}
+                        onDelete={handleDeleteNotification}
                       />
                     </Link>
                   ) : (
                     <NotificationContent 
                       notification={notification} 
                       onMarkAsRead={handleMarkAsRead}
+                      onDelete={handleDeleteNotification}
                     />
                   )}
                 </div>
@@ -165,7 +175,8 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
 const NotificationContent: React.FC<{ 
   notification: Notification;
   onMarkAsRead: (e: React.MouseEvent, notificationId: string) => void;
-}> = ({ notification, onMarkAsRead }) => {
+  onDelete: (e: React.MouseEvent, notificationId: string) => void;
+}> = ({ notification, onMarkAsRead, onDelete }) => {
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
       case 'success':
@@ -199,20 +210,31 @@ const NotificationContent: React.FC<{
               {format(new Date(notification.created_at), "dd MMM yyyy, HH:mm", { locale: ru })}
             </p>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1 flex-shrink-0">
             {!notification.is_read && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => onMarkAsRead(e, notification.id)}
-                  className="p-1 h-6 w-6 hover:bg-blue-100 text-blue-600"
-                  title="Отметить как прочитанное"
-                >
-                  <Check className="h-3 w-3" />
-                </Button>
-                <div className="h-2 w-2 rounded-full bg-blue-500" />
-              </>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => onMarkAsRead(e, notification.id)}
+                className="p-1 h-6 w-6 hover:bg-blue-100 text-blue-600"
+                title="Отметить как прочитанное"
+              >
+                <Check className="h-3 w-3" />
+              </Button>
+            )}
+            {notification.is_read && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => onDelete(e, notification.id)}
+                className="p-1 h-6 w-6 hover:bg-red-100 text-red-600"
+                title="Удалить уведомление"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            )}
+            {!notification.is_read && (
+              <div className="h-2 w-2 rounded-full bg-blue-500" />
             )}
           </div>
         </div>
