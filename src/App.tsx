@@ -25,6 +25,7 @@ import ProfileSettings from "./pages/user/ProfileSettings";
 import OrdersPage from "./pages/orders/OrdersPage";
 import NewOrderPage from "./pages/orders/NewOrderPage";
 import OrderDetailPage from "./pages/orders/OrderDetailPage";
+import { NotificationToast } from "./components/notifications/NotificationToast";
 
 // Import Finance module pages
 import CategoriesPage from "./pages/finance/CategoriesPage";
@@ -33,77 +34,80 @@ import FinanceReportsPage from "./pages/finance/FinanceReportsPage";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/logout" element={<Logout />} />
-      <Route path="/access-denied" element={<AccessDenied />} />
+    <>
+      <NotificationToast />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/logout" element={<Logout />} />
+        <Route path="/access-denied" element={<AccessDenied />} />
 
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Layout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<DashboardPage />} />
-        <Route path="dashboard" element={<DashboardPage />} />
-        <Route path="leads" element={<Leads />} />
-        <Route path="contacts" element={<Contacts />} />
-        <Route path="companies" element={<Companies />} />
-        
-        <Route path="orders" element={<OrdersPage />} />
-        <Route path="orders/new" element={<NewOrderPage />} />
-        <Route path="orders/:id" element={<OrderDetailPage />} />
-        
-        <Route path="tasks" element={<Tasks />} />
-        <Route path="calendar" element={<Calendar />} />
-        <Route path="products" element={<Products />} />
-        <Route path="suppliers" element={<Suppliers />} />
-        <Route path="partners" element={<Partners />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<DashboardPage />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="leads" element={<Leads />} />
+          <Route path="contacts" element={<Contacts />} />
+          <Route path="companies" element={<Companies />} />
+          
+          <Route path="orders" element={<OrdersPage />} />
+          <Route path="orders/new" element={<NewOrderPage />} />
+          <Route path="orders/:id" element={<OrderDetailPage />} />
+          
+          <Route path="tasks" element={<Tasks />} />
+          <Route path="calendar" element={<Calendar />} />
+          <Route path="products" element={<Products />} />
+          <Route path="suppliers" element={<Suppliers />} />
+          <Route path="partners" element={<Partners />} />
 
-        {/* Finance module routes */}
-        <Route 
-          path="finance/categories" 
-          element={
-            <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
-              <CategoriesPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="finance/transactions" 
-          element={
-            <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
-              <TransactionsPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="finance/reports" 
-          element={
-            <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
-              <FinanceReportsPage />
-            </ProtectedRoute>
-          } 
-        />
+          {/* Finance module routes */}
+          <Route 
+            path="finance/categories" 
+            element={
+              <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
+                <CategoriesPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="finance/transactions" 
+            element={
+              <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
+                <TransactionsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="finance/reports" 
+            element={
+              <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
+                <FinanceReportsPage />
+              </ProtectedRoute>
+            } 
+          />
 
-        <Route path="settings" element={<Settings />} />
-        <Route path="user/profile" element={<ProfileSettings />} />
-        <Route 
-          path="admin/users" 
-          element={
-            <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
-              <UserManagement />
-            </ProtectedRoute>
-          } 
-        />
-      </Route>
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+          <Route path="settings" element={<Settings />} />
+          <Route path="user/profile" element={<ProfileSettings />} />
+          <Route 
+            path="admin/users" 
+            element={
+              <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
+                <UserManagement />
+              </ProtectedRoute>
+            } 
+          />
+        </Route>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
   );
 }
 

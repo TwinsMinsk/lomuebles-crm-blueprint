@@ -3,12 +3,17 @@ import React, { useEffect } from "react";
 import { toast } from "sonner";
 import { CheckCircle, AlertCircle, Info, AlertTriangle } from "lucide-react";
 import { useNotifications, type Notification } from "@/hooks/useNotifications";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 
 // Component to show real-time notification toasts
 export const NotificationToast: React.FC = () => {
   const { data: notifications = [] } = useNotifications();
+  const { user } = useAuth();
 
   useEffect(() => {
+    if (!user) return;
+
     // Listen for real-time updates from Supabase
     const channel = supabase
       .channel('notifications')
@@ -18,7 +23,7 @@ export const NotificationToast: React.FC = () => {
           event: 'INSERT',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${user?.id}`, // Only listen for current user's notifications
+          filter: `user_id=eq.${user.id}`, // Only listen for current user's notifications
         },
         (payload) => {
           const notification = payload.new as Notification;
@@ -30,7 +35,7 @@ export const NotificationToast: React.FC = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [user]);
 
   const showNotificationToast = (notification: Notification) => {
     const getIcon = () => {
