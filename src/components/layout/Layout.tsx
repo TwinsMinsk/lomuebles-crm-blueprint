@@ -5,8 +5,7 @@ import Footer from "./Footer";
 import { 
   SidebarProvider, 
   Sidebar, 
-  SidebarContent,
-  SidebarTrigger
+  SidebarContent
 } from "@/components/ui/sidebar";
 import SidebarNavigation from "./SidebarNavigation";
 
@@ -15,7 +14,7 @@ const Layout = () => {
     <SidebarProvider>
       <div className="flex flex-col min-h-screen w-full">
         <Header />
-        <div className="flex flex-1">
+        <div className="flex flex-1 pt-16">
           <Sidebar>
             <SidebarContent className="bg-white">
               <SidebarNavigation />

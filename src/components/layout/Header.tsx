@@ -12,6 +12,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User, Settings, LogOut } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const Header = () => {
   const { user, userRole } = useAuth();
@@ -27,9 +28,10 @@ const Header = () => {
   };
 
   return (
-    <header className="border-b bg-white">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b bg-white shadow-sm">
       <div className="flex h-16 items-center px-6">
         <div className="flex items-center space-x-4">
+          <SidebarTrigger />
           <Link to="/dashboard" className="flex items-center space-x-2">
             <div className="h-8 w-8 rounded bg-blue-600 flex items-center justify-center">
               <span className="text-white font-bold text-sm">LM</span>

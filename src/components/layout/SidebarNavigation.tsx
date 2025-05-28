@@ -190,7 +190,7 @@ const SidebarNavigation = () => {
   };
 
   return (
-    <div className="px-3 py-[71px]">
+    <div className="px-3 py-6">
       {menuGroups.map((group) => {
         if (!hasGroupAccess(group)) return null;
         
