@@ -30,6 +30,7 @@ interface NotificationListProps {
 }
 
 export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) => {
+  // Remove limit to show all notifications
   const { data: notifications = [], isLoading } = useNotifications();
   const markAsReadMutation = useMarkNotificationAsRead();
   const markAllAsReadMutation = useMarkAllNotificationsAsRead();
@@ -49,6 +50,7 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
   };
 
   const handleNotificationClick = (notification: Notification) => {
+    console.log("Notification clicked:", notification.id, notification.action_url);
     if (notification.action_url) {
       onClose();
     }
@@ -57,16 +59,19 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
   const handleMarkAsRead = (e: React.MouseEvent, notificationId: string) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log("Marking notification as read:", notificationId);
     markAsReadMutation.mutate(notificationId);
   };
 
   const handleDeleteNotification = (e: React.MouseEvent, notificationId: string) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log("Deleting notification:", notificationId);
     deleteNotificationMutation.mutate(notificationId);
   };
 
   const handleMarkAllAsRead = () => {
+    console.log("Marking all notifications as read");
     markAllAsReadMutation.mutate();
   };
 
@@ -122,8 +127,8 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
         </div>
       </div>
 
-      {/* Scrollable Content */}
-      <div className="flex-1 min-h-0 overflow-hidden">
+      {/* Scrollable Content - Improved styling */}
+      <div className="flex-1 min-h-0">
         {notifications.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
@@ -131,38 +136,17 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
             <p className="text-xs text-gray-400 mt-1">Новые уведомления появятся здесь</p>
           </div>
         ) : (
-          <ScrollArea className="h-full">
+          <ScrollArea className="h-full max-h-80">
             <div className="divide-y divide-gray-100">
               {notifications.map((notification) => (
-                <div
+                <NotificationItem
                   key={notification.id}
-                  className={`p-4 transition-all duration-200 cursor-pointer ${
-                    !notification.is_read 
-                      ? 'bg-blue-50/70 hover:bg-blue-50 border-l-4 border-l-blue-400' 
-                      : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => handleNotificationClick(notification)}
-                >
-                  {notification.action_url ? (
-                    <Link 
-                      to={notification.action_url}
-                      className="block"
-                      onClick={() => onClose()}
-                    >
-                      <NotificationContent 
-                        notification={notification} 
-                        onMarkAsRead={handleMarkAsRead}
-                        onDelete={handleDeleteNotification}
-                      />
-                    </Link>
-                  ) : (
-                    <NotificationContent 
-                      notification={notification} 
-                      onMarkAsRead={handleMarkAsRead}
-                      onDelete={handleDeleteNotification}
-                    />
-                  )}
-                </div>
+                  notification={notification}
+                  onMarkAsRead={handleMarkAsRead}
+                  onDelete={handleDeleteNotification}
+                  onNotificationClick={handleNotificationClick}
+                  onClose={onClose}
+                />
               ))}
             </div>
           </ScrollArea>
@@ -172,11 +156,14 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
   );
 };
 
-const NotificationContent: React.FC<{ 
+// Separate component for individual notification items to improve performance
+const NotificationItem: React.FC<{
   notification: Notification;
   onMarkAsRead: (e: React.MouseEvent, notificationId: string) => void;
   onDelete: (e: React.MouseEvent, notificationId: string) => void;
-}> = ({ notification, onMarkAsRead, onDelete }) => {
+  onNotificationClick: (notification: Notification) => void;
+  onClose: () => void;
+}> = ({ notification, onMarkAsRead, onDelete, onNotificationClick, onClose }) => {
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
       case 'success':
@@ -190,8 +177,12 @@ const NotificationContent: React.FC<{
     }
   };
 
-  return (
-    <div className="flex items-start gap-3">
+  const handleClick = () => {
+    onNotificationClick(notification);
+  };
+
+  const content = (
+    <div className="flex items-start gap-3 p-4">
       <div className="mt-0.5 flex-shrink-0">
         {getNotificationIcon(notification.type)}
       </div>
@@ -239,6 +230,32 @@ const NotificationContent: React.FC<{
           </div>
         </div>
       </div>
+    </div>
+  );
+
+  const containerClasses = `transition-all duration-200 cursor-pointer ${
+    !notification.is_read 
+      ? 'bg-blue-50/70 hover:bg-blue-50 border-l-4 border-l-blue-400' 
+      : 'hover:bg-gray-50'
+  }`;
+
+  if (notification.action_url) {
+    return (
+      <div className={containerClasses} onClick={handleClick}>
+        <Link 
+          to={notification.action_url}
+          className="block"
+          onClick={onClose}
+        >
+          {content}
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className={containerClasses} onClick={handleClick}>
+      {content}
     </div>
   );
 };
