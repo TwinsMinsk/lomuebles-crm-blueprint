@@ -240,7 +240,8 @@ export const useAddTransaction = () => {
         throw new Error('Category is required');
       }
 
-      const { data, error } = await supabase
+      // First, create the transaction without files
+      const { data: transaction, error } = await supabase
         .from("transactions")
         .insert({
           transaction_date: transactionData.transaction_date instanceof Date ? 
@@ -257,14 +258,34 @@ export const useAddTransaction = () => {
           related_partner_manufacturer_id: transactionData.related_partner_manufacturer_id,
           related_user_id: transactionData.related_user_id,
           payment_method: transactionData.payment_method,
-          attached_files: transactionData.attached_files,
+          attached_files: [], // Initialize with empty array
           creator_user_id: user.id
         })
         .select('id')
         .single();
 
       if (error) throw error;
-      return data;
+
+      // If we have attached files, we need to handle them
+      if (transactionData.attached_files && transactionData.attached_files.length > 0) {
+        // Filter out pending files and keep only real uploaded files
+        const realFiles = transactionData.attached_files.filter(file => !file.isPending);
+        
+        if (realFiles.length > 0) {
+          // Update the transaction with the real files
+          const { error: updateError } = await supabase
+            .from("transactions")
+            .update({ attached_files: realFiles })
+            .eq('id', transaction.id);
+
+          if (updateError) {
+            console.error("Error updating transaction with files:", updateError);
+            // Don't throw here as the transaction was created successfully
+          }
+        }
+      }
+
+      return transaction;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });

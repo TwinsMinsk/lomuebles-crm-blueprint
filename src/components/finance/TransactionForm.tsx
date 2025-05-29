@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,9 +19,9 @@ import { cn } from "@/lib/utils";
 import { Transaction, TransactionFormData } from "@/hooks/finance/useTransactions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { FileUploadSection } from "@/components/common/FileUploadSection";
 import TransactionCategorySelector from "./form-selectors/TransactionCategorySelector";
 import TransactionOrderSelector from "./form-selectors/TransactionOrderSelector";
+import TransactionFileUpload from "./TransactionFileUpload";
 
 // Define schema for the form
 const transactionFormSchema = z.object({
@@ -134,10 +135,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     const fullData: TransactionFormData = {
       ...data,
       transaction_date: data.transaction_date,
-      type: data.type, // Ensure type is included
+      type: data.type,
       category_id: Number(data.category_id),
       amount: Number(data.amount),
-      currency: data.currency || 'EUR', // Ensure currency is always included with a default value
+      currency: data.currency || 'EUR',
       related_order_id: data.related_order_id ? Number(data.related_order_id) : null,
       related_contact_id: data.related_contact_id ? Number(data.related_contact_id) : null,
       related_supplier_id: data.related_supplier_id ? Number(data.related_supplier_id) : null,
@@ -231,7 +232,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
               )}
             />
 
-            {/* Replace Popover+Command with the new CategorySelector */}
             <FormField
               control={form.control}
               name="category_id"
@@ -322,7 +322,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Связанные объекты и описание</h3>
             
-            {/* Replace Popover+Command with the new OrderSelector */}
             <FormField
               control={form.control}
               name="related_order_id"
@@ -345,13 +344,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
               )}
             />
             
-            {/* ... keep existing code (Other related entities: Contact, Supplier, Partner, Employee) ... */}
-
             <div className="space-y-2">
               <FormLabel>Прикрепленные файлы</FormLabel>
-              <FileUploadSection
-                entityType="transactions"
-                entityId={transaction?.id || "new"}
+              <TransactionFileUpload
+                transactionId={transaction?.id}
                 existingFiles={files}
                 onFilesChange={handleFilesChange}
               />
