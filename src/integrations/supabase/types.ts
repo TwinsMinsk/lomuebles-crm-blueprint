@@ -484,7 +484,7 @@ export type Database = {
           assigned_user_id: string | null
           attached_files_order_docs: Json | null
           client_company_id: number | null
-          client_contact_id: number
+          client_contact_id: number | null
           client_language: string
           closing_date: string | null
           created_at: string
@@ -506,7 +506,7 @@ export type Database = {
           assigned_user_id?: string | null
           attached_files_order_docs?: Json | null
           client_company_id?: number | null
-          client_contact_id: number
+          client_contact_id?: number | null
           client_language: string
           closing_date?: string | null
           created_at?: string
@@ -528,7 +528,7 @@ export type Database = {
           assigned_user_id?: string | null
           attached_files_order_docs?: Json | null
           client_company_id?: number | null
-          client_contact_id?: number
+          client_contact_id?: number | null
           client_language?: string
           closing_date?: string | null
           created_at?: string

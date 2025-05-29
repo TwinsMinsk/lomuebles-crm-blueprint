@@ -6,7 +6,7 @@ import { Order } from "@/types/order";
 
 // Define the type for orderData that matches Supabase's requirements
 type OrderInput = {
-  client_contact_id: number;
+  client_contact_id?: number | null; // Now optional
   client_language: string; 
   order_type: string;
   status: string;

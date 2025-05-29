@@ -17,8 +17,8 @@ export interface Order {
   created_at: string;
   closing_date: string | null;
   
-  // IDs for relations
-  client_contact_id: number;
+  // IDs for relations - client_contact_id is now optional
+  client_contact_id: number | null;
   client_company_id: number | null;
   creator_user_id: string;
   assigned_user_id: string | null;
@@ -68,12 +68,12 @@ export interface OrderItem {
   link_to_product_on_tilda?: string | null;
 }
 
-// Form schema for order editing
+// Form schema for order editing - client_contact_id is now optional
 export const orderSchema = z.object({
   orderName: z.string().optional().nullable(),
   orderType: z.enum(["Готовая мебель (Tilda)", "Мебель на заказ"]),
   status: z.string(),
-  clientContactId: z.number(),
+  clientContactId: z.number().optional().nullable(),
   clientCompanyId: z.number().optional().nullable(),
   sourceLeadId: z.number().optional().nullable(),
   assignedUserId: z.string().optional().nullable(),
@@ -94,6 +94,12 @@ export const orderSchema = z.object({
       type: z.string().optional(),
     })
   ).optional().nullable(),
+}).refine(data => {
+  // At least one of contact or lead must be specified
+  return data.clientContactId || data.sourceLeadId;
+}, {
+  message: "Необходимо указать либо контакт клиента, либо связанный лид",
+  path: ["clientContactId"]
 });
 
 // Values type for the order form
