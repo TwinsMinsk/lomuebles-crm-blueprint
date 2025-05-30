@@ -1,5 +1,6 @@
 
 
+
 import React, { useState } from 'react';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -134,42 +135,42 @@ const FinanceReportsPage = () => {
         </CardContent>
       </Card>
       
-      {/* Enhanced Tabs for mobile */}
+      {/* Fixed Mobile-Responsive Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="mb-6 overflow-x-auto">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 min-h-[60px] lg:min-h-[48px] bg-gradient-to-r from-blue-50 to-indigo-50 p-2 gap-1 lg:gap-0 rounded-xl">
+        <div className="mb-6">
+          <TabsList className="grid w-full grid-cols-4 h-auto bg-gradient-to-r from-blue-50 to-indigo-50 p-1 gap-1 rounded-xl">
             <TabsTrigger 
               value="summary" 
-              className="text-sm sm:text-base font-semibold px-3 py-3 lg:py-2 rounded-lg transition-all duration-300 
+              className="text-xs sm:text-sm lg:text-base font-medium px-1 sm:px-2 lg:px-3 py-2 lg:py-2 rounded-lg transition-all duration-200
                          data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 
-                         data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105
+                         data-[state=active]:text-white data-[state=active]:shadow-lg
                          hover:bg-white/60 hover:shadow-md whitespace-nowrap min-w-0 flex items-center justify-center"
             >
-              <span className="truncate">Общая сводка</span>
+              <span className="truncate">Сводка</span>
             </TabsTrigger>
             <TabsTrigger 
               value="expenses" 
-              className="text-sm sm:text-base font-semibold px-3 py-3 lg:py-2 rounded-lg transition-all duration-300
+              className="text-xs sm:text-sm lg:text-base font-medium px-1 sm:px-2 lg:px-3 py-2 lg:py-2 rounded-lg transition-all duration-200
                          data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-pink-500
-                         data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105
+                         data-[state=active]:text-white data-[state=active]:shadow-lg
                          hover:bg-white/60 hover:shadow-md whitespace-nowrap min-w-0 flex items-center justify-center"
             >
               <span className="truncate">Расходы</span>
             </TabsTrigger>
             <TabsTrigger 
               value="income" 
-              className="text-sm sm:text-base font-semibold px-3 py-3 lg:py-2 rounded-lg transition-all duration-300
+              className="text-xs sm:text-sm lg:text-base font-medium px-1 sm:px-2 lg:px-3 py-2 lg:py-2 rounded-lg transition-all duration-200
                          data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500
-                         data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105
+                         data-[state=active]:text-white data-[state=active]:shadow-lg
                          hover:bg-white/60 hover:shadow-md whitespace-nowrap min-w-0 flex items-center justify-center"
             >
               <span className="truncate">Доходы</span>
             </TabsTrigger>
             <TabsTrigger 
               value="orders" 
-              className="text-sm sm:text-base font-semibold px-3 py-3 lg:py-2 rounded-lg transition-all duration-300
+              className="text-xs sm:text-sm lg:text-base font-medium px-1 sm:px-2 lg:px-3 py-2 lg:py-2 rounded-lg transition-all duration-200
                          data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-violet-500
-                         data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105
+                         data-[state=active]:text-white data-[state=active]:shadow-lg
                          hover:bg-white/60 hover:shadow-md whitespace-nowrap min-w-0 flex items-center justify-center"
             >
               <span className="truncate">Заказы</span>
@@ -381,4 +382,5 @@ const FinanceReportsPage = () => {
     </div>;
 };
 export default FinanceReportsPage;
+
 
