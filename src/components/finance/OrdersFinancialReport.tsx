@@ -18,7 +18,7 @@ interface OrdersFinancialReportProps {
 
 export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialReportProps) => {
   const isMobile = useIsMobile();
-  const [filtersOpen, setFiltersOpen] = useState(!isMobile);
+  const [filtersOpen, setFiltersOpen] = useState(true); // Always open by default
   
   const [filters, setFilters] = useState<OrdersFinancialFilters>({
     dateFrom: format(dateFrom, 'yyyy-MM-dd'),
@@ -104,12 +104,13 @@ export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialRepor
         </Card>
       </div>
 
-      {/* Collapsible Filters for Mobile */}
+      {/* Single Collapsible Filters Section */}
       <Card>
         <CardContent className="p-4">
           <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+            {/* Show trigger button only on mobile */}
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between md:hidden mb-4">
+              <Button variant="ghost" className="w-full justify-between lg:hidden mb-4">
                 <span className="flex items-center">
                   <Filter className="mr-2 h-4 w-4" />
                   Фильтры
@@ -163,52 +164,6 @@ export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialRepor
               </div>
             </CollapsibleContent>
           </Collapsible>
-
-          {/* Always visible filters on desktop */}
-          <div className="hidden md:block">
-            <div className="flex flex-col md:flex-row gap-4 items-end">
-              <div className="flex-1">
-                <label className="text-sm font-medium mb-2 block">Тип заказа</label>
-                <Select 
-                  value={filters.orderType || 'all'} 
-                  onValueChange={(value) => handleFilterChange('orderType', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Все типы</SelectItem>
-                    <SelectItem value="Готовая мебель (Tilda)">Готовая мебель (Tilda)</SelectItem>
-                    <SelectItem value="Мебель на заказ">Мебель на заказ</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex-1">
-                <label className="text-sm font-medium mb-2 block">Статус заказа</label>
-                <Select 
-                  value={filters.orderStatus || 'all'} 
-                  onValueChange={(value) => handleFilterChange('orderStatus', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Все статусы</SelectItem>
-                    <SelectItem value="Новый">Новый</SelectItem>
-                    <SelectItem value="В работе">В работе</SelectItem>
-                    <SelectItem value="Завершен">Завершен</SelectItem>
-                    <SelectItem value="Отменен">Отменен</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-                Обновить
-              </Button>
-            </div>
-          </div>
         </CardContent>
       </Card>
 
@@ -279,68 +234,70 @@ export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialRepor
                 ))}
               </tbody>
 
-              {/* Mobile Cards */}
-              {ordersData.map((order) => (
-                <ResponsiveRow key={order.order_id}>
-                  <ResponsiveRowItem 
-                    label="Номер заказа" 
-                    value={<span className="font-medium">{order.order_number}</span>} 
-                  />
-                  <ResponsiveRowItem 
-                    label="Название заказа" 
-                    value={order.order_name || '—'} 
-                  />
-                  <ResponsiveRowItem 
-                    label="Клиент" 
-                    value={order.client_name || '—'} 
-                  />
-                  <ResponsiveRowItem 
-                    label="Тип" 
-                    value={
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                        {order.order_type}
-                      </span>
-                    } 
-                  />
-                  <ResponsiveRowItem 
-                    label="Статус" 
-                    value={
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        order.status === 'Завершен' ? 'bg-green-100 text-green-800' :
-                        order.status === 'В работе' ? 'bg-yellow-100 text-yellow-800' :
-                        order.status === 'Отменен' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {order.status}
-                      </span>
-                    } 
-                  />
-                  <ResponsiveRowItem 
-                    label="Дата создания" 
-                    value={formatDate(order.created_at)} 
-                  />
-                  <ResponsiveRowItem 
-                    label="Дата закрытия" 
-                    value={order.closing_date ? formatDate(order.closing_date) : '—'} 
-                  />
-                  <ResponsiveRowItem 
-                    label="Доходы" 
-                    value={<span className="font-medium text-green-600">{formatCurrency(order.total_income)}</span>} 
-                  />
-                  <ResponsiveRowItem 
-                    label="Расходы" 
-                    value={<span className="font-medium text-red-600">{formatCurrency(order.total_expenses)}</span>} 
-                  />
-                  <ResponsiveRowItem 
-                    label="Прибыль" 
-                    value={
-                      <span className={`font-medium ${order.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(order.profit)}
-                      </span>
-                    } 
-                  />
-                </ResponsiveRow>
-              ))}
+              {/* Mobile Cards - Only show on mobile screens */}
+              <div className="lg:hidden">
+                {ordersData.map((order) => (
+                  <ResponsiveRow key={`mobile-${order.order_id}`}>
+                    <ResponsiveRowItem 
+                      label="Номер заказа" 
+                      value={<span className="font-medium">{order.order_number}</span>} 
+                    />
+                    <ResponsiveRowItem 
+                      label="Название заказа" 
+                      value={order.order_name || '—'} 
+                    />
+                    <ResponsiveRowItem 
+                      label="Клиент" 
+                      value={order.client_name || '—'} 
+                    />
+                    <ResponsiveRowItem 
+                      label="Тип" 
+                      value={
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                          {order.order_type}
+                        </span>
+                      } 
+                    />
+                    <ResponsiveRowItem 
+                      label="Статус" 
+                      value={
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          order.status === 'Завершен' ? 'bg-green-100 text-green-800' :
+                          order.status === 'В работе' ? 'bg-yellow-100 text-yellow-800' :
+                          order.status === 'Отменен' ? 'bg-red-100 text-red-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {order.status}
+                        </span>
+                      } 
+                    />
+                    <ResponsiveRowItem 
+                      label="Дата создания" 
+                      value={formatDate(order.created_at)} 
+                    />
+                    <ResponsiveRowItem 
+                      label="Дата закрытия" 
+                      value={order.closing_date ? formatDate(order.closing_date) : '—'} 
+                    />
+                    <ResponsiveRowItem 
+                      label="Доходы" 
+                      value={<span className="font-medium text-green-600">{formatCurrency(order.total_income)}</span>} 
+                    />
+                    <ResponsiveRowItem 
+                      label="Расходы" 
+                      value={<span className="font-medium text-red-600">{formatCurrency(order.total_expenses)}</span>} 
+                    />
+                    <ResponsiveRowItem 
+                      label="Прибыль" 
+                      value={
+                        <span className={`font-medium ${order.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {formatCurrency(order.profit)}
+                        </span>
+                      } 
+                    />
+                  </ResponsiveRow>
+                ))}
+              </div>
             </ResponsiveTable>
           )}
         </CardContent>
