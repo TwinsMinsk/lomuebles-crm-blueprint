@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { CalendarIcon, Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Transaction, TransactionFormData } from "@/hooks/finance/useTransactions";
 import { useQuery } from "@tanstack/react-query";
@@ -131,22 +130,28 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
 
   const isDataLoading = isLoadingCategories || isLoadingContacts || isLoadingOrders;
 
-  const onSubmitHandler = (data: TransactionFormValues) => {
-    const fullData: TransactionFormData = {
-      ...data,
-      transaction_date: data.transaction_date,
-      type: data.type,
-      category_id: Number(data.category_id),
-      amount: Number(data.amount),
-      currency: data.currency || 'EUR',
-      related_order_id: data.related_order_id ? Number(data.related_order_id) : null,
-      related_contact_id: data.related_contact_id ? Number(data.related_contact_id) : null,
-      related_supplier_id: data.related_supplier_id ? Number(data.related_supplier_id) : null,
-      related_partner_manufacturer_id: data.related_partner_manufacturer_id ? Number(data.related_partner_manufacturer_id) : null,
-      related_user_id: data.related_user_id || null,
-      attached_files: files,
-    };
-    onSuccess(fullData);
+  const onSubmitHandler = async (data: TransactionFormValues) => {
+    try {
+      const fullData: TransactionFormData = {
+        ...data,
+        transaction_date: data.transaction_date,
+        type: data.type,
+        category_id: Number(data.category_id),
+        amount: Number(data.amount),
+        currency: data.currency || 'EUR',
+        related_order_id: data.related_order_id ? Number(data.related_order_id) : null,
+        related_contact_id: data.related_contact_id ? Number(data.related_contact_id) : null,
+        related_supplier_id: data.related_supplier_id ? Number(data.related_supplier_id) : null,
+        related_partner_manufacturer_id: data.related_partner_manufacturer_id ? Number(data.related_partner_manufacturer_id) : null,
+        related_user_id: data.related_user_id || null,
+        attached_files: files,
+      };
+      
+      console.log('Submitting transaction with files:', fullData.attached_files);
+      onSuccess(fullData);
+    } catch (error) {
+      console.error('Error submitting transaction form:', error);
+    }
   };
 
   if (isDataLoading) {

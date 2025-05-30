@@ -240,7 +240,18 @@ export const useAddTransaction = () => {
         throw new Error('Category is required');
       }
 
-      // First, create the transaction without files
+      console.log('Creating transaction with data:', transactionData);
+
+      // Prepare files for storage - filter out any pending files and keep only real uploaded files
+      const realFiles = transactionData.attached_files?.filter(file => !file.isPending) || [];
+      
+      console.log('Processing files:', {
+        totalFiles: transactionData.attached_files?.length || 0,
+        realFiles: realFiles.length,
+        files: realFiles
+      });
+
+      // Create the transaction with the real files
       const { data: transaction, error } = await supabase
         .from("transactions")
         .insert({
@@ -258,38 +269,26 @@ export const useAddTransaction = () => {
           related_partner_manufacturer_id: transactionData.related_partner_manufacturer_id,
           related_user_id: transactionData.related_user_id,
           payment_method: transactionData.payment_method,
-          attached_files: [], // Initialize with empty array
+          attached_files: realFiles, // Store the real uploaded files
           creator_user_id: user.id
         })
         .select('id')
         .single();
 
-      if (error) throw error;
-
-      // If we have attached files, we need to handle them
-      if (transactionData.attached_files && transactionData.attached_files.length > 0) {
-        // Filter out pending files and keep only real uploaded files
-        const realFiles = transactionData.attached_files.filter(file => !file.isPending);
-        
-        if (realFiles.length > 0) {
-          // Update the transaction with the real files
-          const { error: updateError } = await supabase
-            .from("transactions")
-            .update({ attached_files: realFiles })
-            .eq('id', transaction.id);
-
-          if (updateError) {
-            console.error("Error updating transaction with files:", updateError);
-            // Don't throw here as the transaction was created successfully
-          }
-        }
+      if (error) {
+        console.error('Error creating transaction:', error);
+        throw error;
       }
 
+      console.log('Transaction created successfully:', transaction);
       return transaction;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
     },
+    onError: (error: any) => {
+      console.error('Transaction creation failed:', error);
+    }
   });
 };
 
