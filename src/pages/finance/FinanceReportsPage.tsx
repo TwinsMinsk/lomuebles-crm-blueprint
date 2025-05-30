@@ -178,7 +178,7 @@ const FinanceReportsPage = () => {
             <Card>
               <CardContent className="p-6 flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Выручка за период</p>
+                  <p className="text-sm text-muted-foreground">Прибыль за период</p>
                   {isLoading ? <div className="h-8 flex items-center">
                       <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                     </div> : <p className={`text-2xl font-bold ${financialSummary && financialSummary.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
