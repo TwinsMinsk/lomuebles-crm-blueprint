@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useOrdersFinancialSummary, OrdersFinancialFilters } from '@/hooks/finance/useOrdersFinancialSummary';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ResponsiveTable, ResponsiveRow, ResponsiveRowItem } from '@/components/ui/responsive-table';
+import { Loader2, RefreshCw, ChevronDown, ChevronUp, Filter } from 'lucide-react';
 
 interface OrdersFinancialReportProps {
   dateFrom: Date;
@@ -15,6 +17,9 @@ interface OrdersFinancialReportProps {
 }
 
 export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialReportProps) => {
+  const isMobile = useIsMobile();
+  const [filtersOpen, setFiltersOpen] = useState(!isMobile);
+  
   const [filters, setFilters] = useState<OrdersFinancialFilters>({
     dateFrom: format(dateFrom, 'yyyy-MM-dd'),
     dateTo: format(dateTo, 'yyyy-MM-dd'),
@@ -74,7 +79,7 @@ export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialRepor
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-muted-foreground">Общий доход</div>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-xl md:text-2xl font-bold text-green-600">
               {formatCurrency(totals.totalIncome)}
             </div>
           </CardContent>
@@ -83,7 +88,7 @@ export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialRepor
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-muted-foreground">Общие расходы</div>
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-xl md:text-2xl font-bold text-red-600">
               {formatCurrency(totals.totalExpenses)}
             </div>
           </CardContent>
@@ -92,62 +97,122 @@ export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialRepor
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-muted-foreground">Общая прибыль</div>
-            <div className={`text-2xl font-bold ${totals.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`text-xl md:text-2xl font-bold ${totals.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {formatCurrency(totals.totalProfit)}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* Collapsible Filters for Mobile */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-end">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">Тип заказа</label>
-              <Select 
-                value={filters.orderType || 'all'} 
-                onValueChange={(value) => handleFilterChange('orderType', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Все типы</SelectItem>
-                  <SelectItem value="Готовая мебель (Tilda)">Готовая мебель (Tilda)</SelectItem>
-                  <SelectItem value="Мебель на заказ">Мебель на заказ</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between md:hidden mb-4">
+                <span className="flex items-center">
+                  <Filter className="mr-2 h-4 w-4" />
+                  Фильтры
+                </span>
+                {filtersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </Button>
+            </CollapsibleTrigger>
             
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">Статус заказа</label>
-              <Select 
-                value={filters.orderStatus || 'all'} 
-                onValueChange={(value) => handleFilterChange('orderStatus', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Все статусы</SelectItem>
-                  <SelectItem value="Новый">Новый</SelectItem>
-                  <SelectItem value="В работе">В работе</SelectItem>
-                  <SelectItem value="Завершен">Завершен</SelectItem>
-                  <SelectItem value="Отменен">Отменен</SelectItem>
-                </SelectContent>
-              </Select>
+            <CollapsibleContent className="space-y-4 md:space-y-0">
+              <div className="flex flex-col md:flex-row gap-4 items-end">
+                <div className="flex-1 w-full">
+                  <label className="text-sm font-medium mb-2 block">Тип заказа</label>
+                  <Select 
+                    value={filters.orderType || 'all'} 
+                    onValueChange={(value) => handleFilterChange('orderType', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Все типы</SelectItem>
+                      <SelectItem value="Готовая мебель (Tilda)">Готовая мебель (Tilda)</SelectItem>
+                      <SelectItem value="Мебель на заказ">Мебель на заказ</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex-1 w-full">
+                  <label className="text-sm font-medium mb-2 block">Статус заказа</label>
+                  <Select 
+                    value={filters.orderStatus || 'all'} 
+                    onValueChange={(value) => handleFilterChange('orderStatus', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Все статусы</SelectItem>
+                      <SelectItem value="Новый">Новый</SelectItem>
+                      <SelectItem value="В работе">В работе</SelectItem>
+                      <SelectItem value="Завершен">Завершен</SelectItem>
+                      <SelectItem value="Отменен">Отменен</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <Button variant="outline" onClick={() => refetch()} disabled={isLoading} className="w-full md:w-auto">
+                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                  Обновить
+                </Button>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Always visible filters on desktop */}
+          <div className="hidden md:block">
+            <div className="flex flex-col md:flex-row gap-4 items-end">
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-2 block">Тип заказа</label>
+                <Select 
+                  value={filters.orderType || 'all'} 
+                  onValueChange={(value) => handleFilterChange('orderType', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все типы</SelectItem>
+                    <SelectItem value="Готовая мебель (Tilda)">Готовая мебель (Tilda)</SelectItem>
+                    <SelectItem value="Мебель на заказ">Мебель на заказ</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-2 block">Статус заказа</label>
+                <Select 
+                  value={filters.orderStatus || 'all'} 
+                  onValueChange={(value) => handleFilterChange('orderStatus', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все статусы</SelectItem>
+                    <SelectItem value="Новый">Новый</SelectItem>
+                    <SelectItem value="В работе">В работе</SelectItem>
+                    <SelectItem value="Завершен">Завершен</SelectItem>
+                    <SelectItem value="Отменен">Отменен</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                Обновить
+              </Button>
             </div>
-            
-            <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
-              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-              Обновить
-            </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Orders Table */}
+      {/* Responsive Orders Table */}
       <Card>
         <CardContent className="p-0">
           {isLoading ? (
@@ -159,61 +224,124 @@ export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialRepor
               Нет данных о заказах за выбранный период
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Номер заказа</TableHead>
-                    <TableHead>Название заказа</TableHead>
-                    <TableHead>Клиент</TableHead>
-                    <TableHead>Тип</TableHead>
-                    <TableHead>Статус</TableHead>
-                    <TableHead>Дата создания</TableHead>
-                    <TableHead>Дата закрытия</TableHead>
-                    <TableHead className="text-right">Доходы</TableHead>
-                    <TableHead className="text-right">Расходы</TableHead>
-                    <TableHead className="text-right">Прибыль</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {ordersData.map((order) => (
-                    <TableRow key={order.order_id}>
-                      <TableCell className="font-medium">{order.order_number}</TableCell>
-                      <TableCell>{order.order_name || '—'}</TableCell>
-                      <TableCell>{order.client_name || '—'}</TableCell>
-                      <TableCell>
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                          {order.order_type}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className={`text-xs px-2 py-1 rounded ${
-                          order.status === 'Завершен' ? 'bg-green-100 text-green-800' :
-                          order.status === 'В работе' ? 'bg-yellow-100 text-yellow-800' :
-                          order.status === 'Отменен' ? 'bg-red-100 text-red-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {order.status}
-                        </span>
-                      </TableCell>
-                      <TableCell>{formatDate(order.created_at)}</TableCell>
-                      <TableCell>{order.closing_date ? formatDate(order.closing_date) : '—'}</TableCell>
-                      <TableCell className="text-right font-medium text-green-600">
-                        {formatCurrency(order.total_income)}
-                      </TableCell>
-                      <TableCell className="text-right font-medium text-red-600">
-                        {formatCurrency(order.total_expenses)}
-                      </TableCell>
-                      <TableCell className={`text-right font-medium ${
-                        order.profit >= 0 ? 'text-green-600' : 'text-red-600'
+            <ResponsiveTable>
+              {/* Desktop Table Header */}
+              <thead className="hidden lg:table-header-group">
+                <tr className="border-b bg-gradient-to-r from-green-600 to-green-500">
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-white">Номер заказа</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-white">Название заказа</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-white">Клиент</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-white">Тип</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-white">Статус</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-white">Дата создания</th>
+                  <th className="h-12 px-4 text-left align-middle font-semibold text-white">Дата закрытия</th>
+                  <th className="h-12 px-4 text-right align-middle font-semibold text-white">Доходы</th>
+                  <th className="h-12 px-4 text-right align-middle font-semibold text-white">Расходы</th>
+                  <th className="h-12 px-4 text-right align-middle font-semibold text-white">Прибыль</th>
+                </tr>
+              </thead>
+              
+              <tbody className="hidden lg:table-row-group">
+                {ordersData.map((order) => (
+                  <tr key={order.order_id} className="border-b transition-colors hover:bg-muted/50">
+                    <td className="p-4 align-middle font-medium">{order.order_number}</td>
+                    <td className="p-4 align-middle">{order.order_name || '—'}</td>
+                    <td className="p-4 align-middle">{order.client_name || '—'}</td>
+                    <td className="p-4 align-middle">
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        {order.order_type}
+                      </span>
+                    </td>
+                    <td className="p-4 align-middle">
+                      <span className={`text-xs px-2 py-1 rounded ${
+                        order.status === 'Завершен' ? 'bg-green-100 text-green-800' :
+                        order.status === 'В работе' ? 'bg-yellow-100 text-yellow-800' :
+                        order.status === 'Отменен' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
                       }`}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="p-4 align-middle">{formatDate(order.created_at)}</td>
+                    <td className="p-4 align-middle">{order.closing_date ? formatDate(order.closing_date) : '—'}</td>
+                    <td className="p-4 align-middle text-right font-medium text-green-600">
+                      {formatCurrency(order.total_income)}
+                    </td>
+                    <td className="p-4 align-middle text-right font-medium text-red-600">
+                      {formatCurrency(order.total_expenses)}
+                    </td>
+                    <td className={`p-4 align-middle text-right font-medium ${
+                      order.profit >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {formatCurrency(order.profit)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+
+              {/* Mobile Cards */}
+              {ordersData.map((order) => (
+                <ResponsiveRow key={order.order_id}>
+                  <ResponsiveRowItem 
+                    label="Номер заказа" 
+                    value={<span className="font-medium">{order.order_number}</span>} 
+                  />
+                  <ResponsiveRowItem 
+                    label="Название заказа" 
+                    value={order.order_name || '—'} 
+                  />
+                  <ResponsiveRowItem 
+                    label="Клиент" 
+                    value={order.client_name || '—'} 
+                  />
+                  <ResponsiveRowItem 
+                    label="Тип" 
+                    value={
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        {order.order_type}
+                      </span>
+                    } 
+                  />
+                  <ResponsiveRowItem 
+                    label="Статус" 
+                    value={
+                      <span className={`text-xs px-2 py-1 rounded ${
+                        order.status === 'Завершен' ? 'bg-green-100 text-green-800' :
+                        order.status === 'В работе' ? 'bg-yellow-100 text-yellow-800' :
+                        order.status === 'Отменен' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {order.status}
+                      </span>
+                    } 
+                  />
+                  <ResponsiveRowItem 
+                    label="Дата создания" 
+                    value={formatDate(order.created_at)} 
+                  />
+                  <ResponsiveRowItem 
+                    label="Дата закрытия" 
+                    value={order.closing_date ? formatDate(order.closing_date) : '—'} 
+                  />
+                  <ResponsiveRowItem 
+                    label="Доходы" 
+                    value={<span className="font-medium text-green-600">{formatCurrency(order.total_income)}</span>} 
+                  />
+                  <ResponsiveRowItem 
+                    label="Расходы" 
+                    value={<span className="font-medium text-red-600">{formatCurrency(order.total_expenses)}</span>} 
+                  />
+                  <ResponsiveRowItem 
+                    label="Прибыль" 
+                    value={
+                      <span className={`font-medium ${order.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {formatCurrency(order.profit)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                      </span>
+                    } 
+                  />
+                </ResponsiveRow>
+              ))}
+            </ResponsiveTable>
           )}
         </CardContent>
       </Card>

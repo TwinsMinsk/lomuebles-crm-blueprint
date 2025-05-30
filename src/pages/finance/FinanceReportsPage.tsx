@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -134,13 +135,13 @@ const FinanceReportsPage = () => {
         </CardContent>
       </Card>
       
-      {/* Tabs for different reports */}
+      {/* Tabs for different reports - Made mobile responsive */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-6">
-          <TabsTrigger value="summary">Общая сводка</TabsTrigger>
-          <TabsTrigger value="expenses">Расходы по категориям</TabsTrigger>
-          <TabsTrigger value="income">Доходы по категориям</TabsTrigger>
-          <TabsTrigger value="orders">Отчет по заказам</TabsTrigger>
+        <TabsList className="mb-6 grid w-full grid-cols-2 lg:grid-cols-4">
+          <TabsTrigger value="summary" className="text-xs sm:text-sm">Общая сводка</TabsTrigger>
+          <TabsTrigger value="expenses" className="text-xs sm:text-sm">Расходы</TabsTrigger>
+          <TabsTrigger value="income" className="text-xs sm:text-sm">Доходы</TabsTrigger>
+          <TabsTrigger value="orders" className="text-xs sm:text-sm">Заказы</TabsTrigger>
         </TabsList>
         
         {/* Summary Tab */}
