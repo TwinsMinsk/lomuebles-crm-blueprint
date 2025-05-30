@@ -1,6 +1,7 @@
 
+
 import React, { useState } from 'react';
-import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useAuth } from '@/context/AuthContext';
 import { DateRangePicker } from '@/components/ui/date-picker';
@@ -24,8 +25,8 @@ const FinanceReportsPage = () => {
   } = useAuth();
   const isAdmin = userRole === 'Главный Администратор' || userRole === 'Администратор';
 
-  // Date range state
-  const [dateFrom, setDateFrom] = useState<Date>(startOfMonth(subMonths(new Date(), 5)));
+  // Date range state - default to current month
+  const [dateFrom, setDateFrom] = useState<Date>(startOfMonth(new Date()));
   const [dateTo, setDateTo] = useState<Date>(endOfMonth(new Date()));
   const [activeTab, setActiveTab] = useState<string>('summary');
 
@@ -104,6 +105,7 @@ const FinanceReportsPage = () => {
         <p>У вас нет прав для просмотра финансовой информации.</p>
       </div>;
   }
+
   return <div className="container mx-auto p-4 md:p-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
         <h1 className="text-2xl font-bold mb-4 sm:mb-0">Финансовые отчеты</h1>
@@ -379,3 +381,4 @@ const FinanceReportsPage = () => {
     </div>;
 };
 export default FinanceReportsPage;
+

@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -18,7 +19,7 @@ interface OrdersFinancialReportProps {
 
 export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialReportProps) => {
   const isMobile = useIsMobile();
-  const [filtersOpen, setFiltersOpen] = useState(true); // Always open by default
+  const [filtersOpen, setFiltersOpen] = useState(!isMobile); // Open by default on desktop, closed on mobile
   
   const [filters, setFilters] = useState<OrdersFinancialFilters>({
     dateFrom: format(dateFrom, 'yyyy-MM-dd'),
@@ -35,6 +36,11 @@ export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialRepor
       dateTo: format(dateTo, 'yyyy-MM-dd')
     }));
   }, [dateFrom, dateTo]);
+
+  // Update filters state when mobile state changes
+  React.useEffect(() => {
+    setFiltersOpen(!isMobile);
+  }, [isMobile]);
 
   const {
     data: ordersData = [],
@@ -108,9 +114,9 @@ export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialRepor
       <Card>
         <CardContent className="p-4">
           <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
-            {/* Show trigger button only on mobile */}
+            {/* Show trigger button on mobile, hide on desktop but show filters */}
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between lg:hidden mb-4">
+              <Button variant="ghost" className="w-full justify-between md:hidden mb-4">
                 <span className="flex items-center">
                   <Filter className="mr-2 h-4 w-4" />
                   Фильтры
@@ -307,3 +313,4 @@ export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialRepor
 };
 
 export default OrdersFinancialReport;
+
