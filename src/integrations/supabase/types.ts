@@ -1075,6 +1075,10 @@ export type Database = {
         Args: { date_from: string; date_to: string }
         Returns: Json
       }
+      get_task_related_details: {
+        Args: { p_task_id: number; p_user_id: string }
+        Returns: Json
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: string

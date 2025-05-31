@@ -13,6 +13,7 @@ import { Task } from "@/types/task";
 import { useTaskForm } from "@/hooks/tasks/useTaskForm";
 import { Loader2, Trash } from "lucide-react";
 import DeleteTaskDialog from "./DeleteTaskDialog";
+import { useAuth } from "@/context/AuthContext";
 
 interface TaskFormModalProps {
   open: boolean;
@@ -27,16 +28,24 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
 }) => {
   const isNewTask = !task?.task_id;
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const { userRole } = useAuth();
   
   // Debug the modal rendering
   useEffect(() => {
     console.log("TaskFormModal rendered", { isOpen: open, isNewTask });
   }, [open, isNewTask]);
 
+  // Check if we need to show related details (which makes the modal larger)
+  const shouldShowRelatedDetails = task?.task_id && (
+    userRole === 'Специалист' || 
+    userRole === 'Главный Администратор' || 
+    userRole === 'Администратор'
+  );
+
   return (
     <>
       <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className={`sm:max-w-[700px] max-h-[90vh] overflow-y-auto ${shouldShowRelatedDetails ? 'lg:max-w-[900px]' : ''}`}>
           <DialogHeader>
             <DialogTitle>
               {isNewTask ? "Создать новую задачу" : "Редактировать задачу"}
