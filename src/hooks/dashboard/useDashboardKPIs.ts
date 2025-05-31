@@ -4,11 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 
 export const useDashboardKPIs = () => {
-  const { userRole } = useAuth();
+  const { userRole, user } = useAuth();
   const isAdmin = userRole === 'Главный Администратор' || userRole === 'Администратор';
+  const isSpecialist = userRole && !isAdmin;
 
   return useQuery({
-    queryKey: ['dashboard-kpis', userRole],
+    queryKey: ['dashboard-kpis', userRole, user?.id],
     queryFn: async () => {
       const today = new Date().toISOString().split('T')[0];
       
@@ -52,18 +53,32 @@ export const useDashboardKPIs = () => {
         .select('*', { count: 'exact', head: true })
         .in('status', allActiveStatuses);
 
-      // Get today's tasks count
-      const { count: todaysTasksCount } = await supabase
+      // Build today's tasks query with role-based filtering
+      let todaysTasksQuery = supabase
         .from('tasks')
         .select('*', { count: 'exact', head: true })
         .eq('due_date', today);
 
-      // Get overdue tasks count
-      const { count: overdueTasksCount } = await supabase
+      // Filter by assigned user for specialists
+      if (isSpecialist && user?.id) {
+        todaysTasksQuery = todaysTasksQuery.eq('assigned_task_user_id', user.id);
+      }
+
+      const { count: todaysTasksCount } = await todaysTasksQuery;
+
+      // Build overdue tasks query with role-based filtering
+      let overdueTasksQuery = supabase
         .from('tasks')
         .select('*', { count: 'exact', head: true })
         .lt('due_date', today)
         .neq('task_status', 'Выполнена');
+
+      // Filter by assigned user for specialists
+      if (isSpecialist && user?.id) {
+        overdueTasksQuery = overdueTasksQuery.eq('assigned_task_user_id', user.id);
+      }
+
+      const { count: overdueTasksCount } = await overdueTasksQuery;
 
       return {
         newLeadsCount: newLeadsCount || 0,
@@ -72,6 +87,6 @@ export const useDashboardKPIs = () => {
         overdueTasksCount: overdueTasksCount || 0,
       };
     },
-    enabled: !!userRole,
+    enabled: !!userRole && !!user,
   });
 };
