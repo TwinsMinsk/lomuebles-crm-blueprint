@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -154,7 +153,7 @@ const ContactDetails: React.FC<{ contact: TaskRelatedContact }> = ({ contact }) 
           </div>
         )}
         
-        {!isSpecialist && contact.primary_phone && (
+        {contact.primary_phone && (
           <div className="flex items-center gap-2">
             <Phone className="h-4 w-4 text-gray-500" />
             <span>{contact.primary_phone}</span>
@@ -242,7 +241,7 @@ const LeadDetails: React.FC<{ lead: TaskRelatedLead }> = ({ lead }) => {
           </div>
         )}
         
-        {!isSpecialist && lead.phone && (
+        {lead.phone && (
           <div className="flex items-center gap-2">
             <Phone className="h-4 w-4 text-gray-500" />
             <span>{lead.phone}</span>
