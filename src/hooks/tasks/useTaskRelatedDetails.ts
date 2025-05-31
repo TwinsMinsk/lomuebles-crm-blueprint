@@ -27,7 +27,9 @@ export const useTaskRelatedDetails = (taskId: number | null | undefined) => {
       }
 
       console.log("Task related details fetched:", data);
-      return data as TaskRelatedDetailsResponse;
+      
+      // Convert the Json type to our expected interface through unknown
+      return data as unknown as TaskRelatedDetailsResponse;
     },
     enabled: !!taskId && !!user,
     staleTime: 5 * 60 * 1000, // 5 minutes
