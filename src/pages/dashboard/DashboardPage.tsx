@@ -36,7 +36,7 @@ const DashboardPage: React.FC = () => {
   const isAdmin = userRole === 'Главный Администратор' || userRole === 'Администратор';
   const isSpecialist = userRole === 'Замерщик' || userRole === 'Дизайнер' || userRole === 'Монтажник';
   
-  // Fetch KPIs
+  // Fetch KPIs (only for admins)
   const { 
     data: kpiData,
     isLoading: isLoadingKPIs,
@@ -57,37 +57,9 @@ const DashboardPage: React.FC = () => {
   };
 
   const renderKPICards = () => {
-    // For specialists, show only task-related KPI cards
+    // Don't show KPI cards for specialists
     if (isSpecialist) {
-      return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-          <ModernKPICard
-            title="Задачи на сегодня"
-            value={isLoadingKPIs ? "..." : (isErrorKPIs ? "Ошибка" : (kpiData?.todaysTasksCount || 0).toLocaleString())}
-            description="Мои задачи с дедлайном сегодня"
-            detailsLink="/tasks"
-            detailsLinkText="Все задачи"
-            icon={Calendar}
-            iconColor="text-white"
-            gradient="bg-green-500"
-            isDarkBackground={true}
-            loading={isLoadingKPIs}
-          />
-          
-          <ModernKPICard
-            title="Просроченные задачи"
-            value={isLoadingKPIs ? "..." : (isErrorKPIs ? "Ошибка" : (kpiData?.overdueTasksCount || 0).toLocaleString())}
-            description="Мои задачи с истекшим дедлайном"
-            detailsLink="/tasks"
-            detailsLinkText="Просмотреть"
-            icon={AlertTriangle}
-            iconColor="text-white"
-            gradient="bg-red-500"
-            isDarkBackground={true}
-            loading={isLoadingKPIs}
-          />
-        </div>
-      );
+      return null;
     }
 
     // For admins, show all KPI cards
@@ -465,7 +437,7 @@ const DashboardPage: React.FC = () => {
           <p className="text-gray-600">Добро пожаловать в lomuebles.es CRM</p>
         </div>
 
-        {/* KPI Cards */}
+        {/* KPI Cards - only for admins */}
         {renderKPICards()}
 
         {/* Main Content */}
@@ -484,7 +456,7 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
         ) : (
-          /* Single Column Layout for Non-Admin Users */
+          /* Single Column Layout for Non-Admin Users - just the tasks table */
           <div className="max-w-4xl mx-auto">
             {renderMyTasksSection()}
           </div>
