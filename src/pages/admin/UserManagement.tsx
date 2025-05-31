@@ -328,9 +328,7 @@ const UserManagement = () => {
                                 </SelectItem>
                                 <SelectItem value="Администратор">Администратор</SelectItem>
                                 <SelectItem value="Менеджер">Менеджер</SelectItem>
-                                <SelectItem value="Замерщик">Замерщик</SelectItem>
-                                <SelectItem value="Дизайнер">Дизайнер</SelectItem>
-                                <SelectItem value="Монтажник">Монтажник</SelectItem>
+                                <SelectItem value="Специалист">Специалист</SelectItem>
                               </SelectContent>
                             </Select>
                           </TableCell>
