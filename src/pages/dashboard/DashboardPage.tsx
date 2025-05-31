@@ -34,6 +34,7 @@ import {
 const DashboardPage: React.FC = () => {
   const { userRole, user } = useAuth();
   const isAdmin = userRole === 'Главный Администратор' || userRole === 'Администратор';
+  const isSpecialist = userRole === 'Специалист';
   
   // Fetch KPIs
   const { 
@@ -56,6 +57,40 @@ const DashboardPage: React.FC = () => {
   };
 
   const renderKPICards = () => {
+    if (isSpecialist) {
+      // Show only task-related KPIs for specialists
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+          <ModernKPICard
+            title="Мои задачи на сегодня"
+            value={isLoadingKPIs ? "..." : (isErrorKPIs ? "Ошибка" : (kpiData?.todaysTasksCount || 0).toLocaleString())}
+            description="Задачи с дедлайном сегодня"
+            detailsLink="/tasks"
+            detailsLinkText="Все задачи"
+            icon={Calendar}
+            iconColor="text-white"
+            gradient="bg-green-500"
+            isDarkBackground={true}
+            loading={isLoadingKPIs}
+          />
+          
+          <ModernKPICard
+            title="Мои просроченные задачи"
+            value={isLoadingKPIs ? "..." : (isErrorKPIs ? "Ошибка" : (kpiData?.overdueTasksCount || 0).toLocaleString())}
+            description="Задачи с истекшим дедлайном"
+            detailsLink="/tasks"
+            detailsLinkText="Просмотреть"
+            icon={AlertTriangle}
+            iconColor="text-white"
+            gradient="bg-red-500"
+            isDarkBackground={true}
+            loading={isLoadingKPIs}
+          />
+        </div>
+      );
+    }
+
+    // Show all KPIs for admins
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <ModernKPICard
