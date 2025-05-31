@@ -1,6 +1,8 @@
 
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { useFormContext } from "react-hook-form";
 import LeadSelector from "./related-entities/LeadSelector";
 import ContactSelector from "./related-entities/ContactSelector";
 import OrderSelector from "./related-entities/OrderSelector";
@@ -12,6 +14,7 @@ import SimplifiedOrderSelector from "./related-entities/SimplifiedOrderSelector"
 
 const RelatedEntitiesFields: React.FC = () => {
   const { userRole } = useAuth();
+  const { control } = useFormContext();
   
   const isSpecialist = userRole === 'Специалист';
 
@@ -28,11 +31,90 @@ const RelatedEntitiesFields: React.FC = () => {
           </>
         ) : (
           <>
-            <LeadSelector />
-            <ContactSelector />
-            <OrderSelector />
-            <PartnerSelector />
-            <CustomRequestSelector />
+            <FormField
+              control={control}
+              name="related_lead_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Связанный лид</FormLabel>
+                  <FormControl>
+                    <LeadSelector
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={control}
+              name="related_contact_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Связанный контакт</FormLabel>
+                  <FormControl>
+                    <ContactSelector
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={control}
+              name="related_order_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Связанный заказ</FormLabel>
+                  <FormControl>
+                    <OrderSelector
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={control}
+              name="related_partner_manufacturer_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Связанный партнер</FormLabel>
+                  <FormControl>
+                    <PartnerSelector
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={control}
+              name="related_custom_request_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Связанный запрос</FormLabel>
+                  <FormControl>
+                    <CustomRequestSelector
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </>
         )}
       </div>
