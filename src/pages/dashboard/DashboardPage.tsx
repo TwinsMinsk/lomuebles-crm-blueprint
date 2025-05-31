@@ -34,7 +34,11 @@ import {
 const DashboardPage: React.FC = () => {
   const { userRole, user } = useAuth();
   const isAdmin = userRole === 'Главный Администратор' || userRole === 'Администратор';
-  const isSpecialist = userRole === 'Замерщик' || userRole === 'Дизайнер' || userRole === 'Монтажник';
+  const isSpecialist = userRole === 'Замерщик' || userRole === 'Дизайнер' || userRole === 'Монтажник' || userRole === 'Специалист';
+  
+  console.log('DashboardPage: User role:', userRole);
+  console.log('DashboardPage: Is admin:', isAdmin);
+  console.log('DashboardPage: Is specialist:', isSpecialist);
   
   // Fetch KPIs (only for admins)
   const { 
@@ -59,9 +63,11 @@ const DashboardPage: React.FC = () => {
   const renderKPICards = () => {
     // Don't show KPI cards for specialists
     if (isSpecialist) {
+      console.log('DashboardPage: Hiding KPI cards for specialist role');
       return null;
     }
 
+    console.log('DashboardPage: Showing KPI cards for admin role');
     // For admins, show all KPI cards
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

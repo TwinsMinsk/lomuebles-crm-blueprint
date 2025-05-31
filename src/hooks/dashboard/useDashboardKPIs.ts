@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 export const useDashboardKPIs = () => {
   const { userRole, user } = useAuth();
   const isAdmin = userRole === 'Главный Администратор' || userRole === 'Администратор';
-  const isSpecialist = userRole === 'Замерщик' || userRole === 'Дизайнер' || userRole === 'Монтажник';
+  const isSpecialist = userRole === 'Замерщик' || userRole === 'Дизайнер' || userRole === 'Монтажник' || userRole === 'Специалист';
 
   return useQuery({
     queryKey: ['dashboard-kpis', userRole, user?.id],
