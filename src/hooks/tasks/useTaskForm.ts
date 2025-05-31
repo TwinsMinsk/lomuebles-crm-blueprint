@@ -13,7 +13,7 @@ export const useTaskForm = (
   initialData?: Task,
   onSuccess?: () => void
 ) => {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const queryClient = useQueryClient();
@@ -39,7 +39,8 @@ export const useTaskForm = (
         description: "",
         task_status: "Новая",
         priority: "Средний",
-        assigned_task_user_id: user?.id || "",
+        // For specialists, auto-assign to themselves
+        assigned_task_user_id: userRole === 'Специалист' ? (user?.id || "") : (user?.id || ""),
         // If initialData exists but doesn't have task_name (from calendar), parse the due_date
         due_date: initialData?.due_date ? new Date(initialData.due_date) : null,
       };
@@ -53,9 +54,22 @@ export const useTaskForm = (
   useEffect(() => {
     console.log("useTaskForm initialized", { 
       isEditing: !!initialData?.task_id,
-      defaultValues
+      defaultValues,
+      userRole,
+      userId: user?.id
     });
-  }, [initialData]);
+  }, [initialData, userRole, user?.id]);
+
+  // Ensure specialists always have themselves assigned
+  useEffect(() => {
+    if (userRole === 'Специалист' && user?.id) {
+      const currentAssigned = form.getValues('assigned_task_user_id');
+      if (!currentAssigned) {
+        console.log("Setting assigned_task_user_id for specialist:", user.id);
+        form.setValue('assigned_task_user_id', user.id);
+      }
+    }
+  }, [userRole, user?.id, form]);
 
   const onSubmit = async (data: TaskFormValues) => {
     console.log("onSubmit called with data:", data);
@@ -67,6 +81,9 @@ export const useTaskForm = (
 
     setIsLoading(true);
     try {
+      // Ensure assigned_task_user_id is set (fallback to current user)
+      const assignedUserId = data.assigned_task_user_id || user.id;
+      
       // Prepare task data and ensure types are correct
       const taskData = {
         ...data,
@@ -79,7 +96,7 @@ export const useTaskForm = (
           ? new Date().toISOString()
           : null,
         // Ensure required fields are present
-        assigned_task_user_id: data.assigned_task_user_id || user.id,
+        assigned_task_user_id: assignedUserId,
         task_name: data.task_name
       };
 
