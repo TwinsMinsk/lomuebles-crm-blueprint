@@ -1,6 +1,5 @@
 
 import React from "react";
-import { useFormContext } from "react-hook-form";
 import { useAuth } from "@/context/AuthContext";
 import LeadSelector from "./related-entities/LeadSelector";
 import ContactSelector from "./related-entities/ContactSelector";
@@ -12,16 +11,8 @@ import SimplifiedContactSelector from "./related-entities/SimplifiedContactSelec
 import SimplifiedOrderSelector from "./related-entities/SimplifiedOrderSelector";
 
 const RelatedEntitiesFields: React.FC = () => {
-  const { watch, setValue } = useFormContext();
   const { userRole } = useAuth();
   
-  // Get current values from form
-  const relatedOrderId = watch("related_order_id");
-  const relatedLeadId = watch("related_lead_id");
-  const relatedContactId = watch("related_contact_id");
-  const relatedPartnerId = watch("related_partner_manufacturer_id");
-  const relatedCustomRequestId = watch("related_custom_request_id");
-
   const isSpecialist = userRole === 'Специалист';
 
   return (
@@ -31,41 +22,17 @@ const RelatedEntitiesFields: React.FC = () => {
         {/* Use simplified selectors for specialists */}
         {isSpecialist ? (
           <>
-            <SimplifiedLeadSelector 
-              value={relatedLeadId} 
-              onChange={(value) => setValue("related_lead_id", value)} 
-            />
-            <SimplifiedContactSelector 
-              value={relatedContactId} 
-              onChange={(value) => setValue("related_contact_id", value)} 
-            />
-            <SimplifiedOrderSelector 
-              value={relatedOrderId} 
-              onChange={(value) => setValue("related_order_id", value)} 
-            />
+            <SimplifiedLeadSelector />
+            <SimplifiedContactSelector />
+            <SimplifiedOrderSelector />
           </>
         ) : (
           <>
-            <LeadSelector 
-              value={relatedLeadId} 
-              onChange={(value) => setValue("related_lead_id", value)} 
-            />
-            <ContactSelector 
-              value={relatedContactId} 
-              onChange={(value) => setValue("related_contact_id", value)} 
-            />
-            <OrderSelector 
-              value={relatedOrderId} 
-              onChange={(value) => setValue("related_order_id", value)} 
-            />
-            <PartnerSelector 
-              value={relatedPartnerId} 
-              onChange={(value) => setValue("related_partner_manufacturer_id", value)} 
-            />
-            <CustomRequestSelector 
-              value={relatedCustomRequestId} 
-              onChange={(value) => setValue("related_custom_request_id", value)} 
-            />
+            <LeadSelector />
+            <ContactSelector />
+            <OrderSelector />
+            <PartnerSelector />
+            <CustomRequestSelector />
           </>
         )}
       </div>

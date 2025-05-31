@@ -6,12 +6,7 @@ import { useFormContext } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-interface SimplifiedContactSelectorProps {
-  value?: number | null;
-  onChange: (value: number | null) => void;
-}
-
-const SimplifiedContactSelector: React.FC<SimplifiedContactSelectorProps> = ({ value, onChange }) => {
+const SimplifiedContactSelector: React.FC = () => {
   const { control } = useFormContext();
 
   const { data: contacts = [], isLoading } = useQuery({
@@ -40,8 +35,8 @@ const SimplifiedContactSelector: React.FC<SimplifiedContactSelectorProps> = ({ v
           <FormLabel>Связанный контакт</FormLabel>
           <FormControl>
             <Select
-              value={value?.toString() || ""}
-              onValueChange={(val) => onChange(val ? parseInt(val) : null)}
+              value={field.value?.toString() || ""}
+              onValueChange={(val) => field.onChange(val ? parseInt(val) : null)}
               disabled={isLoading}
             >
               <SelectTrigger>

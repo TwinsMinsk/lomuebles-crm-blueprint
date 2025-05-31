@@ -6,12 +6,7 @@ import { useFormContext } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-interface SimplifiedOrderSelectorProps {
-  value?: number | null;
-  onChange: (value: number | null) => void;
-}
-
-const SimplifiedOrderSelector: React.FC<SimplifiedOrderSelectorProps> = ({ value, onChange }) => {
+const SimplifiedOrderSelector: React.FC = () => {
   const { control } = useFormContext();
 
   const { data: orders = [], isLoading } = useQuery({
@@ -40,8 +35,8 @@ const SimplifiedOrderSelector: React.FC<SimplifiedOrderSelectorProps> = ({ value
           <FormLabel>Связанный заказ</FormLabel>
           <FormControl>
             <Select
-              value={value?.toString() || ""}
-              onValueChange={(val) => onChange(val ? parseInt(val) : null)}
+              value={field.value?.toString() || ""}
+              onValueChange={(val) => field.onChange(val ? parseInt(val) : null)}
               disabled={isLoading}
             >
               <SelectTrigger>
