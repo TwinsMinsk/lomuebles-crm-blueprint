@@ -10,8 +10,11 @@ import { useTasksState } from "@/hooks/tasks/useTasksState";
 import { PlusCircle, CheckSquare } from "lucide-react";
 import TaskFormModal from "./TaskFormModal";
 import { useTaskFormModal } from "@/hooks/tasks/useTaskFormModal";
+import { Task } from "@/types/task";
+import { useAuth } from "@/context/AuthContext";
 
 const TasksContent: React.FC = () => {
+  const { userRole } = useAuth();
   const {
     tasks,
     isLoading,
@@ -31,6 +34,18 @@ const TasksContent: React.FC = () => {
   } = useTasksState();
 
   const { isOpen, selectedTask, openModal, closeModal } = useTaskFormModal();
+
+  const handleTaskEdit = (task: Task) => {
+    openModal(task);
+  };
+
+  const handleCloseModal = () => {
+    closeModal();
+    refetch();
+  };
+
+  // Only show create button for admins and managers
+  const canCreateTasks = userRole !== 'Специалист';
 
   return (
     <div className="space-y-6">
@@ -52,12 +67,14 @@ const TasksContent: React.FC = () => {
                 Управление задачами и отслеживание их выполнения
               </p>
             </div>
-            <div className="hidden lg:block">
-              <Button onClick={() => openModal()} className="flex items-center gap-2">
-                <PlusCircle className="h-4 w-4" />
-                Новая задача
-              </Button>
-            </div>
+            {canCreateTasks && (
+              <div className="hidden lg:block">
+                <Button onClick={() => openModal()} className="flex items-center gap-2">
+                  <PlusCircle className="h-4 w-4" />
+                  Новая задача
+                </Button>
+              </div>
+            )}
           </div>
         </ModernCardHeader>
         <ModernCardContent className="p-0">
@@ -74,6 +91,7 @@ const TasksContent: React.FC = () => {
                 setSortDirection('asc');
               }
             }}
+            onTaskEdit={handleTaskEdit}
           />
         </ModernCardContent>
       </ModernCard>
@@ -88,21 +106,20 @@ const TasksContent: React.FC = () => {
         </div>
       )}
 
-      {/* Mobile FAB */}
-      <FloatingActionButton
-        onClick={() => openModal()}
-        icon={<PlusCircle className="h-6 w-6" />}
-        label="Новая задача"
-      />
+      {/* Mobile FAB - only for admins and managers */}
+      {canCreateTasks && (
+        <FloatingActionButton
+          onClick={() => openModal()}
+          icon={<PlusCircle className="h-6 w-6" />}
+          label="Новая задача"
+        />
+      )}
 
-      {/* Task Creation Modal */}
-      {isOpen && (
+      {/* Task Modal - only for admins and managers */}
+      {canCreateTasks && isOpen && (
         <TaskFormModal 
           open={isOpen} 
-          onClose={() => {
-            closeModal();
-            refetch();
-          }} 
+          onClose={handleCloseModal} 
           task={selectedTask} 
         />
       )}

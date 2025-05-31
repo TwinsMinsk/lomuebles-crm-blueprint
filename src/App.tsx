@@ -26,12 +26,25 @@ import OrdersPage from "./pages/orders/OrdersPage";
 import NewOrderPage from "./pages/orders/NewOrderPage";
 import OrderDetailPage from "./pages/orders/OrderDetailPage";
 import TaskDetailPage from "./pages/tasks/TaskDetailPage";
+import SpecialistTaskDetailPage from "./pages/tasks/SpecialistTaskDetailPage";
 import { NotificationToast } from "./components/notifications/NotificationToast";
+import { useAuth } from "./context/AuthContext";
 
 // Import Finance module pages
 import CategoriesPage from "./pages/finance/CategoriesPage";
 import TransactionsPage from "./pages/finance/TransactionsPage";
 import FinanceReportsPage from "./pages/finance/FinanceReportsPage";
+
+// Component for role-based task detail routing
+const TaskDetailRouter = () => {
+  const { userRole } = useAuth();
+  
+  if (userRole === 'Специалист') {
+    return <SpecialistTaskDetailPage />;
+  }
+  
+  return <TaskDetailPage />;
+};
 
 function App() {
   return (
@@ -64,7 +77,7 @@ function App() {
           <Route path="orders/:id" element={<OrderDetailPage />} />
           
           <Route path="tasks" element={<Tasks />} />
-          <Route path="tasks/:id" element={<TaskDetailPage />} />
+          <Route path="tasks/:id" element={<TaskDetailRouter />} />
           <Route path="calendar" element={<Calendar />} />
           <Route path="products" element={<Products />} />
           <Route path="suppliers" element={<Suppliers />} />

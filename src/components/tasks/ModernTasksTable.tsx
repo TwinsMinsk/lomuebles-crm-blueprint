@@ -9,6 +9,7 @@ import { ModernEmptyState } from "@/components/ui/modern-empty-state";
 import { CheckSquare, Calendar, User, AlertCircle, ExternalLink } from "lucide-react";
 import { formatDateInMadrid, formatDateTimeInMadrid } from "@/utils/timezone";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 interface ModernTasksTableProps {
   tasks: Task[];
@@ -16,7 +17,7 @@ interface ModernTasksTableProps {
   sortColumn?: string;
   sortDirection?: 'asc' | 'desc';
   onSort?: (column: string) => void;
-  onTaskClick?: (task: Task) => void;
+  onTaskEdit?: (task: Task) => void;
 }
 
 const ModernTasksTable: React.FC<ModernTasksTableProps> = ({
@@ -25,9 +26,10 @@ const ModernTasksTable: React.FC<ModernTasksTableProps> = ({
   sortColumn,
   sortDirection,
   onSort,
-  onTaskClick,
+  onTaskEdit,
 }) => {
   const navigate = useNavigate();
+  const { userRole } = useAuth();
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "—";
@@ -84,8 +86,14 @@ const ModernTasksTable: React.FC<ModernTasksTableProps> = ({
   };
 
   const handleTaskClick = (task: Task) => {
-    // Navigate to task detail page instead of opening modal
-    navigate(`/tasks/${task.task_id}`);
+    // Role-based navigation
+    if (userRole === 'Специалист') {
+      // Specialists go to dedicated detail page
+      navigate(`/tasks/${task.task_id}`);
+    } else {
+      // Admins and managers open modal for editing
+      onTaskEdit?.(task);
+    }
   };
 
   if (loading) {

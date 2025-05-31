@@ -1,17 +1,18 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, User, AlertCircle, FileText, Edit } from "lucide-react";
+import { ArrowLeft, Calendar, User, AlertCircle, FileText, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModernCard, ModernCardContent, ModernCardHeader, ModernCardTitle } from "@/components/ui/modern-card";
 import { ModernStatusBadge } from "@/components/ui/modern-status-badge";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { ModernEmptyState } from "@/components/ui/modern-empty-state";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
 import TaskRelatedDetails from "@/components/tasks/TaskRelatedDetails";
-import TaskFormModal from "@/components/tasks/TaskFormModal";
 import { useTaskById } from "@/hooks/tasks/useTaskById";
 import { formatDateTimeInMadrid } from "@/utils/timezone";
-import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,13 +22,21 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-const TaskDetailPage: React.FC = () => {
+const TASK_STATUSES = [
+  'Новая',
+  'В работе', 
+  'Завершена',
+  'Отменена'
+];
+
+const SpecialistTaskDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const taskId = id ? parseInt(id, 10) : null;
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
   const { data: task, isLoading, error, refetch } = useTaskById(taskId);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   const getPriorityColor = (priority: string | null) => {
     switch (priority) {
@@ -57,9 +66,39 @@ const TaskDetailPage: React.FC = () => {
     }
   };
 
-  const handleEditModalClose = () => {
-    setIsEditModalOpen(false);
-    refetch();
+  const handleStatusUpdate = async (newStatus: string) => {
+    if (!task || !taskId) return;
+    
+    setIsUpdatingStatus(true);
+    try {
+      const { error } = await supabase
+        .from('tasks')
+        .update({ 
+          task_status: newStatus,
+          completion_date: newStatus === 'Завершена' ? new Date().toISOString() : null
+        })
+        .eq('task_id', taskId);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Статус обновлен",
+        description: `Статус задачи изменен на "${newStatus}"`,
+      });
+
+      refetch();
+    } catch (error) {
+      console.error('Error updating task status:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось обновить статус задачи",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingStatus(false);
+    }
   };
 
   if (isLoading) {
@@ -98,24 +137,15 @@ const TaskDetailPage: React.FC = () => {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-2">
-        <Button
-          variant="outline"
-          onClick={() => navigate("/tasks")}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Назад к задачам
-        </Button>
-        <Button
-          onClick={() => setIsEditModalOpen(true)}
-          className="flex items-center gap-2"
-        >
-          <Edit className="h-4 w-4" />
-          Редактировать задачу
-        </Button>
-      </div>
+      {/* Back Button */}
+      <Button
+        variant="outline"
+        onClick={() => navigate("/tasks")}
+        className="flex items-center gap-2"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Назад к задачам
+      </Button>
 
       {/* Task Details Card */}
       <ModernCard>
@@ -126,19 +156,44 @@ const TaskDetailPage: React.FC = () => {
           </ModernCardTitle>
         </ModernCardHeader>
         <ModernCardContent className="space-y-6">
-          {/* Basic Info Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Status */}
-            <div className="space-y-2">
-              <span className="text-sm font-medium text-gray-700">Статус</span>
-              <div>
-                <ModernStatusBadge
-                  status={task.task_status}
-                  variant={getStatusColor(task.task_status)}
-                />
+          {/* Status Update Section */}
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex-1">
+                <span className="text-sm font-medium text-gray-700">Текущий статус:</span>
+                <div className="mt-1">
+                  <ModernStatusBadge
+                    status={task.task_status}
+                    variant={getStatusColor(task.task_status)}
+                  />
+                </div>
+              </div>
+              <div className="flex-1">
+                <span className="text-sm font-medium text-gray-700">Обновить статус:</span>
+                <div className="mt-1 flex gap-2">
+                  <Select
+                    value={task.task_status}
+                    onValueChange={handleStatusUpdate}
+                    disabled={isUpdatingStatus}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TASK_STATUSES.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
+          </div>
 
+          {/* Basic Info Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Priority */}
             {task.priority && (
               <div className="space-y-2">
@@ -168,17 +223,6 @@ const TaskDetailPage: React.FC = () => {
                 <span className="text-sm">{task.assigned_user_name || "Не назначен"}</span>
               </div>
             </div>
-
-            {/* Creator */}
-            {task.creator_user_name && (
-              <div className="space-y-2">
-                <span className="text-sm font-medium text-gray-700">Создал</span>
-                <div className="flex items-center gap-1">
-                  <User className="h-3 w-3 text-gray-400" />
-                  <span className="text-sm">{task.creator_user_name}</span>
-                </div>
-              </div>
-            )}
 
             {/* Due Date */}
             {task.due_date && (
@@ -226,17 +270,8 @@ const TaskDetailPage: React.FC = () => {
 
       {/* Related Details */}
       <TaskRelatedDetails taskId={task.task_id} />
-
-      {/* Edit Modal */}
-      {isEditModalOpen && task && (
-        <TaskFormModal 
-          open={isEditModalOpen} 
-          onClose={handleEditModalClose} 
-          task={task} 
-        />
-      )}
     </div>
   );
 };
 
-export default TaskDetailPage;
+export default SpecialistTaskDetailPage;
