@@ -6,6 +6,7 @@ import App from './App.tsx';
 import './index.css';
 import { AuthProvider } from './context/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { TaskFormProvider } from './context/TaskFormContext';
 import { Toaster } from '@/components/ui/sonner';
 
 const rootElement = document.getElementById("root");
@@ -29,8 +30,10 @@ createRoot(rootElement).render(
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <App />
-          <Toaster />
+          <TaskFormProvider>
+            <App />
+            <Toaster />
+          </TaskFormProvider>
         </AuthProvider>
       </QueryClientProvider>
     </BrowserRouter>

@@ -1,13 +1,12 @@
 
-import React, { useState } from "react";
+import React from "react";
 import CalendarFilters from "./CalendarFilters";
 import CalendarViewSelector from "./CalendarViewSelector";
 import CalendarComponent from "./CalendarComponent";
 import { useCalendarState } from "@/hooks/calendar/useCalendarState";
 import { useCalendarEvents } from "@/hooks/calendar/useCalendarEvents";
 import { convertTasksToEvents } from "./utils/taskToEventConverter";
-import TaskFormModal from "@/components/tasks/TaskFormModal";
-import { useTaskFormModal } from "@/hooks/tasks/useTaskFormModal";
+import { useTaskFormContext } from "@/context/TaskFormContext";
 
 const TasksCalendar: React.FC = () => {
   const { 
@@ -20,8 +19,8 @@ const TasksCalendar: React.FC = () => {
     handleEventDrop 
   } = useCalendarState();
   
-  const { isOpen, selectedTask, openModal, closeModal } = useTaskFormModal();
-  const { handleEventClick, handleDateClick } = useCalendarEvents(tasks, openModal);
+  const { openModal } = useTaskFormContext();
+  const { handleEventClick, handleDateClick } = useCalendarEvents(tasks);
 
   // Convert tasks to calendar events
   const events = convertTasksToEvents(tasks);
@@ -30,11 +29,6 @@ const TasksCalendar: React.FC = () => {
   const safeFilters = {
     assignedUserId: filters?.assignedUserId || null,
     taskStatus: filters?.taskStatus || null
-  };
-
-  const handleCloseModal = () => {
-    closeModal();
-    // No need to refetch here as the calendar will auto-update
   };
 
   return (
@@ -58,15 +52,6 @@ const TasksCalendar: React.FC = () => {
           onEventDrop={handleEventDrop}
         />
       </div>
-
-      {/* Task Modal */}
-      {isOpen && (
-        <TaskFormModal 
-          open={isOpen} 
-          onClose={handleCloseModal} 
-          task={selectedTask} 
-        />
-      )}
     </div>
   );
 };

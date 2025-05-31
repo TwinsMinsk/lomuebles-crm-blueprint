@@ -11,8 +11,10 @@ import { PlusCircle, CheckSquare } from "lucide-react";
 import TaskFormModal from "./TaskFormModal";
 import { useTaskFormModal } from "@/hooks/tasks/useTaskFormModal";
 import { Task } from "@/types/task";
+import { useAuth } from "@/context/AuthContext";
 
 const TasksContent: React.FC = () => {
+  const { userRole } = useAuth();
   const {
     tasks,
     isLoading,
@@ -42,6 +44,9 @@ const TasksContent: React.FC = () => {
     refetch();
   };
 
+  // Only show create button for admins and managers
+  const canCreateTasks = userRole !== 'Специалист';
+
   return (
     <div className="space-y-6">
       <CollapsibleTaskFilters 
@@ -62,12 +67,14 @@ const TasksContent: React.FC = () => {
                 Управление задачами и отслеживание их выполнения
               </p>
             </div>
-            <div className="hidden lg:block">
-              <Button onClick={() => openModal()} className="flex items-center gap-2">
-                <PlusCircle className="h-4 w-4" />
-                Новая задача
-              </Button>
-            </div>
+            {canCreateTasks && (
+              <div className="hidden lg:block">
+                <Button onClick={() => openModal()} className="flex items-center gap-2">
+                  <PlusCircle className="h-4 w-4" />
+                  Новая задача
+                </Button>
+              </div>
+            )}
           </div>
         </ModernCardHeader>
         <ModernCardContent className="p-0">
@@ -99,15 +106,17 @@ const TasksContent: React.FC = () => {
         </div>
       )}
 
-      {/* Mobile FAB */}
-      <FloatingActionButton
-        onClick={() => openModal()}
-        icon={<PlusCircle className="h-6 w-6" />}
-        label="Новая задача"
-      />
+      {/* Mobile FAB - only for admins and managers */}
+      {canCreateTasks && (
+        <FloatingActionButton
+          onClick={() => openModal()}
+          icon={<PlusCircle className="h-6 w-6" />}
+          label="Новая задача"
+        />
+      )}
 
-      {/* Task Modal */}
-      {isOpen && (
+      {/* Task Modal - only for admins and managers */}
+      {canCreateTasks && isOpen && (
         <TaskFormModal 
           open={isOpen} 
           onClose={handleCloseModal} 
