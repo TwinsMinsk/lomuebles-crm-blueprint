@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Task } from "@/types/task";
 import { ResponsiveTable, ResponsiveRow, ResponsiveRowItem } from "@/components/ui/responsive-table";
@@ -7,6 +8,7 @@ import { ModernStatusBadge } from "@/components/ui/modern-status-badge";
 import { ModernEmptyState } from "@/components/ui/modern-empty-state";
 import { CheckSquare, Calendar, User, AlertCircle, ExternalLink } from "lucide-react";
 import { formatDateInMadrid, formatDateTimeInMadrid } from "@/utils/timezone";
+import { useNavigate } from "react-router-dom";
 
 interface ModernTasksTableProps {
   tasks: Task[];
@@ -25,6 +27,8 @@ const ModernTasksTable: React.FC<ModernTasksTableProps> = ({
   onSort,
   onTaskClick,
 }) => {
+  const navigate = useNavigate();
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "—";
     return formatDateInMadrid(dateString);
@@ -79,6 +83,11 @@ const ModernTasksTable: React.FC<ModernTasksTableProps> = ({
     return null;
   };
 
+  const handleTaskClick = (task: Task) => {
+    // Navigate to task detail page instead of opening modal
+    navigate(`/tasks/${task.task_id}`);
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -127,15 +136,15 @@ const ModernTasksTable: React.FC<ModernTasksTableProps> = ({
           return (
             <ResponsiveRow
               key={task.task_id}
-              onClick={() => onTaskClick?.(task)}
-              className="group"
+              onClick={() => handleTaskClick(task)}
+              className="group cursor-pointer"
             >
               {/* Task Info */}
               <ResponsiveRowItem
                 label="Задача"
                 value={
                   <div className="space-y-2">
-                    <div className="font-medium text-gray-900">
+                    <div className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
                       {task.task_name}
                     </div>
                     {task.description && (

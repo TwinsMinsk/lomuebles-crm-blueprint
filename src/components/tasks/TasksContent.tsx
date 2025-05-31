@@ -74,7 +74,6 @@ const TasksContent: React.FC = () => {
                 setSortDirection('asc');
               }
             }}
-            onTaskClick={(task) => openModal(task)}
           />
         </ModernCardContent>
       </ModernCard>
@@ -96,6 +95,7 @@ const TasksContent: React.FC = () => {
         label="Новая задача"
       />
 
+      {/* Task Creation Modal */}
       {isOpen && (
         <TaskFormModal 
           open={isOpen} 

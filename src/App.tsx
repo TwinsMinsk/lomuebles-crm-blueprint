@@ -25,6 +25,7 @@ import ProfileSettings from "./pages/user/ProfileSettings";
 import OrdersPage from "./pages/orders/OrdersPage";
 import NewOrderPage from "./pages/orders/NewOrderPage";
 import OrderDetailPage from "./pages/orders/OrderDetailPage";
+import TaskDetailPage from "./pages/tasks/TaskDetailPage";
 import { NotificationToast } from "./components/notifications/NotificationToast";
 
 // Import Finance module pages
@@ -63,6 +64,7 @@ function App() {
           <Route path="orders/:id" element={<OrderDetailPage />} />
           
           <Route path="tasks" element={<Tasks />} />
+          <Route path="tasks/:id" element={<TaskDetailPage />} />
           <Route path="calendar" element={<Calendar />} />
           <Route path="products" element={<Products />} />
           <Route path="suppliers" element={<Suppliers />} />
