@@ -1,6 +1,3 @@
-
-
-
 import React, { useState } from 'react';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -121,7 +118,9 @@ const FinanceReportsPage = () => {
         <CardContent className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
             <div className="col-span-3 md:col-span-2">
-              <p className="text-sm font-medium mb-2">Выберите период для отчета:</p>
+              <p className="text-sm font-medium mb-2">
+                Выберите период для финансовых операций:
+              </p>
               <DateRangePicker dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={setDateFrom} onDateToChange={setDateTo} disabled={isLoading} />
             </div>
             <div className="col-span-3 md:col-span-1 text-right text-sm text-muted-foreground">
@@ -382,5 +381,3 @@ const FinanceReportsPage = () => {
     </div>;
 };
 export default FinanceReportsPage;
-
-

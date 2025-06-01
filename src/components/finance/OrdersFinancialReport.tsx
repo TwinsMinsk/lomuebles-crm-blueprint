@@ -1,5 +1,4 @@
 
-
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -10,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ResponsiveTable, ResponsiveRow, ResponsiveRowItem } from '@/components/ui/responsive-table';
-import { Loader2, RefreshCw, ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import { Loader2, RefreshCw, ChevronDown, ChevronUp, Filter, Info } from 'lucide-react';
 
 interface OrdersFinancialReportProps {
   dateFrom: Date;
@@ -80,6 +79,22 @@ export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialRepor
 
   return (
     <div className="space-y-6">
+      {/* Info Banner */}
+      <Card className="border-l-4 border-l-blue-500 bg-blue-50">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div className="text-sm text-blue-800">
+              <p className="font-medium mb-1">Фильтрация по финансовым операциям</p>
+              <p>
+                В отчете отображаются заказы, которые имеют финансовые операции (доходы или расходы) в выбранном периоде.
+                Суммы рассчитываются только для операций в указанном диапазоне дат.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
@@ -182,7 +197,10 @@ export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialRepor
             </div>
           ) : ordersData.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              Нет данных о заказах за выбранный период
+              <p className="text-lg font-medium mb-2">Нет данных о заказах за выбранный период</p>
+              <p className="text-sm">
+                Попробуйте изменить период или проверьте, есть ли финансовые операции в выбранном диапазоне дат
+              </p>
             </div>
           ) : (
             <ResponsiveTable>
@@ -196,9 +214,9 @@ export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialRepor
                   <th className="h-12 px-4 text-left align-middle font-semibold text-white">Статус</th>
                   <th className="h-12 px-4 text-left align-middle font-semibold text-white">Дата создания</th>
                   <th className="h-12 px-4 text-left align-middle font-semibold text-white">Дата закрытия</th>
-                  <th className="h-12 px-4 text-right align-middle font-semibold text-white">Доходы</th>
-                  <th className="h-12 px-4 text-right align-middle font-semibold text-white">Расходы</th>
-                  <th className="h-12 px-4 text-right align-middle font-semibold text-white">Прибыль</th>
+                  <th className="h-12 px-4 text-right align-middle font-semibold text-white">Доходы*</th>
+                  <th className="h-12 px-4 text-right align-middle font-semibold text-white">Расходы*</th>
+                  <th className="h-12 px-4 text-right align-middle font-semibold text-white">Прибыль*</th>
                 </tr>
               </thead>
               
@@ -286,15 +304,15 @@ export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialRepor
                       value={order.closing_date ? formatDate(order.closing_date) : '—'} 
                     />
                     <ResponsiveRowItem 
-                      label="Доходы" 
+                      label="Доходы*" 
                       value={<span className="font-medium text-green-600">{formatCurrency(order.total_income)}</span>} 
                     />
                     <ResponsiveRowItem 
-                      label="Расходы" 
+                      label="Расходы*" 
                       value={<span className="font-medium text-red-600">{formatCurrency(order.total_expenses)}</span>} 
                     />
                     <ResponsiveRowItem 
-                      label="Прибыль" 
+                      label="Прибыль*" 
                       value={
                         <span className={`font-medium ${order.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {formatCurrency(order.profit)}
@@ -306,6 +324,15 @@ export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialRepor
               </div>
             </ResponsiveTable>
           )}
+          
+          {/* Footer note about filtering */}
+          {ordersData.length > 0 && (
+            <div className="px-4 py-3 border-t bg-gray-50">
+              <p className="text-xs text-gray-600">
+                * Суммы рассчитаны только для финансовых операций в выбранном периоде
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -313,4 +340,3 @@ export const OrdersFinancialReport = ({ dateFrom, dateTo }: OrdersFinancialRepor
 };
 
 export default OrdersFinancialReport;
-
