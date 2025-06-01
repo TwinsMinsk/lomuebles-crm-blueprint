@@ -2,7 +2,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import { getTodayInMadrid } from "@/utils/timezone";
 
 export const useRecentLeads = () => {
   const { userRole } = useAuth();
@@ -11,16 +10,6 @@ export const useRecentLeads = () => {
   return useQuery({
     queryKey: ['recent-leads'],
     queryFn: async () => {
-      // Get recent leads from the last 7 days in Madrid timezone
-      const today = getTodayInMadrid();
-      const sevenDaysAgo = new Date(today.start);
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-      console.log('useRecentLeads: Date range in Madrid timezone:', {
-        from: sevenDaysAgo.toISOString(),
-        to: today.end.toISOString()
-      });
-
       const { data, error } = await supabase
         .from('leads')
         .select(`
@@ -31,7 +20,6 @@ export const useRecentLeads = () => {
           creation_date,
           assigned_user_id
         `)
-        .gte('creation_date', sevenDaysAgo.toISOString())
         .order('creation_date', { ascending: false })
         .limit(5);
 
@@ -71,16 +59,6 @@ export const useRecentOrders = () => {
   return useQuery({
     queryKey: ['recent-orders'],
     queryFn: async () => {
-      // Get recent orders from the last 7 days in Madrid timezone
-      const today = getTodayInMadrid();
-      const sevenDaysAgo = new Date(today.start);
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-      console.log('useRecentOrders: Date range in Madrid timezone:', {
-        from: sevenDaysAgo.toISOString(),
-        to: today.end.toISOString()
-      });
-
       const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -91,7 +69,6 @@ export const useRecentOrders = () => {
           created_at,
           client_contact_id
         `)
-        .gte('created_at', sevenDaysAgo.toISOString())
         .order('created_at', { ascending: false })
         .limit(5);
 

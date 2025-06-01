@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import { getMadridDayBoundaries } from "@/utils/timezone";
 
 export interface TransactionCategory {
   id: number;
@@ -46,7 +45,7 @@ export interface TransactionWithRelations extends Transaction {
   } | null;
   related_supplier?: {
     supplier_id: number;
-    supplier_name: string;
+    supplier_name: string; // Изменено с company_name на supplier_name
   } | null;
   related_partner_manufacturer?: {
     partner_manufacturer_id: number;
@@ -84,8 +83,6 @@ export interface TransactionFormData {
 
 export const fetchTransactions = async (filters?: TransactionsFilters): Promise<TransactionWithRelations[]> => {
   try {
-    console.log('fetchTransactions: Starting with filters:', filters);
-
     // Сначала получаем основные данные транзакций
     let query = supabase
       .from("transactions")
@@ -95,21 +92,13 @@ export const fetchTransactions = async (filters?: TransactionsFilters): Promise<
       `)
       .order('transaction_date', { ascending: false });
 
-    // Apply filters with Madrid timezone handling
+    // Применяем фильтры
     if (filters) {
       if (filters.dateFrom) {
-        const startDate = new Date(filters.dateFrom);
-        const startBoundaries = getMadridDayBoundaries(startDate);
-        const fromISO = startBoundaries.start.toISOString().split('T')[0];
-        query = query.gte('transaction_date', fromISO);
-        console.log('fetchTransactions: Applied dateFrom filter (Madrid):', fromISO);
+        query = query.gte('transaction_date', filters.dateFrom);
       }
       if (filters.dateTo) {
-        const endDate = new Date(filters.dateTo);
-        const endBoundaries = getMadridDayBoundaries(endDate);
-        const toISO = endBoundaries.end.toISOString().split('T')[0];
-        query = query.lte('transaction_date', toISO);
-        console.log('fetchTransactions: Applied dateTo filter (Madrid):', toISO);
+        query = query.lte('transaction_date', filters.dateTo);
       }
       if (filters.type && filters.type !== 'all') {
         query = query.eq('type', filters.type);
@@ -123,8 +112,6 @@ export const fetchTransactions = async (filters?: TransactionsFilters): Promise<
 
     if (transactionsError) throw transactionsError;
     if (!transactionsData || transactionsData.length === 0) return [];
-
-    console.log('fetchTransactions: Found transactions:', transactionsData.length);
 
     // Создаем массив для хранения результатов с отношениями
     const transactionsWithRelations: TransactionWithRelations[] = [];
@@ -191,7 +178,6 @@ export const fetchTransactions = async (filters?: TransactionsFilters): Promise<
       transactionsWithRelations.push(transactionWithRelations);
     }
 
-    console.log('fetchTransactions: Final result:', transactionsWithRelations.length, 'transactions');
     return transactionsWithRelations;
   } catch (error) {
     console.error("Error fetching transactions:", error);
@@ -265,20 +251,13 @@ export const useAddTransaction = () => {
         files: realFiles
       });
 
-      // Convert transaction date to proper format for Madrid timezone
-      let transactionDate: string;
-      if (transactionData.transaction_date instanceof Date) {
-        // Convert Madrid date to ISO date string
-        transactionDate = transactionData.transaction_date.toISOString().split('T')[0];
-      } else {
-        transactionDate = transactionData.transaction_date;
-      }
-
       // Create the transaction with the real files
       const { data: transaction, error } = await supabase
         .from("transactions")
         .insert({
-          transaction_date: transactionDate,
+          transaction_date: transactionData.transaction_date instanceof Date ? 
+            transactionData.transaction_date.toISOString().split('T')[0] : 
+            transactionData.transaction_date,
           type: transactionData.type,
           category_id: transactionData.category_id,
           amount: transactionData.amount,
@@ -290,7 +269,7 @@ export const useAddTransaction = () => {
           related_partner_manufacturer_id: transactionData.related_partner_manufacturer_id,
           related_user_id: transactionData.related_user_id,
           payment_method: transactionData.payment_method,
-          attached_files: realFiles,
+          attached_files: realFiles, // Store the real uploaded files
           creator_user_id: user.id
         })
         .select('id')

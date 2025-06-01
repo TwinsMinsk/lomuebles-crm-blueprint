@@ -1,7 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { getMadridDayBoundaries } from "@/utils/timezone";
 
 export interface OrderFinancialData {
   order_id: number;
@@ -28,41 +27,18 @@ export const fetchOrdersFinancialSummary = async (filters?: OrdersFinancialFilte
   try {
     console.log('fetchOrdersFinancialSummary: Starting with filters:', filters);
 
-    let fromISO: string | undefined;
-    let toISO: string | undefined;
-
-    // Convert date filters to Madrid timezone boundaries if provided
-    if (filters?.dateFrom || filters?.dateTo) {
-      if (filters.dateFrom) {
-        const startDate = new Date(filters.dateFrom);
-        const startBoundaries = getMadridDayBoundaries(startDate);
-        fromISO = startBoundaries.start.toISOString().split('T')[0];
-      }
-      
-      if (filters.dateTo) {
-        const endDate = new Date(filters.dateTo);
-        const endBoundaries = getMadridDayBoundaries(endDate);
-        toISO = endBoundaries.end.toISOString().split('T')[0];
-      }
-
-      console.log('fetchOrdersFinancialSummary: Madrid timezone date range:', {
-        original: { dateFrom: filters.dateFrom, dateTo: filters.dateTo },
-        madrid: { fromISO, toISO }
-      });
-    }
-
     // First, get all orders that have transactions within the date range
     let transactionQuery = supabase
       .from("transactions")
       .select("related_order_id")
       .not("related_order_id", "is", null);
 
-    // Apply date filters to transactions using Madrid timezone
-    if (fromISO) {
-      transactionQuery = transactionQuery.gte('transaction_date', fromISO);
+    // Apply date filters to transactions
+    if (filters?.dateFrom) {
+      transactionQuery = transactionQuery.gte('transaction_date', filters.dateFrom);
     }
-    if (toISO) {
-      transactionQuery = transactionQuery.lte('transaction_date', toISO);
+    if (filters?.dateTo) {
+      transactionQuery = transactionQuery.lte('transaction_date', filters.dateTo);
     }
 
     const { data: transactionOrderIds, error: transactionError } = await transactionQuery;
@@ -136,14 +112,14 @@ export const fetchOrdersFinancialSummary = async (filters?: OrdersFinancialFilte
         .eq("type", "expense")
         .eq("related_order_id", order.id);
 
-      // Apply date filters to both queries using Madrid timezone
-      if (fromISO) {
-        incomeQuery = incomeQuery.gte('transaction_date', fromISO);
-        expenseQuery = expenseQuery.gte('transaction_date', fromISO);
+      // Apply date filters to both queries
+      if (filters?.dateFrom) {
+        incomeQuery = incomeQuery.gte('transaction_date', filters.dateFrom);
+        expenseQuery = expenseQuery.gte('transaction_date', filters.dateFrom);
       }
-      if (toISO) {
-        incomeQuery = incomeQuery.lte('transaction_date', toISO);
-        expenseQuery = expenseQuery.lte('transaction_date', toISO);
+      if (filters?.dateTo) {
+        incomeQuery = incomeQuery.lte('transaction_date', filters.dateTo);
+        expenseQuery = expenseQuery.lte('transaction_date', filters.dateTo);
       }
 
       // Execute both queries

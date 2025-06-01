@@ -2,7 +2,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import { getTodayInMadrid } from "@/utils/timezone";
 
 interface TaskData {
   task_id: number;
@@ -17,54 +16,38 @@ interface TaskData {
 
 export const useMyTasks = () => {
   const { user, userRole } = useAuth();
-  const isSpecialist = userRole === 'Замерщик' || userRole === 'Дизайнер' || userRole === 'Монтажник' || userRole === 'Специалист';
+  const isAdmin = userRole === 'Главный Администратор' || userRole === 'Администратор';
 
   return useQuery({
     queryKey: ['my-tasks', user?.id],
     queryFn: async (): Promise<TaskData[]> => {
-      if (!user || !isSpecialist) return [];
+      if (!user?.id) return [];
 
-      const { data: tasks, error } = await supabase
+      const { data, error } = await supabase
         .from('tasks')
         .select(`
           task_id,
           task_name,
           task_status,
           priority,
-          due_date,
-          related_order_id,
-          related_contact_id,
-          related_lead_id
+          due_date
         `)
         .eq('assigned_task_user_id', user.id)
         .neq('task_status', 'Выполнена')
-        .neq('task_status', 'Отменена')
-        .order('due_date', { ascending: true, nullsFirst: false })
+        .order('due_date', { ascending: true })
         .limit(10);
 
       if (error) throw error;
 
-      // Get today's boundaries in Madrid timezone for overdue calculation
-      const todayBoundaries = getTodayInMadrid();
-      const todayStart = todayBoundaries.start;
-
-      return (tasks || []).map((task: any) => {
-        const isOverdue = task.due_date && new Date(task.due_date) < todayStart;
-        
-        return {
-          ...task,
-          isOverdue,
-          relatedEntityName: task.related_order_id 
-            ? `Заказ #${task.related_order_id}`
-            : task.related_contact_id 
-            ? `Контакт #${task.related_contact_id}`
-            : task.related_lead_id 
-            ? `Лид #${task.related_lead_id}`
-            : null
-        };
-      });
+      const today = new Date().toISOString().split('T')[0];
+      
+      return (data || []).map(task => ({
+        ...task,
+        isOverdue: task.due_date ? task.due_date < today : false,
+        relatedEntityName: '', // Will be populated separately if needed
+      }));
     },
-    enabled: !!user && isSpecialist,
+    enabled: !!user?.id && !isAdmin,
   });
 };
 
@@ -75,9 +58,7 @@ export const useAllTasks = () => {
   return useQuery({
     queryKey: ['all-tasks'],
     queryFn: async (): Promise<TaskData[]> => {
-      if (!isAdmin) return [];
-
-      const { data: tasks, error } = await supabase
+      const { data, error } = await supabase
         .from('tasks')
         .select(`
           task_id,
@@ -85,20 +66,16 @@ export const useAllTasks = () => {
           task_status,
           priority,
           due_date,
-          assigned_task_user_id,
-          related_order_id,
-          related_contact_id,
-          related_lead_id
+          assigned_task_user_id
         `)
         .neq('task_status', 'Выполнена')
-        .neq('task_status', 'Отменена')
-        .order('due_date', { ascending: true, nullsFirst: false })
+        .order('due_date', { ascending: true })
         .limit(10);
 
       if (error) throw error;
 
       // Get user names for assigned users
-      const userIds = [...new Set(tasks?.map(task => task.assigned_task_user_id).filter(Boolean))];
+      const userIds = [...new Set((data || []).map(task => task.assigned_task_user_id).filter(Boolean))];
       
       let userNames: Record<string, string> = {};
       if (userIds.length > 0) {
@@ -115,19 +92,14 @@ export const useAllTasks = () => {
         }
       }
 
-      // Get today's boundaries in Madrid timezone for overdue calculation
-      const todayBoundaries = getTodayInMadrid();
-      const todayStart = todayBoundaries.start;
-
-      return (tasks || []).map((task: any) => {
-        const isOverdue = task.due_date && new Date(task.due_date) < todayStart;
-        
-        return {
-          ...task,
-          isOverdue,
-          assignedUserName: task.assigned_task_user_id ? userNames[task.assigned_task_user_id] || 'Не назначен' : 'Не назначен'
-        };
-      });
+      const today = new Date().toISOString().split('T')[0];
+      
+      return (data || []).map(task => ({
+        ...task,
+        assignedUserName: userNames[task.assigned_task_user_id] || 'Не назначен',
+        isOverdue: task.due_date ? task.due_date < today : false,
+        relatedEntityName: '', // Will be populated separately if needed
+      }));
     },
     enabled: isAdmin,
   });

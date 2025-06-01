@@ -7,14 +7,8 @@ export const convertTasksToEvents = (tasks: Task[]) => {
     // Skip tasks without a due date
     if (!task.due_date) return null;
 
-    // Convert UTC due date to Madrid time for display in calendar
+    // Convert UTC due date to Madrid time for display
     const madridDueDate = toMadridTime(task.due_date);
-
-    console.log('convertTasksToEvents: Converting task due date', {
-      taskId: task.task_id,
-      originalDueDate: task.due_date,
-      madridDueDate: madridDueDate
-    });
 
     // Determine color based on priority
     let backgroundColor = "#3788d8"; // default blue
