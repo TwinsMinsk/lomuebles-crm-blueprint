@@ -1,6 +1,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { getMadridDayBoundaries } from "@/utils/timezone";
 
 export interface FinancialSummary {
   total_income: number;
@@ -14,100 +16,124 @@ export interface CategorySummary {
   total_amount: number;
 }
 
-// Get financial summary for a date range
+// Get financial summary for a date range (using Madrid timezone)
 export const fetchFinancialSummary = async (dateFrom: string, dateTo: string): Promise<FinancialSummary> => {
-  // Since we can't directly use RPC for get_financial_summary yet, let's use separate queries
+  // Convert date strings to Madrid timezone boundaries
+  const startDate = new Date(dateFrom);
+  const endDate = new Date(dateTo);
+  
+  const startBoundaries = getMadridDayBoundaries(startDate);
+  const endBoundaries = getMadridDayBoundaries(endDate);
+  
+  // Use the start of the first day and end of the last day
+  const fromISO = startBoundaries.start.toISOString().split('T')[0];
+  const toISO = endBoundaries.end.toISOString().split('T')[0];
+
+  console.log('fetchFinancialSummary: Date range in Madrid timezone:', {
+    original: { dateFrom, dateTo },
+    madrid: { fromISO, toISO }
+  });
+
+  // Get income data
   const { data: incomeData, error: incomeError } = await supabase
     .from("transactions")
     .select("amount")
     .eq("type", "income")
-    .gte("transaction_date", dateFrom)
-    .lte("transaction_date", dateTo);
+    .gte("transaction_date", fromISO)
+    .lte("transaction_date", toISO);
 
   if (incomeError) throw incomeError;
 
+  // Get expense data
   const { data: expenseData, error: expenseError } = await supabase
     .from("transactions")
     .select("amount")
     .eq("type", "expense")
-    .gte("transaction_date", dateFrom)
-    .lte("transaction_date", dateTo);
+    .gte("transaction_date", fromISO)
+    .lte("transaction_date", toISO);
 
   if (expenseError) throw expenseError;
 
   // Calculate totals
-  const totalIncome = incomeData.reduce((sum, item) => sum + Number(item.amount), 0);
-  const totalExpense = expenseData.reduce((sum, item) => sum + Number(item.amount), 0);
-  const profit = totalIncome - totalExpense;
+  const total_income = incomeData?.reduce((sum, item) => sum + Number(item.amount), 0) || 0;
+  const total_expense = expenseData?.reduce((sum, item) => sum + Number(item.amount), 0) || 0;
+  const profit = total_income - total_expense;
+
+  console.log('fetchFinancialSummary: Results:', { total_income, total_expense, profit });
 
   return {
-    total_income: totalIncome,
-    total_expense: totalExpense,
-    profit: profit
+    total_income,
+    total_expense,
+    profit
   };
 };
 
-// Hook for fetching financial summary
-export const useFinancialSummary = (dateFrom: string | null, dateTo: string | null) => {
-  return useQuery({
-    queryKey: ["financial_summary", dateFrom, dateTo],
-    queryFn: async () => {
-      if (!dateFrom || !dateTo) return null;
-      return await fetchFinancialSummary(dateFrom, dateTo);
-    },
-    enabled: !!dateFrom && !!dateTo,
-  });
-};
+// Get category summary for a date range and type (using Madrid timezone)
+export const fetchCategorySummary = async (dateFrom: string, dateTo: string, type: 'income' | 'expense'): Promise<CategorySummary[]> => {
+  // Convert date strings to Madrid timezone boundaries
+  const startDate = new Date(dateFrom);
+  const endDate = new Date(dateTo);
+  
+  const startBoundaries = getMadridDayBoundaries(startDate);
+  const endBoundaries = getMadridDayBoundaries(endDate);
+  
+  // Use the start of the first day and end of the last day
+  const fromISO = startBoundaries.start.toISOString().split('T')[0];
+  const toISO = endBoundaries.end.toISOString().split('T')[0];
 
-// Fetch expense categories summary
-export const fetchCategorySummary = async (
-  dateFrom: string, 
-  dateTo: string, 
-  type: "income" | "expense"
-) => {
+  console.log('fetchCategorySummary: Date range in Madrid timezone for', type, ':', {
+    original: { dateFrom, dateTo },
+    madrid: { fromISO, toISO }
+  });
+
   const { data, error } = await supabase
     .from("transactions")
     .select(`
-      category_id,
       amount,
-      category:transaction_categories!category_id(name)
+      category_id,
+      transaction_categories!category_id(id, name)
     `)
     .eq("type", type)
-    .gte("transaction_date", dateFrom)
-    .lte("transaction_date", dateTo);
+    .gte("transaction_date", fromISO)
+    .lte("transaction_date", toISO);
 
   if (error) throw error;
 
-  // Process data to group by category
-  const categorySummary: Record<number, CategorySummary> = {};
+  // Group by category and sum amounts
+  const categoryMap = new Map<number, { name: string; total: number }>();
   
-  data.forEach((item: any) => {
-    const categoryId = item.category_id;
-    if (!categorySummary[categoryId]) {
-      categorySummary[categoryId] = {
-        category_id: categoryId,
-        category_name: item.category?.name || 'Неизвестная категория',
-        total_amount: 0
-      };
+  data?.forEach((transaction: any) => {
+    const categoryId = transaction.category_id;
+    const categoryName = transaction.transaction_categories?.name || 'Без категории';
+    const amount = Number(transaction.amount);
+    
+    if (categoryMap.has(categoryId)) {
+      categoryMap.get(categoryId)!.total += amount;
+    } else {
+      categoryMap.set(categoryId, { name: categoryName, total: amount });
     }
-    categorySummary[categoryId].total_amount += Number(item.amount);
   });
 
-  return Object.values(categorySummary).sort((a, b) => b.total_amount - a.total_amount);
+  const result = Array.from(categoryMap.entries()).map(([categoryId, data]) => ({
+    category_id: categoryId,
+    category_name: data.name,
+    total_amount: data.total
+  }));
+
+  console.log('fetchCategorySummary: Results for', type, ':', result);
+  return result;
 };
 
-// Hook for fetching category summaries
-export const useCategorySummary = (
-  dateFrom: string | null, 
-  dateTo: string | null,
-  type: "income" | "expense"
-) => {
+export const useFinancialSummary = (dateFrom: string, dateTo: string) => {
   return useQuery({
-    queryKey: [`${type}_categories_summary`, dateFrom, dateTo],
-    queryFn: async () => {
-      if (!dateFrom || !dateTo) return [];
-      return await fetchCategorySummary(dateFrom, dateTo, type);
-    },
-    enabled: !!dateFrom && !!dateTo,
+    queryKey: ['financial_summary', dateFrom, dateTo],
+    queryFn: () => fetchFinancialSummary(dateFrom, dateTo),
+  });
+};
+
+export const useCategorySummary = (dateFrom: string, dateTo: string, type: 'income' | 'expense') => {
+  return useQuery({
+    queryKey: ['category_summary', dateFrom, dateTo, type],
+    queryFn: () => fetchCategorySummary(dateFrom, dateTo, type),
   });
 };
