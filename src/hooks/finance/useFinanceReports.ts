@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { formatInMadridTime } from "@/utils/timezone";
 
 export interface FinancialSummary {
   total_income: number;

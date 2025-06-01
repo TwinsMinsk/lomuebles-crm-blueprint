@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { ResponsiveTable, ResponsiveRow, ResponsiveRowItem } from "@/components/ui/responsive-table";
@@ -9,6 +8,7 @@ import { TransactionWithRelations } from "@/hooks/finance/useTransactions";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { ModernEmptyState } from "@/components/ui/modern-empty-state";
 import { TableHeader, TableHead, TableBody } from "@/components/ui/table";
+import { formatDateInMadrid } from "@/utils/timezone";
 
 interface ModernTransactionsTableProps {
   transactions: TransactionWithRelations[];
@@ -33,9 +33,9 @@ const ModernTransactionsTable: React.FC<ModernTransactionsTableProps> = ({
     }).format(amount);
   };
 
-  // Format date
+  // Format date using Madrid timezone utilities
   const formatDate = (date: string) => {
-    return format(new Date(date), 'dd.MM.yyyy');
+    return formatDateInMadrid(date);
   };
 
   // Get transaction display name for related entities

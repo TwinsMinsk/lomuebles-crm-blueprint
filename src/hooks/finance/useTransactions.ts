@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { formatInMadridTime } from "@/utils/timezone";
 
 export interface TransactionCategory {
   id: number;
@@ -251,13 +252,20 @@ export const useAddTransaction = () => {
         files: realFiles
       });
 
+      // Properly format the date for Madrid timezone
+      let formattedDate: string;
+      if (transactionData.transaction_date instanceof Date) {
+        // Format date in Madrid timezone to YYYY-MM-DD format for database storage
+        formattedDate = formatInMadridTime(transactionData.transaction_date, 'yyyy-MM-dd');
+      } else {
+        formattedDate = transactionData.transaction_date;
+      }
+
       // Create the transaction with the real files
       const { data: transaction, error } = await supabase
         .from("transactions")
         .insert({
-          transaction_date: transactionData.transaction_date instanceof Date ? 
-            transactionData.transaction_date.toISOString().split('T')[0] : 
-            transactionData.transaction_date,
+          transaction_date: formattedDate,
           type: transactionData.type,
           category_id: transactionData.category_id,
           amount: transactionData.amount,
@@ -299,9 +307,10 @@ export const useUpdateTransaction = () => {
     mutationFn: async ({ id, transactionData }: { id: string; transactionData: Partial<TransactionFormData> }) => {
       const updateData: any = { ...transactionData };
       
-      // Convert Date object to string format for the database
+      // Properly format the date for Madrid timezone
       if (updateData.transaction_date instanceof Date) {
-        updateData.transaction_date = updateData.transaction_date.toISOString().split('T')[0];
+        // Format date in Madrid timezone to YYYY-MM-DD format for database storage
+        updateData.transaction_date = formatInMadridTime(updateData.transaction_date, 'yyyy-MM-dd');
       }
       
       const { data, error } = await supabase
