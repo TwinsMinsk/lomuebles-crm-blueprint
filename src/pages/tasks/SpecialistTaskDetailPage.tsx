@@ -1,7 +1,9 @@
+
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, User, AlertCircle, FileText, Save } from "lucide-react";
+import { ArrowLeft, Calendar, User, AlertCircle, FileText, Save, Edit, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { ModernCard, ModernCardContent, ModernCardHeader, ModernCardTitle } from "@/components/ui/modern-card";
 import { ModernStatusBadge } from "@/components/ui/modern-status-badge";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
@@ -10,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast";
 import TaskRelatedDetails from "@/components/tasks/TaskRelatedDetails";
 import { useTaskById } from "@/hooks/tasks/useTaskById";
+import { useUpdateTask } from "@/hooks/tasks/useUpdateTask";
 import { formatDateTimeInMadrid } from "@/utils/timezone";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -35,7 +38,12 @@ const SpecialistTaskDetailPage: React.FC = () => {
   const taskId = id ? parseInt(id, 10) : null;
   
   const { data: task, isLoading, error, refetch } = useTaskById(taskId);
+  const updateTaskMutation = useUpdateTask();
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  
+  // State for editing description
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [editedDescription, setEditedDescription] = useState("");
 
   const getPriorityColor = (priority: string | null) => {
     switch (priority) {
@@ -108,6 +116,33 @@ const SpecialistTaskDetailPage: React.FC = () => {
     } finally {
       setIsUpdatingStatus(false);
     }
+  };
+
+  const handleEditDescription = () => {
+    setEditedDescription(task?.description || "");
+    setIsEditingDescription(true);
+  };
+
+  const handleSaveDescription = () => {
+    if (!task || !taskId) return;
+
+    updateTaskMutation.mutate(
+      { 
+        task_id: taskId, 
+        description: editedDescription 
+      },
+      {
+        onSuccess: () => {
+          setIsEditingDescription(false);
+          refetch();
+        }
+      }
+    );
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingDescription(false);
+    setEditedDescription("");
   };
 
   if (isLoading) {
@@ -265,15 +300,60 @@ const SpecialistTaskDetailPage: React.FC = () => {
             )}
           </div>
 
-          {/* Description */}
-          {task.description && (
-            <div className="space-y-2">
+          {/* Description Section with Edit Functionality */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-700">Описание</span>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600 whitespace-pre-wrap">{task.description}</p>
-              </div>
+              {!isEditingDescription && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEditDescription}
+                  className="flex items-center gap-1"
+                >
+                  <Edit className="h-3 w-3" />
+                  Редактировать
+                </Button>
+              )}
             </div>
-          )}
+            
+            {isEditingDescription ? (
+              <div className="space-y-3">
+                <Textarea
+                  value={editedDescription}
+                  onChange={(e) => setEditedDescription(e.target.value)}
+                  placeholder="Введите описание задачи..."
+                  className="min-h-[120px]"
+                  disabled={updateTaskMutation.isPending}
+                />
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleSaveDescription}
+                    disabled={updateTaskMutation.isPending}
+                    className="flex items-center gap-1"
+                  >
+                    <Save className="h-3 w-3" />
+                    {updateTaskMutation.isPending ? "Сохранение..." : "Сохранить"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleCancelEdit}
+                    disabled={updateTaskMutation.isPending}
+                    className="flex items-center gap-1"
+                  >
+                    <X className="h-3 w-3" />
+                    Отмена
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                  {task.description || "Описание отсутствует"}
+                </p>
+              </div>
+            )}
+          </div>
         </ModernCardContent>
       </ModernCard>
 
