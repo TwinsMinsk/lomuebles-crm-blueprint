@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, User, AlertCircle, FileText, Save } from "lucide-react";
@@ -25,7 +24,7 @@ import {
 const TASK_STATUSES = [
   'Новая',
   'В работе', 
-  'Завершена',
+  'Выполнена',  // Fixed: Changed from 'Завершена' to 'Выполнена'
   'Отменена'
 ];
 
@@ -53,7 +52,7 @@ const SpecialistTaskDetailPage: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Завершена':
+      case 'Выполнена':  // Fixed: Changed from 'Завершена' to 'Выполнена'
         return 'success';
       case 'В работе':
         return 'warning';
@@ -69,20 +68,30 @@ const SpecialistTaskDetailPage: React.FC = () => {
   const handleStatusUpdate = async (newStatus: string) => {
     if (!task || !taskId) return;
     
+    // Add debugging
+    console.log('Updating task status:', {
+      taskId,
+      currentStatus: task.task_status,
+      newStatus,
+      isCompleted: newStatus === 'Выполнена'
+    });
+    
     setIsUpdatingStatus(true);
     try {
       const { error } = await supabase
         .from('tasks')
         .update({ 
           task_status: newStatus,
-          completion_date: newStatus === 'Завершена' ? new Date().toISOString() : null
+          completion_date: newStatus === 'Выполнена' ? new Date().toISOString() : null  // Fixed: Changed from 'Завершена' to 'Выполнена'
         })
         .eq('task_id', taskId);
 
       if (error) {
+        console.error('Supabase error:', error);
         throw error;
       }
 
+      console.log('Task status updated successfully');
       toast({
         title: "Статус обновлен",
         description: `Статус задачи изменен на "${newStatus}"`,
