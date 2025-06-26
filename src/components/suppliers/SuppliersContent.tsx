@@ -73,6 +73,9 @@ const SuppliersContent = () => {
     }
   };
 
+  console.log('Suppliers data:', suppliers);
+  console.log('Suppliers count:', suppliers.length);
+
   return (
     <div className="space-y-6">
       <ModernCard variant="glass">

@@ -17,9 +17,11 @@ export const useSuppliers = ({
   category,
 }: UseSuppliersOptions) => {
   const fetchSuppliers = async () => {
+    console.log('Fetching suppliers with params:', { page, limit, searchQuery, category });
+    
     let query = supabase
       .from("suppliers")
-      .select("*", { count: "exact" });
+      .select("*, attached_files", { count: "exact" });
 
     // Apply filters
     if (searchQuery) {
@@ -42,8 +44,12 @@ export const useSuppliers = ({
       .range(from, to);
 
     if (error) {
+      console.error('Error fetching suppliers:', error);
       throw error;
     }
+
+    console.log('Fetched suppliers:', data);
+    console.log('Suppliers count:', count);
 
     return {
       suppliers: data as Supplier[],
