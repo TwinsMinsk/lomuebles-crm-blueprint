@@ -7,7 +7,8 @@ import { ResponsiveTable, ResponsiveRow, ResponsiveRowItem } from "@/components/
 import { Button } from "@/components/ui/button";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { ModernEmptyState } from "@/components/ui/modern-empty-state";
-import { Trash2, Phone, Mail, Globe, Package, Truck } from "lucide-react";
+import { Trash2, Phone, Mail, Globe, Package, Truck, FileText } from "lucide-react";
+import AttachedFilesDisplay from "@/components/common/AttachedFilesDisplay";
 
 interface ModernSuppliersTableProps {
   suppliers: Supplier[];
@@ -62,6 +63,7 @@ const ModernSuppliersTable: React.FC<ModernSuppliersTableProps> = ({
           <th className="text-left p-4 font-medium text-gray-700">Поставщик</th>
           <th className="text-left p-4 font-medium text-gray-700">Контактная информация</th>
           <th className="text-left p-4 font-medium text-gray-700">Категории товаров</th>
+          <th className="text-left p-4 font-medium text-gray-700">Файлы</th>
           <th className="text-left p-4 font-medium text-gray-700">Дата создания</th>
           <th className="w-[50px] p-4"></th>
         </tr>
@@ -134,6 +136,21 @@ const ModernSuppliersTable: React.FC<ModernSuppliersTableProps> = ({
                   </span>
                 </div>
               }
+            />
+
+            {/* Attached Files */}
+            <ResponsiveRowItem
+              label="Файлы"
+              value={
+                <div className="max-w-[200px]">
+                  <AttachedFilesDisplay 
+                    files={supplier.attached_files}
+                    maxDisplayCount={2}
+                    compact={true}
+                  />
+                </div>
+              }
+              fullWidth
             />
 
             {/* Creation Date */}
