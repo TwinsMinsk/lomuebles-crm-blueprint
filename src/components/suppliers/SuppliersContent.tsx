@@ -5,6 +5,7 @@ import ModernSuppliersTable from "./ModernSuppliersTable";
 import SupplierFilters from "./SupplierFilters";
 import SupplierFormModal from "./SupplierFormModal";
 import DeleteSupplierDialog from "./DeleteSupplierDialog";
+import TestDataButton from "./TestDataButton";
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
 import { Plus, Truck } from "lucide-react";
@@ -99,10 +100,15 @@ const SuppliersContent = () => {
           </div>
         </ModernCardHeader>
         <ModernCardContent>
-          <SupplierFilters 
-            filters={filters} 
-            setFilters={setFilters} 
-          />
+          <div className="space-y-4">
+            <SupplierFilters 
+              filters={filters} 
+              setFilters={setFilters} 
+            />
+            <div className="flex justify-center">
+              <TestDataButton onDataChanged={refetchSuppliers} />
+            </div>
+          </div>
         </ModernCardContent>
       </ModernCard>
 
