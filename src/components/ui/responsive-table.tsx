@@ -23,7 +23,7 @@ interface ResponsiveRowItemProps {
 
 const ResponsiveTable = React.forwardRef<HTMLDivElement, ResponsiveTableProps>(
   ({ children, className }, ref) => (
-    <div ref={ref} className={cn("w-full", className)}>
+    <div ref={ref} className={cn("space-y-4", className)}>
       {/* Desktop Table */}
       <div className="hidden lg:block">
         <div className="overflow-x-auto">
@@ -33,21 +33,20 @@ const ResponsiveTable = React.forwardRef<HTMLDivElement, ResponsiveTableProps>(
         </div>
       </div>
       
-      {/* Mobile Cards - will be rendered by individual ResponsiveRow components */}
+      {/* Mobile Cards */}
       <div className="lg:hidden space-y-3">
-        {/* Mobile cards are rendered individually by ResponsiveRow components */}
+        {children}
       </div>
     </div>
   )
 )
 ResponsiveTable.displayName = "ResponsiveTable"
 
-const ResponsiveRow = React.forwardRef<HTMLTableRowElement, ResponsiveRowProps>(
+const ResponsiveRow = React.forwardRef<HTMLDivElement, ResponsiveRowProps>(
   ({ children, onClick, className }, ref) => (
     <>
       {/* Desktop Row */}
       <tr 
-        ref={ref}
         className={cn(
           "hidden lg:table-row border-b transition-colors hover:bg-muted/50",
           onClick && "cursor-pointer",
@@ -60,39 +59,40 @@ const ResponsiveRow = React.forwardRef<HTMLTableRowElement, ResponsiveRowProps>(
       
       {/* Mobile Card */}
       <ModernCard 
+        ref={ref}
         className={cn(
-          "lg:hidden p-4 space-y-3 transition-all duration-200 mb-3",
+          "lg:hidden p-4 space-y-3 transition-all duration-200",
           onClick && "cursor-pointer hover:shadow-md"
         )}
         onClick={onClick}
         hover={!!onClick}
       >
-        <div className="space-y-3">
-          {children}
-        </div>
+        {children}
       </ModernCard>
     </>
   )
 )
 ResponsiveRow.displayName = "ResponsiveRow"
 
-const ResponsiveRowItem = React.forwardRef<HTMLTableCellElement, ResponsiveRowItemProps>(
+const ResponsiveRowItem = React.forwardRef<HTMLDivElement, ResponsiveRowItemProps>(
   ({ label, value, className, fullWidth = false }, ref) => (
     <>
       {/* Desktop Cell */}
-      <td ref={ref} className={cn("hidden lg:table-cell p-4 align-middle", className)}>
+      <td className={cn("hidden lg:table-cell p-4 align-middle", className)}>
         {value}
       </td>
       
       {/* Mobile Item */}
       <div 
+        ref={ref}
         className={cn(
-          "lg:hidden flex justify-between items-start gap-3",
-          fullWidth && "flex-col space-y-1"
+          "lg:hidden flex justify-between items-center",
+          fullWidth && "flex-col items-start space-y-1",
+          className
         )}
       >
-        <span className="text-sm font-medium text-gray-600 min-w-[120px]">{label}:</span>
-        <div className={cn("flex-1", fullWidth ? "w-full" : "text-right")}>{value}</div>
+        <span className="text-sm font-medium text-gray-600">{label}:</span>
+        <div className="flex-1 text-right lg:text-left">{value}</div>
       </div>
     </>
   )

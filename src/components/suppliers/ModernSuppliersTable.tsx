@@ -7,7 +7,7 @@ import { ResponsiveTable, ResponsiveRow, ResponsiveRowItem } from "@/components/
 import { Button } from "@/components/ui/button";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { ModernEmptyState } from "@/components/ui/modern-empty-state";
-import { Trash2, Phone, Mail, Globe, Package, Truck } from "lucide-react";
+import { Trash2, Phone, Mail, Globe, Package, Truck, FileText } from "lucide-react";
 import AttachedFilesDisplay from "@/components/common/AttachedFilesDisplay";
 
 interface ModernSuppliersTableProps {
@@ -114,15 +114,7 @@ const ModernSuppliersTable: React.FC<ModernSuppliersTableProps> = ({
                   {supplier.website && (
                     <div className="flex items-center gap-1 text-sm">
                       <Globe className="h-3 w-3 text-gray-400" />
-                      <a 
-                        href={supplier.website.startsWith('http') ? supplier.website : `https://${supplier.website}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {supplier.website}
-                      </a>
+                      {supplier.website}
                     </div>
                   )}
                   {!supplier.phone && !supplier.email && !supplier.website && (
