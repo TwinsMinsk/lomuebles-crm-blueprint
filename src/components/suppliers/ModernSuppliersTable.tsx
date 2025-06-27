@@ -61,7 +61,7 @@ const ModernSuppliersTable: React.FC<ModernSuppliersTableProps> = ({
       <thead className="hidden lg:table-header-group">
         <tr className="border-b bg-gray-50/50">
           <th className="text-left p-4 font-medium text-gray-700">Поставщик</th>
-          <th className="text-left p-4 font-medium text-gray-700">Контактная информация</th>
+          <th className="text-left p-4 font-medium text-gray-700 w-48">Контактная информация</th>
           <th className="text-left p-4 font-medium text-gray-700">Категории товаров</th>
           <th className="text-left p-4 font-medium text-gray-700">Файлы</th>
           <th className="text-left p-4 font-medium text-gray-700">Дата создания</th>
@@ -98,23 +98,23 @@ const ModernSuppliersTable: React.FC<ModernSuppliersTableProps> = ({
             <ResponsiveRowItem
               label="Контактная информация"
               value={
-                <div className="space-y-1">
+                <div className="space-y-1 max-w-[200px]">
                   {supplier.phone && (
                     <div className="flex items-center gap-1 text-sm">
-                      <Phone className="h-3 w-3 text-gray-400" />
-                      {supplier.phone}
+                      <Phone className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                      <span className="truncate">{supplier.phone}</span>
                     </div>
                   )}
                   {supplier.email && (
                     <div className="flex items-center gap-1 text-sm">
-                      <Mail className="h-3 w-3 text-gray-400" />
-                      {supplier.email}
+                      <Mail className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                      <span className="truncate">{supplier.email}</span>
                     </div>
                   )}
                   {supplier.website && (
                     <div className="flex items-center gap-1 text-sm">
-                      <Globe className="h-3 w-3 text-gray-400" />
-                      {supplier.website}
+                      <Globe className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                      <span className="truncate">{supplier.website}</span>
                     </div>
                   )}
                   {!supplier.phone && !supplier.email && !supplier.website && (
@@ -122,6 +122,7 @@ const ModernSuppliersTable: React.FC<ModernSuppliersTableProps> = ({
                   )}
                 </div>
               }
+              className="w-48"
               fullWidth
             />
 
