@@ -31,6 +31,27 @@ export function useTasks() {
         dueDateTo
       } = filters;
       
+      // Improved filter logic: Use OR condition when both assignedToMe and createdByMe are true
+      // This ensures we show tasks that are either assigned to the user OR created by them
+      let finalAssignedToMe = assignedToMe || false;
+      let finalCreatedByMe = createdByMe || false;
+      let finalAssignedUserId = assignedUserId || null;
+      
+      // If a specific user is selected, override the me filters
+      if (assignedUserId && assignedUserId !== 'my' && assignedUserId !== 'all') {
+        finalAssignedUserId = assignedUserId;
+        finalAssignedToMe = false;
+        finalCreatedByMe = false;
+      } else if (assignedUserId === 'my') {
+        finalAssignedToMe = true;
+        finalCreatedByMe = false;
+        finalAssignedUserId = null;
+      } else if (assignedUserId === 'all') {
+        finalAssignedToMe = false;
+        finalCreatedByMe = false;
+        finalAssignedUserId = null;
+      }
+      
       // Call the updated RPC function
       const { data, error } = await supabase.rpc('get_tasks_with_custom_sort', {
         p_page: page,
@@ -41,17 +62,27 @@ export function useTasks() {
         p_task_status: taskStatus || null,
         p_task_type: taskType || null,
         p_priority: priority || null,
-        p_assigned_user_id: assignedUserId || null,
-        p_assigned_to_me: assignedToMe || false,
-        p_created_by_me: createdByMe || false,
+        p_assigned_user_id: finalAssignedUserId,
+        p_assigned_to_me: finalAssignedToMe,
+        p_created_by_me: finalCreatedByMe,
         p_due_date_from: dueDateFrom ? format(dueDateFrom, 'yyyy-MM-dd') : null,
         p_due_date_to: dueDateTo ? format(dueDateTo, 'yyyy-MM-dd') : null,
         p_current_user_id: user?.id || null
       });
       
       if (error) {
+        console.error("RPC function error:", error);
         throw new Error(error.message);
       }
+      
+      console.log("Fetched tasks data:", data);
+      console.log("Applied filters:", {
+        finalAssignedToMe,
+        finalCreatedByMe,
+        finalAssignedUserId,
+        taskStatus,
+        search
+      });
       
       // Set total count from the first row (all rows have the same total_count)
       if (data && data.length > 0) {
@@ -90,6 +121,7 @@ export function useTasks() {
         creator_user_name: task.creator_user_name
       }));
       
+      console.log("Processed tasks count:", processedTasks.length);
       return processedTasks;
     } catch (error) {
       console.error("Error fetching tasks:", error);

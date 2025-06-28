@@ -1,116 +1,159 @@
 
-import { useState, useCallback } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useState } from "react";
 import { TaskFiltersType } from "@/types/task";
+import { DateRange } from "react-day-picker";
+import { addDays, startOfDay, endOfDay } from "date-fns";
+import { useAuth } from "@/context/AuthContext";
 
 export function useTaskFilters(
-  initialFilters: TaskFiltersType,
+  filters: TaskFiltersType,
   setFilters: (filters: TaskFiltersType) => void
 ) {
-  const { user } = useAuth();
-  const [dateRange, setDateRange] = useState<{ from: Date | null; to: Date | null }>({
-    from: null,
-    to: null,
-  });
+  const { userRole } = useAuth();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
-  // Handler for filter changes
-  const handleFilterChange = useCallback((key: keyof TaskFiltersType, value: any) => {
-    setFilters({ ...initialFilters, [key]: value });
-  }, [initialFilters, setFilters]);
+  const handleFilterChange = (key: keyof TaskFiltersType, value: any) => {
+    setFilters({
+      ...filters,
+      [key]: value,
+    });
+  };
 
-  // Handler for date range filter
-  const handleDateRangeSelect = useCallback((range: { from: Date | null; to: Date | null }) => {
+  const handleDateRangeSelect = (range: DateRange | undefined) => {
     setDateRange(range);
-    if (range.from) {
-      const updatedFilters = { ...initialFilters };
-      updatedFilters.dueDateFrom = range.from;
-      updatedFilters.dueDateTo = range.to || range.from;
-      setFilters(updatedFilters);
+    if (range?.from && range?.to) {
+      setFilters({
+        ...filters,
+        dueDateFrom: startOfDay(range.from),
+        dueDateTo: endOfDay(range.to),
+        dueDateRange: null,
+      });
+    } else if (range?.from && !range?.to) {
+      setFilters({
+        ...filters,
+        dueDateFrom: startOfDay(range.from),
+        dueDateTo: null,
+        dueDateRange: null,
+      });
+    } else {
+      setFilters({
+        ...filters,
+        dueDateFrom: null,
+        dueDateTo: null,
+        dueDateRange: null,
+      });
     }
-  }, [initialFilters, setFilters]);
+  };
 
-  // Handler for predefined date ranges
-  const handlePredefinedDateRange = useCallback((rangeType: string) => {
-    const now = new Date();
-    let fromDate: Date | null = null;
-    let toDate: Date | null = null;
+  const handlePredefinedDateRange = (rangeType: string) => {
+    const today = new Date();
+    let from: Date, to: Date;
 
     switch (rangeType) {
-      case 'overdue':
-        toDate = new Date(now.setHours(0, 0, 0, 0));
-        toDate.setDate(toDate.getDate() - 1);
+      case "today":
+        from = to = today;
         break;
-      case 'today':
-        fromDate = new Date(now.setHours(0, 0, 0, 0));
-        toDate = new Date(now.setHours(23, 59, 59, 999));
+      case "tomorrow":
+        from = to = addDays(today, 1);
         break;
-      case 'thisWeek':
-        fromDate = new Date(now);
-        const dayOfWeek = fromDate.getDay();
-        const diff = fromDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // adjust when day is Sunday
-        fromDate = new Date(fromDate.setDate(diff));
-        fromDate.setHours(0, 0, 0, 0);
-        toDate = new Date(fromDate);
-        toDate.setDate(toDate.getDate() + 6);
-        toDate.setHours(23, 59, 59, 999);
+      case "week":
+        from = today;
+        to = addDays(today, 7);
         break;
-      case 'thisMonth':
-        fromDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        toDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      case "month":
+        from = today;
+        to = addDays(today, 30);
         break;
-      case 'all':
-        fromDate = null;
-        toDate = null;
-        break;
+      default:
+        setFilters({
+          ...filters,
+          dueDateFrom: null,
+          dueDateTo: null,
+          dueDateRange: null,
+        });
+        setDateRange(undefined);
+        return;
     }
 
-    setDateRange({ from: fromDate, to: toDate });
-    handleFilterChange('dueDateFrom', fromDate);
-    handleFilterChange('dueDateTo', toDate);
-    handleFilterChange('dueDateRange', rangeType);
-  }, [handleFilterChange]);
+    const range = { from: startOfDay(from), to: endOfDay(to) };
+    setDateRange(range);
+    setFilters({
+      ...filters,
+      dueDateFrom: range.from,
+      dueDateTo: range.to,
+      dueDateRange: rangeType,
+    });
+  };
 
-  // Handler for assigned user filter
-  const handleUserFilterChange = useCallback((value: string) => {
-    if (value === "all") {
-      handleFilterChange("assignedUserId", null);
-      handleFilterChange("assignedToMe", false);
-    } else if (value === "my") {
-      handleFilterChange("assignedUserId", user?.id || null);
-      handleFilterChange("assignedToMe", true);
-    } else {
-      handleFilterChange("assignedUserId", value);
-      handleFilterChange("assignedToMe", false);
-    }
-  }, [handleFilterChange, user]);
-
-  // Handler for task view change
-  const handleTaskViewChange = useCallback((view: string) => {
-    if (view === "my") {
+  const handleUserFilterChange = (value: string) => {
+    if (value === "my") {
       setFilters({
-        ...initialFilters,
+        ...filters,
         assignedToMe: true,
-        createdByMe: true,
-        viewType: "my",
+        createdByMe: false,
+        assignedUserId: null,
       });
-    } else if (view === "all") {
+    } else if (value === "all") {
       setFilters({
-        ...initialFilters,
+        ...filters,
         assignedToMe: false,
         createdByMe: false,
-        viewType: "all",
+        assignedUserId: null,
+      });
+    } else {
+      // Specific user selected
+      setFilters({
+        ...filters,
+        assignedToMe: false,
+        createdByMe: false,
+        assignedUserId: value,
       });
     }
-  }, [initialFilters, setFilters]);
+  };
 
-  const applyFilters = useCallback(() => {
-    // This function would trigger the refetch if needed
-    // Currently, filters are applied reactively
-  }, []);
+  const handleTaskViewChange = (viewType: "my" | "all") => {
+    if (viewType === "my") {
+      setFilters({
+        ...filters,
+        viewType: "my",
+        assignedToMe: true,
+        createdByMe: false,
+        assignedUserId: null,
+      });
+    } else {
+      setFilters({
+        ...filters,
+        viewType: "all",
+        assignedToMe: false,
+        createdByMe: false,
+        assignedUserId: null,
+      });
+    }
+  };
 
-  const resetFiltersFunc = useCallback(() => {
-    setDateRange({ from: null, to: null });
-  }, []);
+  const applyFilters = () => {
+    // Filters are already applied in real-time, this is just for UI feedback
+    console.log("Filters applied:", filters);
+  };
+
+  const resetFiltersFunc = () => {
+    const isAdmin = userRole === "Главный Администратор" || userRole === "Администратор";
+    
+    setDateRange(undefined);
+    setFilters({
+      search: null,
+      taskStatus: null,
+      taskType: null,
+      priority: null,
+      assignedToMe: isAdmin ? false : true,
+      createdByMe: false,
+      viewType: isAdmin ? "all" : "my",
+      assignedUserId: null,
+      dueDateFrom: null,
+      dueDateTo: null,
+      dueDateRange: null,
+    });
+  };
 
   return {
     dateRange,
@@ -120,6 +163,6 @@ export function useTaskFilters(
     handleUserFilterChange,
     handleTaskViewChange,
     applyFilters,
-    resetFiltersFunc
+    resetFiltersFunc,
   };
 }

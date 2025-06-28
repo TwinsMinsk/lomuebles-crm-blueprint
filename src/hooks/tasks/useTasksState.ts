@@ -16,8 +16,8 @@ export function useTasksState() {
     taskStatus: null,
     taskType: null,
     priority: null,
-    assignedToMe: true,
-    createdByMe: true,
+    assignedToMe: false,
+    createdByMe: false,
     viewType: "my",
     assignedUserId: null,
     dueDateFrom: null,
@@ -25,8 +25,33 @@ export function useTasksState() {
     dueDateRange: null,
   });
 
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const { fetchTasks, totalCount } = useTasks();
+
+  // Set default filters based on user role
+  useEffect(() => {
+    if (user && userRole) {
+      const isAdmin = userRole === "Главный Администратор" || userRole === "Администратор";
+      
+      if (isAdmin) {
+        // Admins see all tasks by default
+        setFilters(prev => ({
+          ...prev,
+          assignedToMe: false,
+          createdByMe: false,
+          viewType: "all"
+        }));
+      } else {
+        // Non-admins see tasks assigned to them by default
+        setFilters(prev => ({
+          ...prev,
+          assignedToMe: true,
+          createdByMe: false,
+          viewType: "my"
+        }));
+      }
+    }
+  }, [user, userRole]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -56,14 +81,16 @@ export function useTasksState() {
 
   // Reset filters
   const resetFilters = () => {
+    const isAdmin = userRole === "Главный Администратор" || userRole === "Администратор";
+    
     setFilters({
       search: null,
       taskStatus: null,
       taskType: null,
       priority: null,
-      assignedToMe: true,
-      createdByMe: true,
-      viewType: "my",
+      assignedToMe: isAdmin ? false : true,
+      createdByMe: false,
+      viewType: isAdmin ? "all" : "my",
       assignedUserId: null,
       dueDateFrom: null,
       dueDateTo: null,
