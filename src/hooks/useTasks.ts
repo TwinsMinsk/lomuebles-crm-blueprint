@@ -85,20 +85,11 @@ export function useTasks() {
         query = query.lte('due_date', format(dueDateTo, 'yyyy-MM-dd'));
       }
 
-      // Apply sorting with custom logic for completed/cancelled tasks
+      // Apply sorting - simplified to use only valid Supabase properties
       const isAscending = sortDirection === 'asc';
       
-      // First sort by status to push completed/cancelled tasks to the end
-      query = query.order('task_status', { 
-        ascending: true,
-        nullsFirst: false,
-        // Custom order: active statuses first, then completed/cancelled
-        foreignTable: undefined,
-        referencedTable: undefined
-      });
-      
-      // Then sort by the requested column
-      if (sortColumn && sortColumn !== 'task_status') {
+      // Sort by the requested column
+      if (sortColumn) {
         query = query.order(sortColumn, { ascending: isAscending });
       }
 
