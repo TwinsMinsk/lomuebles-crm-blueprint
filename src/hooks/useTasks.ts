@@ -14,7 +14,7 @@ export function useTasks() {
   const fetchTasks = async ({
     page = 1,
     pageSize = 10,
-    sortColumn = 'due_date',
+    sortColumn = 'task_status',
     sortDirection = 'asc',
     filters = {}
   }: TasksQueryParams) => {
@@ -40,6 +40,11 @@ export function useTasks() {
       }
       
       console.log("Fetched all tasks from RPC:", allTasks?.length || 0);
+      console.log("First 3 tasks order from RPC:", allTasks?.slice(0, 3).map(t => ({ 
+        id: t.task_id, 
+        name: t.task_name, 
+        status: t.task_status 
+      })));
       
       // Convert to Task format and apply client-side filtering
       let filteredTasks: Task[] = (allTasks || []).map((task: any) => ({
@@ -127,8 +132,11 @@ export function useTasks() {
       // Set total count after filtering
       setTotalCount(filteredTasks.length);
       
-      // Apply client-side sorting (if different from RPC default)
+      // Only apply client-side sorting if the user explicitly chose a different sort column
+      // The RPC function already provides optimal sorting by status, so we preserve that order
+      // unless the user wants to sort by a specific column
       if (sortColumn && sortColumn !== 'task_status') {
+        console.log("Applying client-side sorting by:", sortColumn, sortDirection);
         filteredTasks.sort((a, b) => {
           const aValue = a[sortColumn as keyof Task];
           const bValue = b[sortColumn as keyof Task];
@@ -142,6 +150,19 @@ export function useTasks() {
           
           return sortDirection === 'desc' ? -comparison : comparison;
         });
+        
+        console.log("After client sorting, first 3 tasks:", filteredTasks.slice(0, 3).map(t => ({ 
+          id: t.task_id, 
+          name: t.task_name, 
+          status: t.task_status,
+          sortField: t[sortColumn as keyof Task]
+        })));
+      } else {
+        console.log("Using RPC sorting order (by status), first 3 tasks:", filteredTasks.slice(0, 3).map(t => ({ 
+          id: t.task_id, 
+          name: t.task_name, 
+          status: t.task_status 
+        })));
       }
       
       // Apply pagination
@@ -155,7 +176,9 @@ export function useTasks() {
         taskStatus,
         search,
         totalFiltered: filteredTasks.length,
-        paginated: paginatedTasks.length
+        paginated: paginatedTasks.length,
+        sortColumn,
+        sortDirection
       });
       
       return paginatedTasks;

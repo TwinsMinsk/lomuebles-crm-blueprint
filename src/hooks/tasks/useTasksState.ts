@@ -9,7 +9,7 @@ export function useTasksState() {
   // State
   const [currentPage, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [sortColumn, setSortColumn] = useState<string>("due_date");
+  const [sortColumn, setSortColumn] = useState<string>("task_status");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [filters, setFilters] = useState<TaskFiltersType>({
     search: null,
