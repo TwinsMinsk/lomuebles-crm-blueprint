@@ -10,7 +10,7 @@ export function useTasks() {
   const [totalCount, setTotalCount] = useState(0);
   const { user } = useAuth();
   
-  // Function to fetch tasks using the updated RPC function with JOINs
+  // Function to fetch tasks using standard Supabase queries
   const fetchTasks = async ({
     page = 1,
     pageSize = 10,
@@ -31,68 +31,102 @@ export function useTasks() {
         dueDateTo
       } = filters;
       
-      // Improved filter logic: Use OR condition when both assignedToMe and createdByMe are true
-      // This ensures we show tasks that are either assigned to the user OR created by them
-      let finalAssignedToMe = assignedToMe || false;
-      let finalCreatedByMe = createdByMe || false;
-      let finalAssignedUserId = assignedUserId || null;
-      
-      // If a specific user is selected, override the me filters
-      if (assignedUserId && assignedUserId !== 'my' && assignedUserId !== 'all') {
-        finalAssignedUserId = assignedUserId;
-        finalAssignedToMe = false;
-        finalCreatedByMe = false;
-      } else if (assignedUserId === 'my') {
-        finalAssignedToMe = true;
-        finalCreatedByMe = false;
-        finalAssignedUserId = null;
-      } else if (assignedUserId === 'all') {
-        finalAssignedToMe = false;
-        finalCreatedByMe = false;
-        finalAssignedUserId = null;
+      // Build the query
+      let query = supabase
+        .from('tasks')
+        .select(`
+          *,
+          assigned_user:profiles!tasks_assigned_task_user_id_fkey(full_name),
+          creator_user:profiles!tasks_creator_user_id_fkey(full_name),
+          related_lead:leads(name),
+          related_contact:contacts(full_name),
+          related_order:orders(order_number),
+          related_partner:partners_manufacturers(company_name),
+          related_request:custom_requests(request_name)
+        `, { count: 'exact' });
+
+      // Apply filters
+      if (search) {
+        query = query.or(`task_name.ilike.%${search}%,description.ilike.%${search}%`);
       }
+
+      if (taskStatus) {
+        query = query.eq('task_status', taskStatus);
+      }
+
+      if (taskType) {
+        query = query.eq('task_type', taskType);
+      }
+
+      if (priority) {
+        query = query.eq('priority', priority);
+      }
+
+      // User-based filtering
+      if (assignedUserId && assignedUserId !== 'my' && assignedUserId !== 'all') {
+        query = query.eq('assigned_task_user_id', assignedUserId);
+      } else if (assignedUserId === 'my' || assignedToMe) {
+        if (user?.id) {
+          query = query.eq('assigned_task_user_id', user.id);
+        }
+      } else if (createdByMe) {
+        if (user?.id) {
+          query = query.eq('creator_user_id', user.id);
+        }
+      }
+
+      // Date filtering
+      if (dueDateFrom && dueDateTo) {
+        query = query.gte('due_date', format(dueDateFrom, 'yyyy-MM-dd'))
+                     .lte('due_date', format(dueDateTo, 'yyyy-MM-dd'));
+      } else if (dueDateFrom) {
+        query = query.gte('due_date', format(dueDateFrom, 'yyyy-MM-dd'));
+      } else if (dueDateTo) {
+        query = query.lte('due_date', format(dueDateTo, 'yyyy-MM-dd'));
+      }
+
+      // Apply sorting with custom logic for completed/cancelled tasks
+      const isAscending = sortDirection === 'asc';
       
-      // Call the updated RPC function
-      const { data, error } = await supabase.rpc('get_tasks_with_custom_sort', {
-        p_page: page,
-        p_page_size: pageSize,
-        p_sort_column: sortColumn,
-        p_sort_direction: sortDirection,
-        p_search: search || null,
-        p_task_status: taskStatus || null,
-        p_task_type: taskType || null,
-        p_priority: priority || null,
-        p_assigned_user_id: finalAssignedUserId,
-        p_assigned_to_me: finalAssignedToMe,
-        p_created_by_me: finalCreatedByMe,
-        p_due_date_from: dueDateFrom ? format(dueDateFrom, 'yyyy-MM-dd') : null,
-        p_due_date_to: dueDateTo ? format(dueDateTo, 'yyyy-MM-dd') : null,
-        p_current_user_id: user?.id || null
+      // First sort by status to push completed/cancelled tasks to the end
+      query = query.order('task_status', { 
+        ascending: true,
+        nullsFirst: false,
+        // Custom order: active statuses first, then completed/cancelled
+        foreignTable: undefined,
+        referencedTable: undefined
       });
       
+      // Then sort by the requested column
+      if (sortColumn && sortColumn !== 'task_status') {
+        query = query.order(sortColumn, { ascending: isAscending });
+      }
+
+      // Apply pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+      query = query.range(from, to);
+
+      const { data, error, count } = await query;
+      
       if (error) {
-        console.error("RPC function error:", error);
+        console.error("Query error:", error);
         throw new Error(error.message);
       }
       
       console.log("Fetched tasks data:", data);
       console.log("Applied filters:", {
-        finalAssignedToMe,
-        finalCreatedByMe,
-        finalAssignedUserId,
+        assignedToMe,
+        createdByMe,
+        assignedUserId,
         taskStatus,
         search
       });
       
-      // Set total count from the first row (all rows have the same total_count)
-      if (data && data.length > 0) {
-        setTotalCount(data[0].total_count || 0);
-      } else {
-        setTotalCount(0);
-      }
+      // Set total count
+      setTotalCount(count || 0);
       
-      // The data now includes all the related entity names from the JOINs
-      // No need for additional queries - just return the data as Task objects
+      // Process the tasks data
       const processedTasks: Task[] = (data || []).map((task) => ({
         task_id: task.task_id,
         task_name: task.task_name,
@@ -112,13 +146,13 @@ export function useTasks() {
         related_custom_request_id: task.related_custom_request_id,
         related_partner_manufacturer_id: task.related_partner_manufacturer_id,
         // Use the names fetched by the JOINs
-        related_lead_name: task.related_lead_name,
-        related_contact_name: task.related_contact_name,
-        related_order_number: task.related_order_number,
-        related_partner_name: task.related_partner_name,
-        related_request_name: task.related_request_name,
-        assigned_user_name: task.assigned_user_name,
-        creator_user_name: task.creator_user_name
+        related_lead_name: task.related_lead?.name || null,
+        related_contact_name: task.related_contact?.full_name || null,
+        related_order_number: task.related_order?.order_number || null,
+        related_partner_name: task.related_partner?.company_name || null,
+        related_request_name: task.related_request?.request_name || null,
+        assigned_user_name: task.assigned_user?.full_name || null,
+        creator_user_name: task.creator_user?.full_name || null
       }));
       
       console.log("Processed tasks count:", processedTasks.length);
