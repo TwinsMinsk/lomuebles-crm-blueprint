@@ -10,7 +10,7 @@ export function useTasks() {
   const [totalCount, setTotalCount] = useState(0);
   const { user } = useAuth();
   
-  // Function to fetch tasks from Supabase
+  // Function to fetch tasks using the new RPC function with custom sorting
   const fetchTasks = async ({
     page = 1,
     pageSize = 10,
@@ -31,89 +31,41 @@ export function useTasks() {
         dueDateTo
       } = filters;
       
-      // Start building the query
-      let query = supabase
-        .from('tasks')
-        .select('*, profiles!tasks_assigned_task_user_id_fkey(full_name), creator:profiles!tasks_creator_user_id_fkey(full_name)', { count: 'exact' });
-      
-      // Apply search filter
-      if (search) {
-        query = query.or(`task_name.ilike.%${search}%,description.ilike.%${search}%`);
-      }
-      
-      // Apply status filter
-      if (taskStatus) {
-        query = query.eq('task_status', taskStatus);
-      }
-      
-      // Apply task type filter
-      if (taskType) {
-        query = query.eq('task_type', taskType);
-      }
-      
-      // Apply priority filter
-      if (priority) {
-        query = query.eq('priority', priority);
-      }
-      
-      // Apply assigned user filter
-      if (assignedUserId) {
-        query = query.eq('assigned_task_user_id', assignedUserId);
-      }
-      // Filter by assigned to me or created by me if no specific assignedUserId is set
-      else if (assignedToMe && createdByMe && user?.id) {
-        query = query.or(`assigned_task_user_id.eq.${user.id},creator_user_id.eq.${user.id}`);
-      } else if (assignedToMe && user?.id) {
-        query = query.eq('assigned_task_user_id', user.id);
-      } else if (createdByMe && user?.id) {
-        query = query.eq('creator_user_id', user.id);
-      }
-      
-      // Apply due date range filter
-      if (dueDateFrom && dueDateTo) {
-        const fromDateStr = format(dueDateFrom, 'yyyy-MM-dd');
-        const toDateStr = format(dueDateTo, 'yyyy-MM-dd');
-        query = query.gte('due_date', fromDateStr).lte('due_date', toDateStr + 'T23:59:59');
-      } else if (dueDateFrom) {
-        const fromDateStr = format(dueDateFrom, 'yyyy-MM-dd');
-        query = query.gte('due_date', fromDateStr);
-      } else if (dueDateTo) {
-        const toDateStr = format(dueDateTo, 'yyyy-MM-dd');
-        query = query.lte('due_date', toDateStr + 'T23:59:59');
-      }
-      
-      // Add sorting
-      query = query.order(sortColumn, { ascending: sortDirection === 'asc' });
-      
-      // Add pagination
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
-      query = query.range(from, to);
-      
-      // Execute the query
-      const { data, error, count } = await query;
+      // Call the new RPC function
+      const { data, error } = await supabase.rpc('get_tasks_with_custom_sort', {
+        p_page: page,
+        p_page_size: pageSize,
+        p_sort_column: sortColumn,
+        p_sort_direction: sortDirection,
+        p_search: search || null,
+        p_task_status: taskStatus || null,
+        p_task_type: taskType || null,
+        p_priority: priority || null,
+        p_assigned_user_id: assignedUserId || null,
+        p_assigned_to_me: assignedToMe || false,
+        p_created_by_me: createdByMe || false,
+        p_due_date_from: dueDateFrom ? format(dueDateFrom, 'yyyy-MM-dd') : null,
+        p_due_date_to: dueDateTo ? format(dueDateTo, 'yyyy-MM-dd') : null,
+        p_current_user_id: user?.id || null
+      });
       
       if (error) {
         throw new Error(error.message);
       }
       
-      // Store the total count
-      if (count !== null) {
-        setTotalCount(count);
+      // Set total count from the first row (all rows have the same total_count)
+      if (data && data.length > 0) {
+        setTotalCount(data[0].total_count || 0);
+      } else {
+        setTotalCount(0);
       }
       
-      // Process the data
-      const processedTasks: Task[] = data.map(task => {
-        return {
-          ...task,
-          assigned_user_name: task.profiles?.full_name || null,
-          creator_user_name: task.creator?.full_name || null
-        };
-      });
-      
-      // Fetch related entity names in separate queries
-      const processedTasksWithRelations = await Promise.all(
-        processedTasks.map(async (task) => {
+      // Process the data to match our Task interface
+      const processedTasks: Task[] = await Promise.all(
+        (data || []).map(async (task) => {
+          // Fetch related entity names in separate queries for better performance
+          const taskWithRelations = { ...task };
+          
           // For leads
           if (task.related_lead_id) {
             const { data: leadData } = await supabase
@@ -123,7 +75,7 @@ export function useTasks() {
               .single();
               
             if (leadData) {
-              task.related_lead_name = leadData.name;
+              taskWithRelations.related_lead_name = leadData.name;
             }
           }
           
@@ -136,11 +88,11 @@ export function useTasks() {
               .single();
               
             if (contactData) {
-              task.related_contact_name = contactData.full_name;
+              taskWithRelations.related_contact_name = contactData.full_name;
             }
           }
           
-          // For orders (updated to use orders table)
+          // For orders
           if (task.related_order_id) {
             const { data: orderData } = await supabase
               .from('orders')
@@ -149,7 +101,7 @@ export function useTasks() {
               .single();
               
             if (orderData) {
-              task.related_order_number = orderData.order_number;
+              taskWithRelations.related_order_number = orderData.order_number;
             }
           }
           
@@ -162,7 +114,7 @@ export function useTasks() {
               .single();
               
             if (partnerData) {
-              task.related_partner_name = partnerData.company_name;
+              taskWithRelations.related_partner_name = partnerData.company_name;
             }
           }
           
@@ -175,15 +127,40 @@ export function useTasks() {
               .single();
               
             if (requestData) {
-              task.related_request_name = requestData.request_name;
+              taskWithRelations.related_request_name = requestData.request_name;
             }
           }
           
-          return task;
+          // Fetch user names
+          if (task.assigned_task_user_id) {
+            const { data: assignedUserData } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('id', task.assigned_task_user_id)
+              .single();
+              
+            if (assignedUserData) {
+              taskWithRelations.assigned_user_name = assignedUserData.full_name;
+            }
+          }
+          
+          if (task.creator_user_id) {
+            const { data: creatorUserData } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('id', task.creator_user_id)
+              .single();
+              
+            if (creatorUserData) {
+              taskWithRelations.creator_user_name = creatorUserData.full_name;
+            }
+          }
+          
+          return taskWithRelations;
         })
       );
       
-      return processedTasksWithRelations;
+      return processedTasks;
     } catch (error) {
       console.error("Error fetching tasks:", error);
       throw error;

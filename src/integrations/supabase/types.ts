@@ -1079,6 +1079,44 @@ export type Database = {
         Args: { p_task_id: number; p_user_id: string }
         Returns: Json
       }
+      get_tasks_with_custom_sort: {
+        Args: {
+          p_page?: number
+          p_page_size?: number
+          p_sort_column?: string
+          p_sort_direction?: string
+          p_search?: string
+          p_task_status?: string
+          p_task_type?: string
+          p_priority?: string
+          p_assigned_user_id?: string
+          p_assigned_to_me?: boolean
+          p_created_by_me?: boolean
+          p_due_date_from?: string
+          p_due_date_to?: string
+          p_current_user_id?: string
+        }
+        Returns: {
+          task_id: number
+          task_name: string
+          description: string
+          task_type: string
+          task_status: string
+          priority: string
+          creation_date: string
+          due_date: string
+          completion_date: string
+          creator_user_id: string
+          assigned_task_user_id: string
+          google_calendar_event_id: string
+          related_lead_id: number
+          related_contact_id: number
+          related_order_id: number
+          related_custom_request_id: number
+          related_partner_manufacturer_id: number
+          total_count: number
+        }[]
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: string
