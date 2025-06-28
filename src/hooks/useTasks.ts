@@ -10,7 +10,7 @@ export function useTasks() {
   const [totalCount, setTotalCount] = useState(0);
   const { user } = useAuth();
   
-  // Function to fetch tasks using the new RPC function with custom sorting
+  // Function to fetch tasks using the updated RPC function with JOINs
   const fetchTasks = async ({
     page = 1,
     pageSize = 10,
@@ -31,7 +31,7 @@ export function useTasks() {
         dueDateTo
       } = filters;
       
-      // Call the new RPC function
+      // Call the updated RPC function
       const { data, error } = await supabase.rpc('get_tasks_with_custom_sort', {
         p_page: page,
         p_page_size: pageSize,
@@ -60,105 +60,35 @@ export function useTasks() {
         setTotalCount(0);
       }
       
-      // Process the data to match our Task interface
-      const processedTasks: Task[] = await Promise.all(
-        (data || []).map(async (task) => {
-          // Fetch related entity names in separate queries for better performance
-          const taskWithRelations = { ...task };
-          
-          // For leads
-          if (task.related_lead_id) {
-            const { data: leadData } = await supabase
-              .from('leads')
-              .select('name')
-              .eq('lead_id', task.related_lead_id)
-              .single();
-              
-            if (leadData) {
-              taskWithRelations.related_lead_name = leadData.name;
-            }
-          }
-          
-          // For contacts
-          if (task.related_contact_id) {
-            const { data: contactData } = await supabase
-              .from('contacts')
-              .select('full_name')
-              .eq('contact_id', task.related_contact_id)
-              .single();
-              
-            if (contactData) {
-              taskWithRelations.related_contact_name = contactData.full_name;
-            }
-          }
-          
-          // For orders
-          if (task.related_order_id) {
-            const { data: orderData } = await supabase
-              .from('orders')
-              .select('order_number')
-              .eq('id', task.related_order_id)
-              .single();
-              
-            if (orderData) {
-              taskWithRelations.related_order_number = orderData.order_number;
-            }
-          }
-          
-          // For partners
-          if (task.related_partner_manufacturer_id) {
-            const { data: partnerData } = await supabase
-              .from('partners_manufacturers')
-              .select('company_name')
-              .eq('partner_manufacturer_id', task.related_partner_manufacturer_id)
-              .single();
-              
-            if (partnerData) {
-              taskWithRelations.related_partner_name = partnerData.company_name;
-            }
-          }
-          
-          // For custom requests
-          if (task.related_custom_request_id) {
-            const { data: requestData } = await supabase
-              .from('custom_requests')
-              .select('request_name')
-              .eq('custom_request_id', task.related_custom_request_id)
-              .single();
-              
-            if (requestData) {
-              taskWithRelations.related_request_name = requestData.request_name;
-            }
-          }
-          
-          // Fetch user names
-          if (task.assigned_task_user_id) {
-            const { data: assignedUserData } = await supabase
-              .from('profiles')
-              .select('full_name')
-              .eq('id', task.assigned_task_user_id)
-              .single();
-              
-            if (assignedUserData) {
-              taskWithRelations.assigned_user_name = assignedUserData.full_name;
-            }
-          }
-          
-          if (task.creator_user_id) {
-            const { data: creatorUserData } = await supabase
-              .from('profiles')
-              .select('full_name')
-              .eq('id', task.creator_user_id)
-              .single();
-              
-            if (creatorUserData) {
-              taskWithRelations.creator_user_name = creatorUserData.full_name;
-            }
-          }
-          
-          return taskWithRelations;
-        })
-      );
+      // The data now includes all the related entity names from the JOINs
+      // No need for additional queries - just return the data as Task objects
+      const processedTasks: Task[] = (data || []).map((task) => ({
+        task_id: task.task_id,
+        task_name: task.task_name,
+        description: task.description,
+        task_type: task.task_type,
+        task_status: task.task_status,
+        priority: task.priority,
+        creation_date: task.creation_date,
+        due_date: task.due_date,
+        completion_date: task.completion_date,
+        creator_user_id: task.creator_user_id,
+        assigned_task_user_id: task.assigned_task_user_id,
+        google_calendar_event_id: task.google_calendar_event_id,
+        related_lead_id: task.related_lead_id,
+        related_contact_id: task.related_contact_id,
+        related_order_id: task.related_order_id,
+        related_custom_request_id: task.related_custom_request_id,
+        related_partner_manufacturer_id: task.related_partner_manufacturer_id,
+        // Use the names fetched by the JOINs
+        related_lead_name: task.related_lead_name,
+        related_contact_name: task.related_contact_name,
+        related_order_number: task.related_order_number,
+        related_partner_name: task.related_partner_name,
+        related_request_name: task.related_request_name,
+        assigned_user_name: task.assigned_user_name,
+        creator_user_name: task.creator_user_name
+      }));
       
       return processedTasks;
     } catch (error) {
