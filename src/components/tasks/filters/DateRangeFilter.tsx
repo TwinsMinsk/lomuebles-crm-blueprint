@@ -6,12 +6,12 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+import { DateRange } from "react-day-picker";
 
 interface DateRangeFilterProps {
-  dateRange: { from: Date | null; to: Date | null };
+  dateRange: DateRange | undefined;
   rangeType: string | null | undefined;
-  onDateRangeSelect: (range: { from: Date | null; to: Date | null }) => void;
+  onDateRangeSelect: (range: DateRange | undefined) => void;
   onPredefinedRangeSelect: (rangeType: string) => void;
 }
 
@@ -46,7 +46,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
               className="w-full justify-start text-left font-normal"
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {dateRange.from ? (
+              {dateRange?.from ? (
                 dateRange.to ? (
                   <>
                     {format(dateRange.from, "dd.MM.yyyy")} -{" "}
@@ -66,6 +66,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
               selected={dateRange}
               onSelect={onDateRangeSelect}
               initialFocus
+              className="pointer-events-auto"
             />
           </PopoverContent>
         </Popover>
