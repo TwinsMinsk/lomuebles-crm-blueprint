@@ -1114,6 +1114,13 @@ export type Database = {
           related_order_id: number
           related_custom_request_id: number
           related_partner_manufacturer_id: number
+          related_lead_name: string
+          related_contact_name: string
+          related_order_number: string
+          related_partner_name: string
+          related_request_name: string
+          assigned_user_name: string
+          creator_user_name: string
           total_count: number
         }[]
       }
