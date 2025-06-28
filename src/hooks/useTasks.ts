@@ -4,13 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Task, TasksQueryParams } from "@/types/task";
 import { useAuth } from "@/context/AuthContext";
-import { format } from "date-fns";
+import { format, parseISO, isWithinInterval } from "date-fns";
 
 export function useTasks() {
   const [totalCount, setTotalCount] = useState(0);
   const { user } = useAuth();
   
-  // Function to fetch tasks using standard Supabase queries
+  // Function to fetch all tasks using the RPC function
   const fetchTasks = async ({
     page = 1,
     pageSize = 10,
@@ -31,94 +31,18 @@ export function useTasks() {
         dueDateTo
       } = filters;
       
-      // Build the query
-      let query = supabase
-        .from('tasks')
-        .select(`
-          *,
-          assigned_user:profiles!tasks_assigned_task_user_id_fkey(full_name),
-          creator_user:profiles!tasks_creator_user_id_fkey(full_name),
-          related_lead:leads(name),
-          related_contact:contacts(full_name),
-          related_order:orders(order_number),
-          related_partner:partners_manufacturers(company_name),
-          related_request:custom_requests(request_name)
-        `, { count: 'exact' });
-
-      // Apply filters
-      if (search) {
-        query = query.or(`task_name.ilike.%${search}%,description.ilike.%${search}%`);
-      }
-
-      if (taskStatus) {
-        query = query.eq('task_status', taskStatus);
-      }
-
-      if (taskType) {
-        query = query.eq('task_type', taskType);
-      }
-
-      if (priority) {
-        query = query.eq('priority', priority);
-      }
-
-      // User-based filtering
-      if (assignedUserId && assignedUserId !== 'my' && assignedUserId !== 'all') {
-        query = query.eq('assigned_task_user_id', assignedUserId);
-      } else if (assignedUserId === 'my' || assignedToMe) {
-        if (user?.id) {
-          query = query.eq('assigned_task_user_id', user.id);
-        }
-      } else if (createdByMe) {
-        if (user?.id) {
-          query = query.eq('creator_user_id', user.id);
-        }
-      }
-
-      // Date filtering
-      if (dueDateFrom && dueDateTo) {
-        query = query.gte('due_date', format(dueDateFrom, 'yyyy-MM-dd'))
-                     .lte('due_date', format(dueDateTo, 'yyyy-MM-dd'));
-      } else if (dueDateFrom) {
-        query = query.gte('due_date', format(dueDateFrom, 'yyyy-MM-dd'));
-      } else if (dueDateTo) {
-        query = query.lte('due_date', format(dueDateTo, 'yyyy-MM-dd'));
-      }
-
-      // Apply sorting - simplified to use only valid Supabase properties
-      const isAscending = sortDirection === 'asc';
-      
-      // Sort by the requested column
-      if (sortColumn) {
-        query = query.order(sortColumn, { ascending: isAscending });
-      }
-
-      // Apply pagination
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
-      query = query.range(from, to);
-
-      const { data, error, count } = await query;
+      // Call the RPC function to get all sorted tasks
+      const { data: allTasks, error } = await supabase.rpc('get_sorted_tasks');
       
       if (error) {
-        console.error("Query error:", error);
+        console.error("RPC error:", error);
         throw new Error(error.message);
       }
       
-      console.log("Fetched tasks data:", data);
-      console.log("Applied filters:", {
-        assignedToMe,
-        createdByMe,
-        assignedUserId,
-        taskStatus,
-        search
-      });
+      console.log("Fetched all tasks from RPC:", allTasks?.length || 0);
       
-      // Set total count
-      setTotalCount(count || 0);
-      
-      // Process the tasks data
-      const processedTasks: Task[] = (data || []).map((task) => ({
+      // Convert to Task format and apply client-side filtering
+      let filteredTasks: Task[] = (allTasks || []).map((task: any) => ({
         task_id: task.task_id,
         task_name: task.task_name,
         description: task.description,
@@ -136,18 +60,105 @@ export function useTasks() {
         related_order_id: task.related_order_id,
         related_custom_request_id: task.related_custom_request_id,
         related_partner_manufacturer_id: task.related_partner_manufacturer_id,
-        // Use the names fetched by the JOINs
-        related_lead_name: task.related_lead?.name || null,
-        related_contact_name: task.related_contact?.full_name || null,
-        related_order_number: task.related_order?.order_number || null,
-        related_partner_name: task.related_partner?.company_name || null,
-        related_request_name: task.related_request?.request_name || null,
-        assigned_user_name: task.assigned_user?.full_name || null,
-        creator_user_name: task.creator_user?.full_name || null
+        // Names are now included from the RPC function
+        assigned_user_name: task.assigned_user_name,
+        creator_user_name: task.creator_user_name,
+        // Set null values for related entity names (not included in RPC)
+        related_lead_name: null,
+        related_contact_name: null,
+        related_order_number: null,
+        related_partner_name: null,
+        related_request_name: null
       }));
+
+      // Apply filters
+      if (search) {
+        const searchLower = search.toLowerCase();
+        filteredTasks = filteredTasks.filter(task =>
+          task.task_name.toLowerCase().includes(searchLower) ||
+          (task.description && task.description.toLowerCase().includes(searchLower))
+        );
+      }
+
+      if (taskStatus) {
+        filteredTasks = filteredTasks.filter(task => task.task_status === taskStatus);
+      }
+
+      if (taskType) {
+        filteredTasks = filteredTasks.filter(task => task.task_type === taskType);
+      }
+
+      if (priority) {
+        filteredTasks = filteredTasks.filter(task => task.priority === priority);
+      }
+
+      // User-based filtering
+      if (assignedUserId && assignedUserId !== 'my' && assignedUserId !== 'all') {
+        filteredTasks = filteredTasks.filter(task => task.assigned_task_user_id === assignedUserId);
+      } else if (assignedUserId === 'my' || assignedToMe) {
+        if (user?.id) {
+          filteredTasks = filteredTasks.filter(task => task.assigned_task_user_id === user.id);
+        }
+      } else if (createdByMe) {
+        if (user?.id) {
+          filteredTasks = filteredTasks.filter(task => task.creator_user_id === user.id);
+        }
+      }
+
+      // Date filtering
+      if (dueDateFrom || dueDateTo) {
+        filteredTasks = filteredTasks.filter(task => {
+          if (!task.due_date) return false;
+          
+          const taskDate = parseISO(task.due_date);
+          
+          if (dueDateFrom && dueDateTo) {
+            return isWithinInterval(taskDate, { start: dueDateFrom, end: dueDateTo });
+          } else if (dueDateFrom) {
+            return taskDate >= dueDateFrom;
+          } else if (dueDateTo) {
+            return taskDate <= dueDateTo;
+          }
+          
+          return true;
+        });
+      }
+
+      // Set total count after filtering
+      setTotalCount(filteredTasks.length);
       
-      console.log("Processed tasks count:", processedTasks.length);
-      return processedTasks;
+      // Apply client-side sorting (if different from RPC default)
+      if (sortColumn && sortColumn !== 'task_status') {
+        filteredTasks.sort((a, b) => {
+          const aValue = a[sortColumn as keyof Task];
+          const bValue = b[sortColumn as keyof Task];
+          
+          if (aValue === null || aValue === undefined) return 1;
+          if (bValue === null || bValue === undefined) return -1;
+          
+          let comparison = 0;
+          if (aValue < bValue) comparison = -1;
+          if (aValue > bValue) comparison = 1;
+          
+          return sortDirection === 'desc' ? -comparison : comparison;
+        });
+      }
+      
+      // Apply pagination
+      const startIndex = (page - 1) * pageSize;
+      const paginatedTasks = filteredTasks.slice(startIndex, startIndex + pageSize);
+      
+      console.log("Applied filters:", {
+        assignedToMe,
+        createdByMe,
+        assignedUserId,
+        taskStatus,
+        search,
+        totalFiltered: filteredTasks.length,
+        paginated: paginatedTasks.length
+      });
+      
+      return paginatedTasks;
     } catch (error) {
       console.error("Error fetching tasks:", error);
       throw error;

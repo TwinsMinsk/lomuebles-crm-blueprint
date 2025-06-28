@@ -1075,6 +1075,30 @@ export type Database = {
         Args: { date_from: string; date_to: string }
         Returns: Json
       }
+      get_sorted_tasks: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          task_id: number
+          task_name: string
+          description: string
+          task_type: string
+          task_status: string
+          priority: string
+          creation_date: string
+          due_date: string
+          completion_date: string
+          creator_user_id: string
+          assigned_task_user_id: string
+          google_calendar_event_id: string
+          related_lead_id: number
+          related_contact_id: number
+          related_order_id: number
+          related_custom_request_id: number
+          related_partner_manufacturer_id: number
+          assigned_user_name: string
+          creator_user_name: string
+        }[]
+      }
       get_task_related_details: {
         Args: { p_task_id: number; p_user_id: string }
         Returns: Json
