@@ -14,7 +14,12 @@ interface MaterialFiltersProps {
 }
 
 export const MaterialFilters = ({ filters, onFiltersChange }: MaterialFiltersProps) => {
-  const { data: suppliersData } = useSuppliers({});
+  const { data: suppliersData } = useSuppliers({
+    page: 1,
+    limit: 100,
+    searchQuery: "",
+    category: null
+  });
   const suppliers = suppliersData?.suppliers || [];
 
   const updateFilter = (key: keyof MaterialFiltersType, value: any) => {

@@ -32,7 +32,12 @@ interface StockMovementFormModalProps {
 }
 
 export const StockMovementFormModal = ({ isOpen, onClose, mode }: StockMovementFormModalProps) => {
-  const { data: suppliersData } = useSuppliers();
+  const { data: suppliersData } = useSuppliers({
+    page: 1,
+    limit: 100,
+    searchQuery: "",
+    category: null
+  });
   const suppliers = suppliersData?.suppliers || [];
   const { data: materials } = useMaterials();
   const createMovement = useCreateStockMovement();

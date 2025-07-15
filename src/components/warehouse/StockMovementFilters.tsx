@@ -14,7 +14,12 @@ interface StockMovementFiltersProps {
 }
 
 export const StockMovementFilters = ({ filters, onFiltersChange }: StockMovementFiltersProps) => {
-  const { data: suppliersData } = useSuppliers();
+  const { data: suppliersData } = useSuppliers({
+    page: 1,
+    limit: 100,
+    searchQuery: "",
+    category: null
+  });
   const suppliers = suppliersData?.suppliers || [];
   const { data: materials } = useMaterials();
 

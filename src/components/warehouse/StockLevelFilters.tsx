@@ -14,7 +14,12 @@ interface StockLevelFiltersProps {
 }
 
 export const StockLevelFilters = ({ filters, onFiltersChange }: StockLevelFiltersProps) => {
-  const { data: suppliersData } = useSuppliers();
+  const { data: suppliersData } = useSuppliers({
+    page: 1,
+    limit: 100,
+    searchQuery: "",
+    category: null
+  });
   const suppliers = suppliersData?.suppliers || [];
 
   const updateFilter = (key: keyof MaterialFilters, value: any) => {

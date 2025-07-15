@@ -35,7 +35,12 @@ interface MaterialFormModalProps {
 }
 
 export const MaterialFormModal = ({ isOpen, onClose, mode, material }: MaterialFormModalProps) => {
-  const { data: suppliersData } = useSuppliers({});
+  const { data: suppliersData } = useSuppliers({
+    page: 1,
+    limit: 100,
+    searchQuery: "",
+    category: null
+  });
   const suppliers = suppliersData?.suppliers || [];
   const createMaterial = useCreateMaterial();
   const updateMaterial = useUpdateMaterial();
