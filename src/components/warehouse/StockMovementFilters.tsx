@@ -51,14 +51,14 @@ export const StockMovementFilters = ({ filters, onFiltersChange }: StockMovement
         <div>
           <Label htmlFor="movement_type">Тип движения</Label>
           <Select 
-            value={filters.movement_type || ""} 
-            onValueChange={(value) => updateFilter("movement_type", value || undefined)}
+            value={filters.movement_type || "__all__"} 
+            onValueChange={(value) => updateFilter("movement_type", value === "__all__" ? undefined : value || undefined)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Все типы" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Все типы</SelectItem>
+              <SelectItem value="__all__">Все типы</SelectItem>
               {STOCK_MOVEMENT_TYPES.map((type) => (
                 <SelectItem key={type} value={type}>
                   {type}
@@ -71,14 +71,14 @@ export const StockMovementFilters = ({ filters, onFiltersChange }: StockMovement
         <div>
           <Label htmlFor="material">Материал</Label>
           <Select 
-            value={filters.material_id?.toString() || ""} 
-            onValueChange={(value) => updateFilter("material_id", value ? Number(value) : undefined)}
+            value={filters.material_id?.toString() || "__all__"} 
+            onValueChange={(value) => updateFilter("material_id", value === "__all__" ? undefined : (value ? Number(value) : undefined))}
           >
             <SelectTrigger>
               <SelectValue placeholder="Все материалы" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Все материалы</SelectItem>
+              <SelectItem value="__all__">Все материалы</SelectItem>
               {materials?.map((material) => (
                 <SelectItem key={material.id} value={material.id.toString()}>
                   {material.name}
@@ -91,14 +91,14 @@ export const StockMovementFilters = ({ filters, onFiltersChange }: StockMovement
         <div>
           <Label htmlFor="supplier">Поставщик</Label>
           <Select 
-            value={filters.supplier_id?.toString() || ""} 
-            onValueChange={(value) => updateFilter("supplier_id", value ? Number(value) : undefined)}
+            value={filters.supplier_id?.toString() || "__all__"} 
+            onValueChange={(value) => updateFilter("supplier_id", value === "__all__" ? undefined : (value ? Number(value) : undefined))}
           >
             <SelectTrigger>
               <SelectValue placeholder="Все поставщики" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Все поставщики</SelectItem>
+              <SelectItem value="__all__">Все поставщики</SelectItem>
               {suppliers.map((supplier) => (
                 <SelectItem key={supplier.supplier_id} value={supplier.supplier_id.toString()}>
                   {supplier.supplier_name}

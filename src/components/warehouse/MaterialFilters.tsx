@@ -50,14 +50,14 @@ export const MaterialFilters = ({ filters, onFiltersChange }: MaterialFiltersPro
         <div>
           <Label htmlFor="category">Категория</Label>
           <Select 
-            value={filters.category || ""} 
-            onValueChange={(value) => updateFilter("category", value || undefined)}
+            value={filters.category || "__all__"} 
+            onValueChange={(value) => updateFilter("category", value === "__all__" ? undefined : value || undefined)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Все категории" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Все категории</SelectItem>
+              <SelectItem value="__all__">Все категории</SelectItem>
               {MATERIAL_CATEGORIES.map((category) => (
                 <SelectItem key={category} value={category}>
                   {category}
@@ -70,14 +70,14 @@ export const MaterialFilters = ({ filters, onFiltersChange }: MaterialFiltersPro
         <div>
           <Label htmlFor="supplier">Поставщик</Label>
           <Select 
-            value={filters.supplier_id?.toString() || ""} 
-            onValueChange={(value) => updateFilter("supplier_id", value ? Number(value) : undefined)}
+            value={filters.supplier_id?.toString() || "__all__"} 
+            onValueChange={(value) => updateFilter("supplier_id", value === "__all__" ? undefined : (value ? Number(value) : undefined))}
           >
             <SelectTrigger>
               <SelectValue placeholder="Все поставщики" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Все поставщики</SelectItem>
+              <SelectItem value="__all__">Все поставщики</SelectItem>
               {suppliers.map((supplier) => (
                 <SelectItem key={supplier.supplier_id} value={supplier.supplier_id.toString()}>
                   {supplier.supplier_name}

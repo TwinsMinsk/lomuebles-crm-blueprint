@@ -208,14 +208,14 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode }: StockMovementF
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Поставщик</FormLabel>
-                    <Select onValueChange={(value) => field.onChange(value ? Number(value) : undefined)} value={field.value?.toString()}>
+                    <Select onValueChange={(value) => field.onChange(value === "__none__" ? undefined : (value ? Number(value) : undefined))} value={field.value?.toString() || "__none__"}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Выберите поставщика" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Без поставщика</SelectItem>
+                        <SelectItem value="__none__">Без поставщика</SelectItem>
                         {suppliers.map((supplier) => (
                           <SelectItem key={supplier.supplier_id} value={supplier.supplier_id.toString()}>
                             {supplier.supplier_name}
