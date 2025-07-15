@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { useMaterials } from "@/hooks/warehouse/useMaterials";
-import { useCreateStockMovement } from "@/hooks/warehouse/useStockMovements";
+import { useCreateStockMovement, useUpdateStockMovement } from "@/hooks/warehouse/useStockMovements";
 import { STOCK_MOVEMENT_TYPES } from "@/types/warehouse";
 import type { StockMovementFormData } from "@/types/warehouse";
+import { useEffect } from "react";
 
 const stockMovementFormSchema = z.object({
   material_id: z.number().min(1, "Материал обязателен"),
@@ -28,10 +29,11 @@ const stockMovementFormSchema = z.object({
 interface StockMovementFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  mode: "create";
+  mode: "create" | "edit";
+  movement?: StockMovementFormData & { id: number };
 }
 
-export const StockMovementFormModal = ({ isOpen, onClose, mode }: StockMovementFormModalProps) => {
+export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: StockMovementFormModalProps) => {
   const { data: suppliersData } = useSuppliers({
     page: 1,
     limit: 100,
@@ -41,6 +43,7 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode }: StockMovementF
   const suppliers = suppliersData?.suppliers || [];
   const { data: materials } = useMaterials();
   const createMovement = useCreateStockMovement();
+  const updateMovement = useUpdateStockMovement();
 
   const form = useForm<StockMovementFormData>({
     resolver: zodResolver(stockMovementFormSchema),
@@ -54,9 +57,39 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode }: StockMovementF
     },
   });
 
+  // Pre-fill form when editing
+  useEffect(() => {
+    if (mode === "edit" && movement) {
+      form.reset({
+        material_id: movement.material_id,
+        movement_type: movement.movement_type,
+        quantity: movement.quantity,
+        unit_cost: movement.unit_cost,
+        reference_document: movement.reference_document || "",
+        notes: movement.notes || "",
+        supplier_id: movement.supplier_id,
+        order_id: movement.order_id,
+        movement_date: movement.movement_date ? new Date(movement.movement_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      });
+    } else if (mode === "create") {
+      form.reset({
+        material_id: 0,
+        movement_type: STOCK_MOVEMENT_TYPES[0],
+        quantity: 0,
+        reference_document: "",
+        notes: "",
+        movement_date: new Date().toISOString().split('T')[0],
+      });
+    }
+  }, [mode, movement, form]);
+
   const onSubmit = async (data: StockMovementFormData) => {
     try {
-      await createMovement.mutateAsync(data);
+      if (mode === "edit" && movement) {
+        await updateMovement.mutateAsync({ ...data, id: movement.id });
+      } else {
+        await createMovement.mutateAsync(data);
+      }
       onClose();
       form.reset();
     } catch (error) {
@@ -69,11 +102,15 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode }: StockMovementF
     form.reset();
   };
 
+  const isLoading = createMovement.isPending || updateMovement.isPending;
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Добавить движение материала</DialogTitle>
+          <DialogTitle>
+            {mode === "edit" ? "Редактировать движение материала" : "Добавить движение материала"}
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -249,9 +286,9 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode }: StockMovementF
               </Button>
               <Button
                 type="submit"
-                disabled={createMovement.isPending}
+                disabled={isLoading}
               >
-                {createMovement.isPending ? "Сохранение..." : "Создать"}
+                {isLoading ? "Сохранение..." : (mode === "edit" ? "Обновить" : "Создать")}
               </Button>
             </div>
           </form>
