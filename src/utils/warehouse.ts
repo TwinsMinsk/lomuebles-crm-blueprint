@@ -32,6 +32,14 @@ export const getStockStatusIcon = (status: StockStatus): string => {
   }
 };
 
+export const getStockStatusInfo = (status: StockStatus) => {
+  return {
+    label: status,
+    className: getStockStatusColor(status),
+    icon: getStockStatusIcon(status)
+  };
+};
+
 export const getMovementTypeColor = (type: StockMovementType): string => {
   switch (type) {
     case 'Поступление':

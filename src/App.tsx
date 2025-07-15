@@ -35,6 +35,11 @@ import CategoriesPage from "./pages/finance/CategoriesPage";
 import TransactionsPage from "./pages/finance/TransactionsPage";
 import FinanceReportsPage from "./pages/finance/FinanceReportsPage";
 
+// Import Warehouse module pages
+import MaterialsPage from "./pages/warehouse/MaterialsPage";
+import StockMovementsPage from "./pages/warehouse/StockMovementsPage";
+import StockLevelsPage from "./pages/warehouse/StockLevelsPage";
+
 // Component for role-based task detail routing
 const TaskDetailRouter = () => {
   const { userRole } = useAuth();
@@ -82,6 +87,32 @@ function App() {
           <Route path="products" element={<Products />} />
           <Route path="suppliers" element={<Suppliers />} />
           <Route path="partners" element={<Partners />} />
+
+          {/* Warehouse module routes */}
+          <Route 
+            path="warehouse/materials" 
+            element={
+              <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
+                <MaterialsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="warehouse/stock-movements" 
+            element={
+              <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
+                <StockMovementsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="warehouse/stock-levels" 
+            element={
+              <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
+                <StockLevelsPage />
+              </ProtectedRoute>
+            } 
+          />
 
           {/* Finance module routes */}
           <Route 
