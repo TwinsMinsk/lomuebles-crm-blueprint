@@ -1281,6 +1281,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_delete_stock_movement: {
+        Args: { movement_id: number }
+        Returns: Json
+      }
       create_notification: {
         Args: {
           p_user_id: string
@@ -1292,6 +1296,10 @@ export type Database = {
           p_action_url?: string
         }
         Returns: string
+      }
+      debug_auth_state: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       delete_old_read_notifications: {
         Args: Record<PropertyKey, never>

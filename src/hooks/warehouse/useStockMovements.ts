@@ -197,9 +197,46 @@ export const useDeleteStockMovement = () => {
       console.log('Attempting to delete movement with id:', id);
       
       // Check if user is authenticated before attempting deletion
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        throw new Error('Ошибка получения сессии. Пожалуйста, попробуйте войти в систему заново.');
+      }
+      
+      if (!session || !session.user) {
+        console.error('No valid session found');
         throw new Error('Сессия истекла. Пожалуйста, войдите в систему заново.');
+      }
+      
+      console.log('Session is valid for user:', session.user.id);
+      
+      // Debug the authentication state before deletion
+      try {
+        const { data: debugData, error: debugError } = await supabase
+          .rpc('debug_auth_state');
+        
+        if (debugError) {
+          console.error('Debug function error:', debugError);
+        } else {
+          console.log('Auth state debug:', debugData);
+        }
+        
+        // Check if user can delete this specific movement
+        const { data: canDeleteData, error: canDeleteError } = await supabase
+          .rpc('can_delete_stock_movement', { movement_id: id });
+        
+        if (canDeleteError) {
+          console.error('Can delete check error:', canDeleteError);
+        } else {
+          console.log('Can delete check result:', canDeleteData);
+          
+          if (canDeleteData && typeof canDeleteData === 'object' && 'can_delete' in canDeleteData && !canDeleteData.can_delete) {
+            throw new Error('У вас нет прав для удаления записей. Обратитесь к администратору.');
+          }
+        }
+      } catch (debugError) {
+        console.error('Debug checks failed:', debugError);
+        // Continue with deletion attempt even if debug fails
       }
       
       const { error } = await supabase
@@ -209,12 +246,20 @@ export const useDeleteStockMovement = () => {
 
       if (error) {
         console.error('Supabase error deleting stock movement:', error);
+        console.error('Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
         
         // Handle specific error types
-        if (error.code === '42501') {
+        if (error.code === '42501' || error.message?.includes('permission denied')) {
           throw new Error('У вас нет прав для удаления записей. Обратитесь к администратору.');
-        } else if (error.code === 'PGRST301') {
+        } else if (error.code === 'PGRST301' || error.message?.includes('JWT')) {
           throw new Error('Сессия истекла. Пожалуйста, войдите в систему заново.');
+        } else if (error.code === 'PGRST116') {
+          throw new Error('Запись не найдена или уже удалена.');
         } else {
           throw new Error(error.message || 'Произошла ошибка при удалении записи.');
         }
