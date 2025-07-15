@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instanciate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "12.2.3 (519615d)"
+  }
   public: {
     Tables: {
       companies: {
@@ -396,6 +401,71 @@ export type Database = {
           },
         ]
       }
+      materials: {
+        Row: {
+          average_cost: number | null
+          barcode: string | null
+          category: Database["public"]["Enums"]["material_category"]
+          created_at: string
+          creator_user_id: string
+          current_cost: number | null
+          description: string | null
+          id: number
+          is_active: boolean
+          max_stock_level: number | null
+          min_stock_level: number | null
+          name: string
+          sku: string | null
+          supplier_id: number | null
+          unit: Database["public"]["Enums"]["material_unit"]
+          updated_at: string
+        }
+        Insert: {
+          average_cost?: number | null
+          barcode?: string | null
+          category: Database["public"]["Enums"]["material_category"]
+          created_at?: string
+          creator_user_id: string
+          current_cost?: number | null
+          description?: string | null
+          id?: number
+          is_active?: boolean
+          max_stock_level?: number | null
+          min_stock_level?: number | null
+          name: string
+          sku?: string | null
+          supplier_id?: number | null
+          unit: Database["public"]["Enums"]["material_unit"]
+          updated_at?: string
+        }
+        Update: {
+          average_cost?: number | null
+          barcode?: string | null
+          category?: Database["public"]["Enums"]["material_category"]
+          created_at?: string
+          creator_user_id?: string
+          current_cost?: number | null
+          description?: string | null
+          id?: number
+          is_active?: boolean
+          max_stock_level?: number | null
+          min_stock_level?: number | null
+          name?: string
+          sku?: string | null
+          supplier_id?: number | null
+          unit?: Database["public"]["Enums"]["material_unit"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "materials_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["supplier_id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           action_url: string | null
@@ -724,6 +794,126 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_levels: {
+        Row: {
+          available_quantity: number | null
+          created_at: string
+          current_quantity: number
+          id: number
+          last_movement_date: string | null
+          location: string | null
+          material_id: number
+          notes: string | null
+          reserved_quantity: number
+          status: Database["public"]["Enums"]["stock_status"]
+          updated_at: string
+        }
+        Insert: {
+          available_quantity?: number | null
+          created_at?: string
+          current_quantity?: number
+          id?: number
+          last_movement_date?: string | null
+          location?: string | null
+          material_id: number
+          notes?: string | null
+          reserved_quantity?: number
+          status?: Database["public"]["Enums"]["stock_status"]
+          updated_at?: string
+        }
+        Update: {
+          available_quantity?: number | null
+          created_at?: string
+          current_quantity?: number
+          id?: number
+          last_movement_date?: string | null
+          location?: string | null
+          material_id?: number
+          notes?: string | null
+          reserved_quantity?: number
+          status?: Database["public"]["Enums"]["stock_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_levels_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: true
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_movements: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: number
+          material_id: number
+          movement_date: string
+          movement_type: Database["public"]["Enums"]["stock_movement_type"]
+          notes: string | null
+          order_id: number | null
+          quantity: number
+          reference_document: string | null
+          supplier_id: number | null
+          total_cost: number | null
+          unit_cost: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: number
+          material_id: number
+          movement_date?: string
+          movement_type: Database["public"]["Enums"]["stock_movement_type"]
+          notes?: string | null
+          order_id?: number | null
+          quantity: number
+          reference_document?: string | null
+          supplier_id?: number | null
+          total_cost?: number | null
+          unit_cost?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: number
+          material_id?: number
+          movement_date?: string
+          movement_type?: Database["public"]["Enums"]["stock_movement_type"]
+          notes?: string | null
+          order_id?: number | null
+          quantity?: number
+          reference_document?: string | null
+          supplier_id?: number | null
+          total_cost?: number | null
+          unit_cost?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["supplier_id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           attached_files: Json | null
@@ -771,6 +961,60 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      suppliers_materials: {
+        Row: {
+          created_at: string
+          id: number
+          is_preferred: boolean
+          lead_time_days: number | null
+          material_id: number
+          minimum_order_quantity: number | null
+          supplier_id: number
+          supplier_price: number | null
+          supplier_sku: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          is_preferred?: boolean
+          lead_time_days?: number | null
+          material_id: number
+          minimum_order_quantity?: number | null
+          supplier_id: number
+          supplier_price?: number | null
+          supplier_sku?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          is_preferred?: boolean
+          lead_time_days?: number | null
+          material_id?: number
+          minimum_order_quantity?: number | null
+          supplier_id?: number
+          supplier_price?: number | null
+          supplier_sku?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suppliers_materials_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suppliers_materials_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["supplier_id"]
           },
         ]
       }
@@ -1117,6 +1361,41 @@ export type Database = {
       }
     }
     Enums: {
+      material_category:
+        | "Древесина"
+        | "Металлы"
+        | "Фурнитура"
+        | "Крепеж"
+        | "Клеи и герметики"
+        | "Лакокрасочные материалы"
+        | "Ткани и обивка"
+        | "Стекло и зеркала"
+        | "Инструменты"
+        | "Расходные материалы"
+        | "Прочие"
+      material_unit:
+        | "шт"
+        | "м"
+        | "м²"
+        | "м³"
+        | "кг"
+        | "л"
+        | "упак"
+        | "комплект"
+        | "рулон"
+        | "лист"
+      stock_movement_type:
+        | "Поступление"
+        | "Расход"
+        | "Перемещение"
+        | "Инвентаризация"
+        | "Списание"
+        | "Возврат"
+      stock_status:
+        | "В наличии"
+        | "Заканчивается"
+        | "Нет в наличии"
+        | "Заказано у поставщика"
       user_role:
         | "Главный Администратор"
         | "Администратор"
@@ -1132,21 +1411,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -1164,14 +1447,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -1187,14 +1472,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -1210,14 +1497,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -1225,14 +1514,16 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
@@ -1240,6 +1531,45 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      material_category: [
+        "Древесина",
+        "Металлы",
+        "Фурнитура",
+        "Крепеж",
+        "Клеи и герметики",
+        "Лакокрасочные материалы",
+        "Ткани и обивка",
+        "Стекло и зеркала",
+        "Инструменты",
+        "Расходные материалы",
+        "Прочие",
+      ],
+      material_unit: [
+        "шт",
+        "м",
+        "м²",
+        "м³",
+        "кг",
+        "л",
+        "упак",
+        "комплект",
+        "рулон",
+        "лист",
+      ],
+      stock_movement_type: [
+        "Поступление",
+        "Расход",
+        "Перемещение",
+        "Инвентаризация",
+        "Списание",
+        "Возврат",
+      ],
+      stock_status: [
+        "В наличии",
+        "Заканчивается",
+        "Нет в наличии",
+        "Заказано у поставщика",
+      ],
       user_role: [
         "Главный Администратор",
         "Администратор",
