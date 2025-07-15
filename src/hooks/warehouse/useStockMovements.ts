@@ -191,11 +191,16 @@ export const useUpdateStockMovement = () => {
 
 export const useDeleteStockMovement = () => {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   return useMutation({
     mutationFn: async (id: number): Promise<void> => {
       console.log('Attempting to delete movement with id:', id);
+      
+      // Check if user is authenticated before attempting deletion
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Сессия истекла. Пожалуйста, войдите в систему заново.');
+      }
       
       const { error } = await supabase
         .from('stock_movements')
@@ -204,7 +209,15 @@ export const useDeleteStockMovement = () => {
 
       if (error) {
         console.error('Supabase error deleting stock movement:', error);
-        throw error;
+        
+        // Handle specific error types
+        if (error.code === '42501') {
+          throw new Error('У вас нет прав для удаления записей. Обратитесь к администратору.');
+        } else if (error.code === 'PGRST301') {
+          throw new Error('Сессия истекла. Пожалуйста, войдите в систему заново.');
+        } else {
+          throw new Error(error.message || 'Произошла ошибка при удалении записи.');
+        }
       }
       
       console.log('Successfully deleted movement with id:', id);
@@ -213,18 +226,9 @@ export const useDeleteStockMovement = () => {
       queryClient.invalidateQueries({ queryKey: ['stock_movements'] });
       queryClient.invalidateQueries({ queryKey: ['stock_levels'] });
       queryClient.invalidateQueries({ queryKey: ['materials'] });
-      toast({
-        title: 'Движение запасов удалено',
-        description: 'Операция успешно удалена из системы',
-      });
     },
     onError: (error) => {
       console.error('Error deleting stock movement:', error);
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось удалить движение запасов',
-        variant: 'destructive',
-      });
-    }
+    },
   });
 };
