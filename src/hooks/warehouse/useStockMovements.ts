@@ -195,15 +195,19 @@ export const useDeleteStockMovement = () => {
 
   return useMutation({
     mutationFn: async (id: number): Promise<void> => {
+      console.log('Attempting to delete movement with id:', id);
+      
       const { error } = await supabase
         .from('stock_movements')
         .delete()
         .eq('id', id);
 
       if (error) {
-        console.error('Error deleting stock movement:', error);
+        console.error('Supabase error deleting stock movement:', error);
         throw error;
       }
+      
+      console.log('Successfully deleted movement with id:', id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stock_movements'] });

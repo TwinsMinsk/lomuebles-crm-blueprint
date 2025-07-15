@@ -25,15 +25,22 @@ export const StockMovementsTable = ({ movements, isLoading }: StockMovementsTabl
   const deleteMovement = useDeleteStockMovement();
 
   const handleDeleteClick = (movementId: number) => {
+    console.log('Delete button clicked for movement:', movementId);
     setSelectedMovementId(movementId);
     setDeleteDialogOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
+    console.log('Delete confirmation for movement:', selectedMovementId);
     if (selectedMovementId) {
-      await deleteMovement.mutateAsync(selectedMovementId);
-      setDeleteDialogOpen(false);
-      setSelectedMovementId(null);
+      try {
+        await deleteMovement.mutateAsync(selectedMovementId);
+        console.log('Delete completed successfully');
+        setDeleteDialogOpen(false);
+        setSelectedMovementId(null);
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
     }
   };
 
