@@ -6,6 +6,8 @@ import { useToast } from '@/hooks/use-toast';
 export const useStockMovements = (filters?: StockMovementFilters) => {
   return useQuery({
     queryKey: ['stock_movements', filters],
+    retry: 3, // Retry 3 times on network errors
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
     queryFn: async (): Promise<StockMovementWithDetails[]> => {
       let query = supabase
         .from('stock_movements')
@@ -68,6 +70,8 @@ export const useStockMovements = (filters?: StockMovementFilters) => {
 export const useStockMovement = (id: number) => {
   return useQuery({
     queryKey: ['stock_movement', id],
+    retry: 3, // Retry 3 times on network errors
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
     queryFn: async (): Promise<StockMovementWithDetails | null> => {
       const { data, error } = await supabase
         .from('stock_movements')
@@ -105,6 +109,8 @@ export const useCreateStockMovement = () => {
   const { toast } = useToast();
 
   return useMutation({
+    retry: 2, // Retry 2 times on network errors for mutations
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000), // Exponential backoff
     mutationFn: async (movementData: StockMovementFormData): Promise<StockMovement> => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) {
@@ -139,11 +145,21 @@ export const useCreateStockMovement = () => {
     },
     onError: (error) => {
       console.error('Error creating stock movement:', error);
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось создать движение запасов',
-        variant: 'destructive',
-      });
+      
+      // Check if it's a network error
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        toast({
+          title: 'Сетевая ошибка',
+          description: 'Не удалось связаться с сервером. Проверьте интернет-соединение и попробуйте снова.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: 'Не удалось создать движение запасов',
+          variant: 'destructive',
+        });
+      }
     }
   });
 };
@@ -153,6 +169,8 @@ export const useUpdateStockMovement = () => {
   const { toast } = useToast();
 
   return useMutation({
+    retry: 2, // Retry 2 times on network errors for mutations
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000), // Exponential backoff
     mutationFn: async ({ id, ...updateData }: Partial<StockMovementFormData> & { id: number }): Promise<StockMovement> => {
       const { data, error } = await supabase
         .from('stock_movements')
@@ -180,19 +198,32 @@ export const useUpdateStockMovement = () => {
     },
     onError: (error) => {
       console.error('Error updating stock movement:', error);
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось обновить движение запасов',
-        variant: 'destructive',
-      });
+      
+      // Check if it's a network error
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        toast({
+          title: 'Сетевая ошибка',
+          description: 'Не удалось связаться с сервером. Проверьте интернет-соединение и попробуйте снова.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: 'Не удалось обновить движение запасов',
+          variant: 'destructive',
+        });
+      }
     }
   });
 };
 
 export const useDeleteStockMovement = () => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   return useMutation({
+    retry: 2, // Retry 2 times on network errors for mutations
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000), // Exponential backoff
     mutationFn: async (id: number): Promise<void> => {
       console.log('Attempting to delete movement with id:', id);
       
@@ -274,6 +305,21 @@ export const useDeleteStockMovement = () => {
     },
     onError: (error) => {
       console.error('Error deleting stock movement:', error);
+      
+      // Check if it's a network error
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        toast({
+          title: 'Сетевая ошибка',
+          description: 'Не удалось связаться с сервером. Проверьте интернет-соединение и попробуйте снова.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Ошибка при удалении',
+          description: error instanceof Error ? error.message : 'Произошла неизвестная ошибка',
+          variant: 'destructive',
+        });
+      }
     },
   });
 };
