@@ -11,7 +11,7 @@ export const useMaterials = (filters?: MaterialFilters) => {
         .from('materials')
         .select(`
           *,
-          stock_level:stock_levels(*),
+          stock_levels(*),
           supplier:suppliers(supplier_name)
         `)
         .order('name', { ascending: true });
@@ -42,7 +42,7 @@ export const useMaterials = (filters?: MaterialFilters) => {
 
       let materials = (data || []).map((item: any) => ({
         ...item,
-        stock_level: item.stock_level?.[0] || null,
+        stock_level: item.stock_levels?.[0] || null,
         supplier_name: item.supplier?.supplier_name || null
       }));
 
@@ -67,7 +67,7 @@ export const useMaterial = (id: number) => {
         .from('materials')
         .select(`
           *,
-          stock_level:stock_levels(*),
+          stock_levels(*),
           supplier:suppliers(supplier_name)
         `)
         .eq('id', id)
@@ -82,7 +82,7 @@ export const useMaterial = (id: number) => {
 
       return {
         ...data,
-        stock_level: data.stock_level?.[0] || null,
+        stock_level: data.stock_levels?.[0] || null,
         supplier_name: data.supplier?.supplier_name || null
       };
     },
