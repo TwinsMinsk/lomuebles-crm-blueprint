@@ -341,6 +341,99 @@ export type Database = {
           },
         ]
       }
+      estimate_items: {
+        Row: {
+          created_at: string
+          estimate_id: number
+          id: number
+          material_id: number
+          price_at_estimation: number | null
+          quantity_needed: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estimate_id: number
+          id?: number
+          material_id: number
+          price_at_estimation?: number | null
+          quantity_needed: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estimate_id?: number
+          id?: number
+          material_id?: number
+          price_at_estimation?: number | null
+          quantity_needed?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estimate_items_estimate_id_fkey"
+            columns: ["estimate_id"]
+            isOneToOne: false
+            referencedRelation: "estimates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimate_items_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      estimates: {
+        Row: {
+          created_at: string
+          creator_user_id: string
+          id: number
+          name: string | null
+          order_id: number
+          status: string
+          total_cost: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_user_id: string
+          id?: number
+          name?: string | null
+          order_id: number
+          status?: string
+          total_cost?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_user_id?: string
+          id?: number
+          name?: string | null
+          order_id?: number
+          status?: string
+          total_cost?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estimates_creator_user_id_fkey"
+            columns: ["creator_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimates_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           assigned_user_id: string | null
@@ -397,6 +490,48 @@ export type Database = {
             columns: ["creator_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_reservations: {
+        Row: {
+          created_at: string
+          id: number
+          material_id: number
+          order_id: number
+          quantity_reserved: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          material_id: number
+          order_id: number
+          quantity_reserved: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          material_id?: number
+          order_id?: number
+          quantity_reserved?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_reservations_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_reservations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
