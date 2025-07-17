@@ -112,7 +112,7 @@ export const useCreateStockMovement = () => {
     retry: 2, // Retry 2 times on network errors for mutations
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000), // Exponential backoff
     mutationFn: async (movementData: StockMovementFormData): Promise<StockMovement> => {
-      console.log('useCreateStockMovement: Starting mutation with data:', movementData);
+      console.log('useCreateStockMovement: Starting RPC mutation with data:', movementData);
       
       // Проверка аутентификации
       const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -130,23 +130,27 @@ export const useCreateStockMovement = () => {
 
       console.log('useCreateStockMovement: User authenticated:', userData.user.id);
 
-      // Подготовка данных для отправки
-      const insertData = {
-        ...movementData,
-        created_by: userData.user.id,
-        movement_date: movementData.movement_date || new Date().toISOString()
+      // Подготовка данных для RPC функции
+      const rpcData = {
+        material_id: movementData.material_id,
+        movement_type: movementData.movement_type,
+        quantity: movementData.quantity,
+        unit_cost: movementData.unit_cost || null,
+        supplier_id: movementData.supplier_id || null,
+        order_id: movementData.order_id || null,
+        movement_date: movementData.movement_date || new Date().toISOString(),
+        notes: movementData.notes || null,
+        reference_document: movementData.reference_document || null,
       };
       
-      console.log('useCreateStockMovement: Data to insert:', insertData);
+      console.log('useCreateStockMovement: Calling RPC with data:', rpcData);
 
-      const { data, error } = await supabase
-        .from('stock_movements')
-        .insert(insertData)
-        .select()
-        .single();
+      const { data, error } = await supabase.rpc('create_stock_movement', {
+        p_movement_data: rpcData
+      });
 
       if (error) {
-        console.error('useCreateStockMovement: Supabase error:', error);
+        console.error('useCreateStockMovement: RPC error:', error);
         console.error('Error code:', error.code);
         console.error('Error message:', error.message);
         console.error('Error details:', error.details);
@@ -154,7 +158,7 @@ export const useCreateStockMovement = () => {
         throw error;
       }
 
-      console.log('useCreateStockMovement: Successfully created movement:', data);
+      console.log('useCreateStockMovement: Successfully created movement via RPC:', data);
       return data;
     },
     onSuccess: (data) => {

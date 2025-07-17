@@ -1432,6 +1432,24 @@ export type Database = {
         }
         Returns: string
       }
+      create_stock_movement: {
+        Args: { p_movement_data: Json }
+        Returns: {
+          created_at: string
+          created_by: string
+          id: number
+          material_id: number
+          movement_date: string
+          movement_type: Database["public"]["Enums"]["stock_movement_type"]
+          notes: string | null
+          order_id: number | null
+          quantity: number
+          reference_document: string | null
+          supplier_id: number | null
+          total_cost: number | null
+          unit_cost: number | null
+        }
+      }
       debug_auth_state: {
         Args: Record<PropertyKey, never>
         Returns: Json
