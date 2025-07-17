@@ -28,6 +28,7 @@ import OrderNotes from "@/components/orders/OrderNotes";
 import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
 import { ArrowLeft, Trash2, Edit, FileText } from "lucide-react";
 import CreateIncomeFromOrder from "@/components/orders/CreateIncomeFromOrder";
+import EstimatesTab from "@/components/warehouse/EstimatesTab";
 
 const OrderDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -173,6 +174,7 @@ const OrderDetailPage = () => {
           <TabsList className="mb-6">
             <TabsTrigger value="details">Детали заказа</TabsTrigger>
             <TabsTrigger value="items">Товары</TabsTrigger>
+            <TabsTrigger value="estimates">Сметы и Материалы</TabsTrigger>
             <TabsTrigger value="notes">Заметки</TabsTrigger>
             <TabsTrigger value="files">Файлы</TabsTrigger>
           </TabsList>
@@ -277,6 +279,12 @@ const OrderDetailPage = () => {
             <div className="bg-white shadow rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-4">Товары в заказе</h2>
               <OrderItemsTable orderId={order.id} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="estimates">
+            <div className="bg-white shadow rounded-lg p-6">
+              <EstimatesTab orderId={order.id} orderNumber={order.order_number} />
             </div>
           </TabsContent>
 
