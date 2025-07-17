@@ -1331,6 +1331,12 @@ export type Database = {
         Args: { date_from: string; date_to: string }
         Returns: Json
       }
+      get_movement_multiplier: {
+        Args: {
+          movement_type_param: Database["public"]["Enums"]["stock_movement_type"]
+        }
+        Returns: number
+      }
       get_sorted_tasks: {
         Args: Record<PropertyKey, never>
         Returns: {
