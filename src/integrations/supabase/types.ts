@@ -1530,6 +1530,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      recalculate_stock_levels: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       material_category:

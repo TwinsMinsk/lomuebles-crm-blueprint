@@ -68,14 +68,19 @@ export const MaterialsTable = ({ materials, isLoading }: MaterialsTableProps) =>
                   {material.stock_level ? (
                     <div className="flex items-center gap-2">
                       <span className="font-medium">
-                        {material.stock_level.current_quantity} {material.unit}
+                        {Number(material.stock_level.current_quantity || 0)} {material.unit}
                       </span>
                       <Badge variant="outline" className={getStockStatusInfo(material.stock_level.status).className}>
                         {getStockStatusInfo(material.stock_level.status).label}
                       </Badge>
                     </div>
                   ) : (
-                    <span className="text-muted-foreground">Нет данных</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">0 {material.unit}</span>
+                      <Badge variant="outline" className="text-red-600 border-red-600">
+                        Нет в наличии
+                      </Badge>
+                    </div>
                   )}
                 </TableCell>
                 <TableCell>{material.min_stock_level} {material.unit}</TableCell>
