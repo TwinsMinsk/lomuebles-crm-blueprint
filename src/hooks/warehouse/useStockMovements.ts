@@ -241,39 +241,10 @@ export const useDeleteStockMovement = () => {
       
       console.log('Session is valid for user:', session.user.id);
       
-      // Debug the authentication state before deletion
-      try {
-        const { data: debugData, error: debugError } = await supabase
-          .rpc('debug_auth_state');
-        
-        if (debugError) {
-          console.error('Debug function error:', debugError);
-        } else {
-          console.log('Auth state debug:', debugData);
-        }
-        
-        // Check if user can delete this specific movement
-        const { data: canDeleteData, error: canDeleteError } = await supabase
-          .rpc('can_delete_stock_movement', { movement_id: id });
-        
-        if (canDeleteError) {
-          console.error('Can delete check error:', canDeleteError);
-        } else {
-          console.log('Can delete check result:', canDeleteData);
-          
-          if (canDeleteData && typeof canDeleteData === 'object' && 'can_delete' in canDeleteData && !canDeleteData.can_delete) {
-            throw new Error('У вас нет прав для удаления записей. Обратитесь к администратору.');
-          }
-        }
-      } catch (debugError) {
-        console.error('Debug checks failed:', debugError);
-        // Continue with deletion attempt even if debug fails
-      }
-      
-      const { error } = await supabase
-        .from('stock_movements')
-        .delete()
-        .eq('id', id);
+      // Call the RPC function to delete the stock movement
+      const { data, error } = await supabase.rpc('delete_stock_movement', {
+        p_movement_id: id
+      });
 
       if (error) {
         console.error('Supabase error deleting stock movement:', error);
@@ -285,18 +256,18 @@ export const useDeleteStockMovement = () => {
         });
         
         // Handle specific error types
-        if (error.code === '42501' || error.message?.includes('permission denied')) {
+        if (error.code === 'P0001' || error.message?.includes('Access denied')) {
           throw new Error('У вас нет прав для удаления записей. Обратитесь к администратору.');
+        } else if (error.code === 'P0001' || error.message?.includes('not found')) {
+          throw new Error('Запись не найдена или уже удалена.');
         } else if (error.code === 'PGRST301' || error.message?.includes('JWT')) {
           throw new Error('Сессия истекла. Пожалуйста, войдите в систему заново.');
-        } else if (error.code === 'PGRST116') {
-          throw new Error('Запись не найдена или уже удалена.');
         } else {
           throw new Error(error.message || 'Произошла ошибка при удалении записи.');
         }
       }
       
-      console.log('Successfully deleted movement with id:', id);
+      console.log('Successfully deleted movement with id:', id, 'Result:', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stock_movements'] });

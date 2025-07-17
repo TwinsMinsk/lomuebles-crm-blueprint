@@ -1305,6 +1305,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      delete_stock_movement: {
+        Args: { p_movement_id: number }
+        Returns: Json
+      }
       generate_new_order_number: {
         Args: Record<PropertyKey, never>
         Returns: string
