@@ -1,7 +1,8 @@
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -48,9 +49,9 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
   const form = useForm<StockMovementFormData>({
     resolver: zodResolver(stockMovementFormSchema),
     defaultValues: {
-      material_id: 0,
+      material_id: 0, // Это значение не пройдет валидацию - будет показана ошибка
       movement_type: STOCK_MOVEMENT_TYPES[0],
-      quantity: 0,
+      quantity: 0, // Это значение не пройдет валидацию - будет показана ошибка
       reference_document: "",
       notes: "",
       movement_date: new Date().toISOString().split('T')[0],
@@ -59,7 +60,9 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
 
   // Pre-fill form when editing
   useEffect(() => {
+    console.log('StockMovementFormModal: useEffect triggered', { mode, movement });
     if (mode === "edit" && movement) {
+      console.log('Setting form values for edit mode:', movement);
       form.reset({
         material_id: movement.material_id,
         movement_type: movement.movement_type,
@@ -72,6 +75,7 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
         movement_date: movement.movement_date ? new Date(movement.movement_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       });
     } else if (mode === "create") {
+      console.log('Resetting form for create mode');
       form.reset({
         material_id: 0,
         movement_type: STOCK_MOVEMENT_TYPES[0],
@@ -84,20 +88,37 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
   }, [mode, movement, form]);
 
   const onSubmit = async (data: StockMovementFormData) => {
+    console.log('Form submitted with data:', data);
+    console.log('Form validation state:', form.formState);
+    console.log('Form errors:', form.formState.errors);
+    
     try {
+      console.log('Calling createMovement.mutateAsync with:', data);
+      
       if (mode === "edit" && movement) {
+        console.log('Editing movement with id:', movement.id);
         await updateMovement.mutateAsync({ ...data, id: movement.id });
       } else {
+        console.log('Creating new movement');
         await createMovement.mutateAsync(data);
       }
+      
+      console.log('Movement operation successful, closing modal');
       onClose();
       form.reset();
     } catch (error) {
-      console.error("Error saving stock movement:", error);
+      console.error('Error in onSubmit:', error);
+      // Дополнительная информация об ошибке
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
+      console.error('Full error object:', JSON.stringify(error, null, 2));
     }
   };
 
   const handleClose = () => {
+    console.log('Modal closing, resetting form');
     onClose();
     form.reset();
   };
@@ -111,6 +132,9 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
           <DialogTitle>
             {mode === "edit" ? "Редактировать движение материала" : "Добавить движение материала"}
           </DialogTitle>
+          <DialogDescription>
+            Заполните форму для {mode === "edit" ? "редактирования" : "создания"} движения материала на складе.
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -122,7 +146,13 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Материал *</FormLabel>
-                    <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
+                    <Select 
+                      onValueChange={(value) => {
+                        console.log('Material selected:', value);
+                        field.onChange(Number(value));
+                      }} 
+                      value={field.value > 0 ? field.value.toString() : ""}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Выберите материал" />
@@ -178,7 +208,11 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
                         step="0.01"
                         {...field}
                         value={field.value || ""}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        onChange={(e) => {
+                          const value = e.target.value ? Number(e.target.value) : 0;
+                          console.log('Quantity changed:', value);
+                          field.onChange(value);
+                        }}
                         placeholder="0"
                       />
                     </FormControl>

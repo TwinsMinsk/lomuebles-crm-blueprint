@@ -112,29 +112,53 @@ export const useCreateStockMovement = () => {
     retry: 2, // Retry 2 times on network errors for mutations
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000), // Exponential backoff
     mutationFn: async (movementData: StockMovementFormData): Promise<StockMovement> => {
-      const { data: userData } = await supabase.auth.getUser();
+      console.log('useCreateStockMovement: Starting mutation with data:', movementData);
+      
+      // Проверка аутентификации
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      console.log('useCreateStockMovement: User data check:', { userData, userError });
+      
+      if (userError) {
+        console.error('useCreateStockMovement: Error getting user:', userError);
+        throw new Error('Ошибка получения данных пользователя: ' + userError.message);
+      }
+      
       if (!userData.user) {
+        console.error('useCreateStockMovement: No user found');
         throw new Error('Пользователь не авторизован');
       }
 
+      console.log('useCreateStockMovement: User authenticated:', userData.user.id);
+
+      // Подготовка данных для отправки
+      const insertData = {
+        ...movementData,
+        created_by: userData.user.id,
+        movement_date: movementData.movement_date || new Date().toISOString()
+      };
+      
+      console.log('useCreateStockMovement: Data to insert:', insertData);
+
       const { data, error } = await supabase
         .from('stock_movements')
-        .insert({
-          ...movementData,
-          created_by: userData.user.id,
-          movement_date: movementData.movement_date || new Date().toISOString()
-        })
+        .insert(insertData)
         .select()
         .single();
 
       if (error) {
-        console.error('Error creating stock movement:', error);
+        console.error('useCreateStockMovement: Supabase error:', error);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
+        console.error('Error hint:', error.hint);
         throw error;
       }
 
+      console.log('useCreateStockMovement: Successfully created movement:', data);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('useCreateStockMovement: onSuccess called with:', data);
       queryClient.invalidateQueries({ queryKey: ['stock_movements'] });
       queryClient.invalidateQueries({ queryKey: ['stock_levels'] });
       queryClient.invalidateQueries({ queryKey: ['materials'] });
@@ -144,22 +168,29 @@ export const useCreateStockMovement = () => {
       });
     },
     onError: (error) => {
-      console.error('Error creating stock movement:', error);
+      console.error('useCreateStockMovement: onError called with:', error);
       
-      // Check if it's a network error
+      // Детальная обработка ошибок
+      let errorMessage = 'Не удалось создать движение запасов';
+      
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        toast({
-          title: 'Сетевая ошибка',
-          description: 'Не удалось связаться с сервером. Проверьте интернет-соединение и попробуйте снова.',
-          variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: 'Ошибка',
-          description: 'Не удалось создать движение запасов',
-          variant: 'destructive',
-        });
+        errorMessage = 'Сетевая ошибка. Проверьте интернет-соединение и попробуйте снова.';
+      } else if (error && typeof error === 'object' && 'code' in error) {
+        const supabaseError = error as any;
+        if (supabaseError.code === '42501') {
+          errorMessage = 'Недостаточно прав для создания записи. Обратитесь к администратору.';
+        } else if (supabaseError.code === 'PGRST301') {
+          errorMessage = 'Сессия истекла. Пожалуйста, войдите в систему заново.';
+        } else if (supabaseError.message) {
+          errorMessage = supabaseError.message;
+        }
       }
+      
+      toast({
+        title: 'Ошибка',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     }
   });
 };
