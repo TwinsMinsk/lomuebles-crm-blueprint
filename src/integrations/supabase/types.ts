@@ -1530,6 +1530,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      recalculate_one_material_stock: {
+        Args: { p_material_id: number }
+        Returns: undefined
+      }
       recalculate_stock_levels: {
         Args: Record<PropertyKey, never>
         Returns: undefined
