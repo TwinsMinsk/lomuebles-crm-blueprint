@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,8 @@ interface MaterialsTableProps {
 export const MaterialsTable = ({ materials, isLoading }: MaterialsTableProps) => {
   const [editingMaterial, setEditingMaterial] = useState<MaterialWithStock | null>(null);
   const [deletingMaterial, setDeletingMaterial] = useState<MaterialWithStock | null>(null);
+
+  console.log('MaterialsTable: Received materials:', materials);
 
   if (isLoading) {
     return <LoadingSkeleton />;
@@ -45,73 +48,77 @@ export const MaterialsTable = ({ materials, isLoading }: MaterialsTableProps) =>
               </TableCell>
             </TableRow>
           ) : (
-            materials.map((material) => (
-              <TableRow key={material.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Package className="h-4 w-4 text-primary" />
+            materials.map((material) => {
+              console.log('Rendering material:', material.name, 'Stock level data:', material.stock_level);
+              
+              return (
+                <TableRow key={material.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                        <Package className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <div className="font-medium">{material.name}</div>
+                        {material.sku && (
+                          <div className="text-sm text-muted-foreground">SKU: {material.sku}</div>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <div className="font-medium">{material.name}</div>
-                      {material.sku && (
-                        <div className="text-sm text-muted-foreground">SKU: {material.sku}</div>
-                      )}
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline">{material.category}</Badge>
-                </TableCell>
-                <TableCell>{material.unit}</TableCell>
-                <TableCell>
-                  {material.stock_level ? (
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{material.category}</Badge>
+                  </TableCell>
+                  <TableCell>{material.unit}</TableCell>
+                  <TableCell>
+                    {material.stock_level ? (
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">
+                          {Number(material.stock_level.current_quantity || 0)} {material.unit}
+                        </span>
+                        <Badge variant="outline" className={getStockStatusInfo(material.stock_level.status).className}>
+                          {getStockStatusInfo(material.stock_level.status).label}
+                        </Badge>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">0 {material.unit}</span>
+                        <Badge variant="outline" className="text-red-600 border-red-600">
+                          Нет данных об остатках
+                        </Badge>
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell>{material.min_stock_level} {material.unit}</TableCell>
+                  <TableCell>
+                    {material.current_cost ? formatCurrency(material.current_cost) : "—"}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={material.is_active ? "default" : "secondary"}>
+                      {material.is_active ? "Активен" : "Неактивен"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">
-                        {Number(material.stock_level.current_quantity || 0)} {material.unit}
-                      </span>
-                      <Badge variant="outline" className={getStockStatusInfo(material.stock_level.status).className}>
-                        {getStockStatusInfo(material.stock_level.status).label}
-                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditingMaterial(material)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeletingMaterial(material)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">0 {material.unit}</span>
-                      <Badge variant="outline" className="text-red-600 border-red-600">
-                        Нет в наличии
-                      </Badge>
-                    </div>
-                  )}
-                </TableCell>
-                <TableCell>{material.min_stock_level} {material.unit}</TableCell>
-                <TableCell>
-                  {material.current_cost ? formatCurrency(material.current_cost) : "—"}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={material.is_active ? "default" : "secondary"}>
-                    {material.is_active ? "Активен" : "Неактивен"}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setEditingMaterial(material)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setDeletingMaterial(material)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
+                  </TableCell>
+                </TableRow>
+              );
+            })
           )}
         </TableBody>
       </Table>

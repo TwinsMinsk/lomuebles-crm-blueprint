@@ -7,6 +7,8 @@ export const useMaterials = (filters?: MaterialFilters) => {
   return useQuery({
     queryKey: ['materials', filters],
     queryFn: async (): Promise<MaterialWithStock[]> => {
+      console.log('useMaterials: Starting query with filters:', filters);
+      
       let query = supabase
         .from('materials')
         .select(`
@@ -40,11 +42,27 @@ export const useMaterials = (filters?: MaterialFilters) => {
         throw error;
       }
 
-      let materials = (data || []).map((item: any) => ({
-        ...item,
-        stock_level: item.stock_levels?.[0] || null,
-        supplier_name: item.supplier?.supplier_name || null
-      }));
+      console.log('useMaterials: Raw data from Supabase:', data);
+
+      // Process the data to extract stock levels correctly
+      let materials = (data || []).map((item: any) => {
+        console.log('Processing material:', item.name, 'Stock levels:', item.stock_levels);
+        
+        // Extract the first stock level (should be only one per material)
+        const stockLevel = item.stock_levels && item.stock_levels.length > 0 ? item.stock_levels[0] : null;
+        
+        const processedMaterial = {
+          ...item,
+          stock_level: stockLevel,
+          supplier_name: item.supplier?.supplier_name || null
+        };
+        
+        console.log('Processed material:', processedMaterial.name, 'Final stock_level:', processedMaterial.stock_level);
+        
+        return processedMaterial;
+      });
+
+      console.log('useMaterials: Processed materials:', materials);
 
       // Apply low stock filter on client side
       if (filters?.low_stock_only) {
@@ -54,6 +72,7 @@ export const useMaterials = (filters?: MaterialFilters) => {
         );
       }
 
+      console.log('useMaterials: Final materials after filtering:', materials);
       return materials;
     }
   });
