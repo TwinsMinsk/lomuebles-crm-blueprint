@@ -47,13 +47,10 @@ export function Combobox({
   const selectedOption = options.find((option) => option.value === value)
 
   const handleSelect = React.useCallback((selectedValue: string) => {
-    console.log('Combobox: Selected value:', selectedValue, 'Current value:', value);
+    console.log('Combobox: handleSelect called with:', selectedValue, 'Current value:', value);
     
-    // If clicking the same option, clear the selection
-    const newValue = selectedValue === value ? "" : selectedValue;
-    console.log('Combobox: New value to set:', newValue);
-    
-    onValueChange?.(newValue);
+    // Simply set the new value - no toggle logic
+    onValueChange?.(selectedValue);
     setOpen(false);
   }, [value, onValueChange]);
 
@@ -81,22 +78,17 @@ export function Combobox({
                 <CommandItem
                   key={option.value}
                   value={option.value}
-                  onSelect={() => {
-                    console.log('CommandItem onSelect triggered for:', option.value);
-                    handleSelect(option.value);
+                  onSelect={(currentValue) => {
+                    console.log('CommandItem onSelect - currentValue:', currentValue, 'option.value:', option.value);
+                    // cmdk converts values to lowercase, so we need to find the original option
+                    const matchingOption = options.find(opt => 
+                      opt.value.toLowerCase() === currentValue.toLowerCase()
+                    );
+                    if (matchingOption) {
+                      handleSelect(matchingOption.value);
+                    }
                   }}
                   className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                  onClick={(e) => {
-                    console.log('CommandItem onClick triggered for:', option.value);
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleSelect(option.value);
-                  }}
-                  onMouseDown={(e) => {
-                    console.log('CommandItem onMouseDown triggered for:', option.value);
-                    // Prevent event bubbling to ensure click works
-                    e.stopPropagation();
-                  }}
                 >
                   <Check
                     className={cn(
