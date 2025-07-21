@@ -71,7 +71,7 @@ export function Combobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 z-50" align="start">
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 z-[9999]" align="start" side="bottom" sideOffset={4}>
         <Command>
           <CommandInput placeholder={`Search ${placeholder.toLowerCase()}...`} />
           <CommandList>
@@ -81,8 +81,22 @@ export function Combobox({
                 <CommandItem
                   key={option.value}
                   value={option.value}
-                  onSelect={() => handleSelect(option.value)}
-                  className="cursor-pointer"
+                  onSelect={() => {
+                    console.log('CommandItem onSelect triggered for:', option.value);
+                    handleSelect(option.value);
+                  }}
+                  className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                  onClick={(e) => {
+                    console.log('CommandItem onClick triggered for:', option.value);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSelect(option.value);
+                  }}
+                  onMouseDown={(e) => {
+                    console.log('CommandItem onMouseDown triggered for:', option.value);
+                    // Prevent event bubbling to ensure click works
+                    e.stopPropagation();
+                  }}
                 >
                   <Check
                     className={cn(
