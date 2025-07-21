@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -31,17 +32,23 @@ const EstimateFormModal: React.FC<EstimateFormModalProps> = ({
 }) => {
   const [estimateName, setEstimateName] = useState("");
   const [estimateStatus, setEstimateStatus] = useState("черновик");
-  const [selectedMaterialId, setSelectedMaterialId] = useState<number | null>(null);
+  const [selectedMaterialId, setSelectedMaterialId] = useState<string>("");
   const [newItemQuantity, setNewItemQuantity] = useState<number>(1);
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
   const [editingQuantity, setEditingQuantity] = useState<number>(0);
 
   const { data: estimate, isLoading: estimateLoading } = useEstimateById(estimateId || undefined);
-  const { data: materials = [] } = useMaterials();
+  const { data: materials = [], isLoading: materialsLoading, error: materialsError } = useMaterials();
   const updateEstimate = useUpdateEstimate();
   const addEstimateItem = useAddEstimateItem();
   const updateEstimateItem = useUpdateEstimateItem();
   const deleteEstimateItem = useDeleteEstimateItem();
+
+  // Debug logs
+  console.log('EstimateFormModal: Materials data:', materials);
+  console.log('EstimateFormModal: Materials loading:', materialsLoading);
+  console.log('EstimateFormModal: Materials error:', materialsError);
+  console.log('EstimateFormModal: Selected material ID:', selectedMaterialId);
 
   // Update form fields when estimate data changes
   useEffect(() => {
@@ -67,28 +74,44 @@ const EstimateFormModal: React.FC<EstimateFormModalProps> = ({
     }
   };
 
+  const handleMaterialChange = (value: string) => {
+    console.log('EstimateFormModal: Material selection changed to:', value);
+    setSelectedMaterialId(value);
+  };
+
   const handleAddMaterial = async () => {
+    console.log('EstimateFormModal: Adding material. Selected ID:', selectedMaterialId, 'Quantity:', newItemQuantity);
+    
     if (!estimateId || !selectedMaterialId || newItemQuantity <= 0) {
       toast.error("Выберите материал и укажите количество");
       return;
     }
 
-    const selectedMaterial = materials.find(m => m.id === selectedMaterialId);
-    if (!selectedMaterial) return;
+    const materialId = parseInt(selectedMaterialId);
+    const selectedMaterial = materials.find(m => m.id === materialId);
+    
+    console.log('EstimateFormModal: Found material:', selectedMaterial);
+    
+    if (!selectedMaterial) {
+      toast.error("Выбранный материал не найден");
+      return;
+    }
 
     try {
       await addEstimateItem.mutateAsync({
         estimate_id: estimateId,
-        material_id: selectedMaterialId,
+        material_id: materialId,
         quantity_needed: newItemQuantity,
         price_at_estimation: selectedMaterial.current_cost || 0,
       });
 
       // Reset form
-      setSelectedMaterialId(null);
+      setSelectedMaterialId("");
       setNewItemQuantity(1);
+      toast.success("Материал добавлен в смету");
     } catch (error) {
       console.error("Error adding material:", error);
+      toast.error("Ошибка при добавлении материала");
     }
   };
 
@@ -117,12 +140,27 @@ const EstimateFormModal: React.FC<EstimateFormModalProps> = ({
     }
   };
 
-  const materialOptions = materials
-    .filter(material => material.is_active)
-    .map(material => ({
-      value: material.id.toString(),
-      label: `${material.name} (${material.current_cost || 0}€/${material.unit})`,
-    }));
+  // Create material options with better error handling
+  const materialOptions = React.useMemo(() => {
+    if (!materials || materials.length === 0) {
+      console.log('EstimateFormModal: No materials available');
+      return [];
+    }
+    
+    const options = materials
+      .filter(material => material && material.is_active)
+      .map(material => {
+        const option = {
+          value: material.id.toString(),
+          label: `${material.name} (${material.current_cost || 0}€/${material.unit})`,
+        };
+        console.log('EstimateFormModal: Created option:', option);
+        return option;
+      });
+    
+    console.log('EstimateFormModal: Final material options:', options);
+    return options;
+  }, [materials]);
 
   if (!isOpen) return null;
 
@@ -178,15 +216,36 @@ const EstimateFormModal: React.FC<EstimateFormModalProps> = ({
             {!readOnly && (
               <div className="border rounded-lg p-4">
                 <h3 className="font-medium mb-4">Добавить материал</h3>
+                
+                {/* Debug info */}
+                {materialsLoading && (
+                  <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-sm">
+                    Загрузка материалов...
+                  </div>
+                )}
+                
+                {materialsError && (
+                  <div className="mb-4 p-2 bg-red-50 border border-red-200 rounded text-sm">
+                    Ошибка загрузки материалов: {materialsError.message}
+                  </div>
+                )}
+                
+                {!materialsLoading && materialOptions.length === 0 && (
+                  <div className="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm">
+                    Нет доступных активных материалов
+                  </div>
+                )}
+                
                 <div className="flex gap-4 items-end">
                   <div className="flex-1">
                     <Label htmlFor="material-select">Материал</Label>
                     <Combobox
                       options={materialOptions}
-                      value={selectedMaterialId?.toString() || ""}
-                      onValueChange={(value) => setSelectedMaterialId(value ? parseInt(value) : null)}
+                      value={selectedMaterialId}
+                      onValueChange={handleMaterialChange}
                       placeholder="Поиск материала..."
                       emptyText="Материалы не найдены"
+                      disabled={materialsLoading || materialOptions.length === 0}
                     />
                   </div>
                   <div className="w-32">

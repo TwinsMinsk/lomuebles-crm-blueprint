@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 
@@ -45,6 +46,17 @@ export function Combobox({
 
   const selectedOption = options.find((option) => option.value === value)
 
+  const handleSelect = React.useCallback((selectedValue: string) => {
+    console.log('Combobox: Selected value:', selectedValue, 'Current value:', value);
+    
+    // If clicking the same option, clear the selection
+    const newValue = selectedValue === value ? "" : selectedValue;
+    console.log('Combobox: New value to set:', newValue);
+    
+    onValueChange?.(newValue);
+    setOpen(false);
+  }, [value, onValueChange]);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -59,7 +71,7 @@ export function Combobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 z-50" align="start">
         <Command>
           <CommandInput placeholder={`Search ${placeholder.toLowerCase()}...`} />
           <CommandList>
@@ -69,10 +81,8 @@ export function Combobox({
                 <CommandItem
                   key={option.value}
                   value={option.value}
-                  onSelect={(currentValue) => {
-                    onValueChange?.(currentValue === value ? "" : currentValue)
-                    setOpen(false)
-                  }}
+                  onSelect={() => handleSelect(option.value)}
+                  className="cursor-pointer"
                 >
                   <Check
                     className={cn(
