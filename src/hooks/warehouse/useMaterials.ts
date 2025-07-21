@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Material, MaterialFormData, MaterialFilters, MaterialWithStock } from '@/types/warehouse';
@@ -48,8 +49,17 @@ export const useMaterials = (filters?: MaterialFilters) => {
       let materials = (data || []).map((item: any) => {
         console.log('Processing material:', item.name, 'Stock levels:', item.stock_levels);
         
-        // Extract the first stock level (should be only one per material)
-        const stockLevel = item.stock_levels && item.stock_levels.length > 0 ? item.stock_levels[0] : null;
+        // Handle stock_levels - it can be either an object or an array with one object
+        let stockLevel = null;
+        if (item.stock_levels) {
+          if (Array.isArray(item.stock_levels)) {
+            // If it's an array, take the first element
+            stockLevel = item.stock_levels.length > 0 ? item.stock_levels[0] : null;
+          } else {
+            // If it's a single object, use it directly
+            stockLevel = item.stock_levels;
+          }
+        }
         
         const processedMaterial = {
           ...item,
