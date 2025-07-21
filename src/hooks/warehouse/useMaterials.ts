@@ -45,12 +45,13 @@ export const useMaterials = (filters?: MaterialFilters) => {
 
       console.log('useMaterials: Raw data from Supabase:', data);
 
-      // Process the data to extract stock levels correctly
+      // Process the data to create stock_level objects from flat or nested data
       let materials = (data || []).map((item: any) => {
-        console.log('Processing material:', item.name, 'Stock levels:', item.stock_levels);
+        console.log('Processing material:', item.name, 'Raw item:', item);
         
-        // Handle stock_levels - it can be either an object or an array with one object
         let stockLevel = null;
+        
+        // Check if we have nested stock_levels data
         if (item.stock_levels) {
           if (Array.isArray(item.stock_levels)) {
             // If it's an array, take the first element
@@ -59,6 +60,22 @@ export const useMaterials = (filters?: MaterialFilters) => {
             // If it's a single object, use it directly
             stockLevel = item.stock_levels;
           }
+        } 
+        // Check if we have flat stock level fields directly on the item
+        else if (item.current_quantity !== undefined || item.status !== undefined) {
+          stockLevel = {
+            id: item.stock_level_id || null,
+            material_id: item.id,
+            current_quantity: item.current_quantity || 0,
+            reserved_quantity: item.reserved_quantity || 0,
+            available_quantity: item.available_quantity || 0,
+            last_movement_date: item.last_movement_date || null,
+            status: item.status || 'Нет в наличии',
+            location: item.location || null,
+            notes: item.stock_notes || null,
+            created_at: item.stock_created_at || null,
+            updated_at: item.stock_updated_at || null
+          };
         }
         
         const processedMaterial = {
