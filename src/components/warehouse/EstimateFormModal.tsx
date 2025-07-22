@@ -245,31 +245,6 @@ const EstimateFormModal: React.FC<EstimateFormModalProps> = ({
               <div className="border rounded-lg p-4 bg-gray-50">
                 <h3 className="font-medium mb-4">Добавить материал</h3>
                 
-                {/* Debug info panel */}
-                <div className="mb-4 space-y-2 text-sm">
-                  {materialsLoading && (
-                    <div className="p-2 bg-blue-50 border border-blue-200 rounded">
-                      ⏳ Загрузка материалов...
-                    </div>
-                  )}
-                  
-                  {materialsError && (
-                    <div className="p-2 bg-red-50 border border-red-200 rounded">
-                      ❌ Ошибка загрузки: {materialsError.message}
-                    </div>
-                  )}
-                  
-                  {!materialsLoading && materialOptions.length === 0 && (
-                    <div className="p-2 bg-yellow-50 border border-yellow-200 rounded">
-                      ⚠️ Нет активных материалов (всего: {materials?.length || 0})
-                    </div>
-                  )}
-                  
-                  <div className="p-2 bg-gray-100 border border-gray-300 rounded text-xs">
-                    🔍 Debug: Выбран "{selectedMaterialId}" | Опций: {materialOptions.length} | Загрузка: {materialsLoading ? 'да' : 'нет'}
-                  </div>
-                </div>
-                
                 <div className="flex gap-4 items-end">
                   <div className="flex-1">
                     <Label htmlFor="material-select">Материал</Label>
@@ -324,9 +299,9 @@ const EstimateFormModal: React.FC<EstimateFormModalProps> = ({
                       {estimate.estimate_items.map((item) => (
                         <TableRow key={item.id}>
                           <TableCell className="font-medium">
-                            {item.material?.name || "Неизвестный материал"}
+                            {item.materials?.name || "Неизвестный материал"}
                           </TableCell>
-                          <TableCell>{item.material?.category || "-"}</TableCell>
+                          <TableCell>{item.materials?.category || "-"}</TableCell>
                           <TableCell>
                             {editingItemId === item.id && !readOnly ? (
                               <div className="flex gap-2 items-center">
@@ -363,17 +338,17 @@ const EstimateFormModal: React.FC<EstimateFormModalProps> = ({
                                   }
                                 }}
                               >
-                                {item.quantity_needed} {item.material?.unit || "шт"}
+                                {item.quantity_needed} {item.materials?.unit || "шт"}
                               </div>
                             )}
                           </TableCell>
                           <TableCell>
-                            {(item.price_at_estimation || item.material?.current_cost || 0).toFixed(2)}€
+                            {(item.price_at_estimation || item.materials?.current_cost || 0).toFixed(2)}€
                           </TableCell>
                           <TableCell>
                             {(
                               item.quantity_needed * 
-                              (item.price_at_estimation || item.material?.current_cost || 0)
+                              (item.price_at_estimation || item.materials?.current_cost || 0)
                             ).toFixed(2)}€
                           </TableCell>
                           {!readOnly && (

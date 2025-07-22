@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -22,7 +23,7 @@ export interface EstimateItem {
   price_at_estimation?: number;
   created_at: string;
   updated_at: string;
-  material?: {
+  materials?: {
     id: number;
     name: string;
     current_cost?: number;
