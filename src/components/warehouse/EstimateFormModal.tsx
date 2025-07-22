@@ -44,9 +44,14 @@ const EstimateFormModal: React.FC<EstimateFormModalProps> = ({
   const updateEstimateItem = useUpdateEstimateItem();
   const deleteEstimateItem = useDeleteEstimateItem();
 
-  // Debug logs
-  console.log('EstimateFormModal: Render - materials:', materials?.length || 0, 'loading:', materialsLoading, 'error:', materialsError);
-  console.log('EstimateFormModal: Selected material ID:', selectedMaterialId, 'type:', typeof selectedMaterialId);
+  // Debug logs with more detail
+  console.log('EstimateFormModal: Modal state - isOpen:', isOpen, 'estimateId:', estimateId);
+  console.log('EstimateFormModal: Materials data:', {
+    count: materials?.length || 0,
+    loading: materialsLoading,
+    error: materialsError,
+    sampleMaterials: materials?.slice(0, 3)?.map(m => ({ id: m.id, name: m.name, active: m.is_active }))
+  });
 
   // Update form fields when estimate data changes
   useEffect(() => {
@@ -73,21 +78,19 @@ const EstimateFormModal: React.FC<EstimateFormModalProps> = ({
   };
 
   const handleMaterialChange = (value: string) => {
-    console.log('EstimateFormModal: Material selection changed to:', value, 'type:', typeof value);
+    console.log('EstimateFormModal: Material selection changed - value:', value, 'type:', typeof value);
     setSelectedMaterialId(value);
   };
 
   const handleAddMaterial = async () => {
-    console.log('EstimateFormModal: Adding material. Selected ID:', selectedMaterialId, 'Quantity:', newItemQuantity);
+    console.log('EstimateFormModal: Adding material - selectedId:', selectedMaterialId, 'quantity:', newItemQuantity);
     
     if (!estimateId || !selectedMaterialId || newItemQuantity <= 0) {
       toast.error("Выберите материал и укажите количество");
       return;
     }
 
-    // Convert string to number
     const materialId = parseInt(selectedMaterialId, 10);
-    console.log('EstimateFormModal: Parsed material ID:', materialId, 'from string:', selectedMaterialId);
     
     if (isNaN(materialId)) {
       toast.error("Некорректный ID материала");
@@ -95,7 +98,6 @@ const EstimateFormModal: React.FC<EstimateFormModalProps> = ({
     }
 
     const selectedMaterial = materials.find(m => m.id === materialId);
-    console.log('EstimateFormModal: Found material:', selectedMaterial?.name || 'NOT FOUND', 'for ID:', materialId);
     
     if (!selectedMaterial) {
       toast.error("Выбранный материал не найден");
@@ -145,33 +147,46 @@ const EstimateFormModal: React.FC<EstimateFormModalProps> = ({
     }
   };
 
-  // Create material options with better error handling and debugging
+  // Create material options with better filtering and debugging
   const materialOptions = React.useMemo(() => {
-    console.log('EstimateFormModal: Creating material options from materials:', materials?.length || 0);
+    console.log('EstimateFormModal: Creating material options...');
     
     if (!materials || materials.length === 0) {
-      console.log('EstimateFormModal: No materials available for options');
+      console.log('EstimateFormModal: No materials available');
       return [];
     }
     
-    const options = materials
-      .filter(material => {
-        const isValid = material && material.is_active && material.id && material.name;
-        if (!isValid) {
-          console.log('EstimateFormModal: Filtering out invalid material:', material);
-        }
-        return isValid;
-      })
-      .map(material => {
-        const option = {
-          value: material.id.toString(), // Ensure it's a string
-          label: `${material.name} (${material.current_cost || 0}€/${material.unit})`,
-        };
-        console.log('EstimateFormModal: Created option:', option);
-        return option;
-      });
+    const validMaterials = materials.filter(material => {
+      const isValid = material && 
+                     material.is_active && 
+                     material.id && 
+                     material.name && 
+                     typeof material.id === 'number';
+      
+      if (!isValid) {
+        console.log('EstimateFormModal: Filtering out invalid material:', {
+          material: material?.name || 'unnamed',
+          id: material?.id,
+          active: material?.is_active,
+          hasName: !!material?.name
+        });
+      }
+      
+      return isValid;
+    });
+
+    const options = validMaterials.map(material => ({
+      value: material.id.toString(),
+      label: `${material.name} (${material.current_cost || 0}€/${material.unit})`,
+    }));
     
-    console.log('EstimateFormModal: Final material options count:', options.length);
+    console.log('EstimateFormModal: Created options:', {
+      totalMaterials: materials.length,
+      validMaterials: validMaterials.length,
+      finalOptions: options.length,
+      sampleOptions: options.slice(0, 3)
+    });
+    
     return options;
   }, [materials]);
 
@@ -227,31 +242,31 @@ const EstimateFormModal: React.FC<EstimateFormModalProps> = ({
 
             {/* Add Material Section */}
             {!readOnly && (
-              <div className="border rounded-lg p-4">
+              <div className="border rounded-lg p-4 bg-gray-50">
                 <h3 className="font-medium mb-4">Добавить материал</h3>
                 
-                {/* Debug info */}
-                <div className="mb-4 space-y-2">
+                {/* Debug info panel */}
+                <div className="mb-4 space-y-2 text-sm">
                   {materialsLoading && (
-                    <div className="p-2 bg-blue-50 border border-blue-200 rounded text-sm">
-                      Загрузка материалов...
+                    <div className="p-2 bg-blue-50 border border-blue-200 rounded">
+                      ⏳ Загрузка материалов...
                     </div>
                   )}
                   
                   {materialsError && (
-                    <div className="p-2 bg-red-50 border border-red-200 rounded text-sm">
-                      Ошибка загрузки материалов: {materialsError.message}
+                    <div className="p-2 bg-red-50 border border-red-200 rounded">
+                      ❌ Ошибка загрузки: {materialsError.message}
                     </div>
                   )}
                   
                   {!materialsLoading && materialOptions.length === 0 && (
-                    <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-sm">
-                      Нет доступных активных материалов (всего материалов: {materials?.length || 0})
+                    <div className="p-2 bg-yellow-50 border border-yellow-200 rounded">
+                      ⚠️ Нет активных материалов (всего: {materials?.length || 0})
                     </div>
                   )}
                   
-                  <div className="p-2 bg-gray-50 border border-gray-200 rounded text-xs">
-                    Debug: Выбранный материал ID: "{selectedMaterialId}" | Опций доступно: {materialOptions.length}
+                  <div className="p-2 bg-gray-100 border border-gray-300 rounded text-xs">
+                    🔍 Debug: Выбран "{selectedMaterialId}" | Опций: {materialOptions.length} | Загрузка: {materialsLoading ? 'да' : 'нет'}
                   </div>
                 </div>
                 
@@ -262,7 +277,7 @@ const EstimateFormModal: React.FC<EstimateFormModalProps> = ({
                       options={materialOptions}
                       value={selectedMaterialId}
                       onValueChange={handleMaterialChange}
-                      placeholder="Поиск материала..."
+                      placeholder="Поиск и выбор материала..."
                       emptyText="Материалы не найдены"
                       disabled={materialsLoading || materialOptions.length === 0}
                     />

@@ -46,13 +46,11 @@ export function Combobox({
 
   const selectedOption = options.find((option) => option.value === value)
 
-  const handleSelect = React.useCallback((selectedValue: string) => {
-    console.log('Combobox: handleSelect called with:', selectedValue, 'Current value:', value);
-    
-    // Simply set the new value - no toggle logic
-    onValueChange?.(selectedValue);
+  const handleSelect = React.useCallback((optionValue: string) => {
+    console.log('Combobox: handleSelect called with:', optionValue);
+    onValueChange?.(optionValue);
     setOpen(false);
-  }, [value, onValueChange]);
+  }, [onValueChange]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -68,7 +66,12 @@ export function Combobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 z-[9999]" align="start" side="bottom" sideOffset={4}>
+      <PopoverContent 
+        className="w-[var(--radix-popover-trigger-width)] p-0 z-[200]" 
+        align="start" 
+        side="bottom" 
+        sideOffset={4}
+      >
         <Command>
           <CommandInput placeholder={`Search ${placeholder.toLowerCase()}...`} />
           <CommandList>
@@ -78,17 +81,17 @@ export function Combobox({
                 <CommandItem
                   key={option.value}
                   value={option.value}
-                  onSelect={(currentValue) => {
-                    console.log('CommandItem onSelect - currentValue:', currentValue, 'option.value:', option.value);
-                    // cmdk converts values to lowercase, so we need to find the original option
-                    const matchingOption = options.find(opt => 
-                      opt.value.toLowerCase() === currentValue.toLowerCase()
-                    );
-                    if (matchingOption) {
-                      handleSelect(matchingOption.value);
-                    }
+                  onSelect={() => {
+                    console.log('CommandItem: Direct click on option:', option.value);
+                    handleSelect(option.value);
+                  }}
+                  onMouseDown={(e) => {
+                    console.log('CommandItem: MouseDown on option:', option.value);
+                    e.preventDefault();
+                    handleSelect(option.value);
                   }}
                   className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                  style={{ pointerEvents: 'auto' }}
                 >
                   <Check
                     className={cn(
