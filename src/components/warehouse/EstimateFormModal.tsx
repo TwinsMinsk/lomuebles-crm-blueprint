@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Save, X } from "lucide-react";
-import { useEstimateById, useUpdateEstimate, useAddEstimateItem, useUpdateEstimateItem, useDeleteEstimateItem } from "@/hooks/warehouse/useEstimates";
+import { useEstimateById, useUpdateEstimate, useAddEstimateItem, useUpdateEstimateItem, useDeleteEstimateItem, useReserveMaterials } from "@/hooks/warehouse/useEstimates";
 import { useMaterials } from "@/hooks/warehouse/useMaterials";
 import { Combobox } from "@/components/ui/combobox";
 import { toast } from "sonner";
@@ -43,6 +43,7 @@ const EstimateFormModal: React.FC<EstimateFormModalProps> = ({
   const addEstimateItem = useAddEstimateItem();
   const updateEstimateItem = useUpdateEstimateItem();
   const deleteEstimateItem = useDeleteEstimateItem();
+  const reserveMaterials = useReserveMaterials();
 
   // Debug logs with more detail
   console.log('EstimateFormModal: Modal state - isOpen:', isOpen, 'estimateId:', estimateId);
@@ -144,6 +145,16 @@ const EstimateFormModal: React.FC<EstimateFormModalProps> = ({
       await deleteEstimateItem.mutateAsync(itemId);
     } catch (error) {
       console.error("Error deleting item:", error);
+    }
+  };
+
+  const handleReserveMaterials = async () => {
+    if (!estimateId) return;
+
+    try {
+      await reserveMaterials.mutateAsync(estimateId);
+    } catch (error) {
+      console.error("Error reserving materials:", error);
     }
   };
 
@@ -389,6 +400,15 @@ const EstimateFormModal: React.FC<EstimateFormModalProps> = ({
               <Button variant="outline" onClick={onClose}>
                 Закрыть
               </Button>
+              {!readOnly && estimate?.status === 'утверждена' && (
+                <Button 
+                  onClick={handleReserveMaterials} 
+                  disabled={reserveMaterials.isPending}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  Зарезервировать материалы
+                </Button>
+              )}
               {!readOnly && (
                 <Button onClick={handleSaveEstimate} disabled={updateEstimate.isPending}>
                   <Save className="mr-2 h-4 w-4" />

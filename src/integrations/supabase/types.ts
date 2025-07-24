@@ -1538,6 +1538,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      reserve_materials_from_estimate: {
+        Args: { p_estimate_id: number }
+        Returns: Json
+      }
     }
     Enums: {
       material_category:

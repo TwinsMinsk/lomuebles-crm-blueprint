@@ -351,3 +351,35 @@ export const useDeleteEstimateItem = () => {
     },
   });
 };
+
+// Hook for reserving materials from an estimate
+export const useReserveMaterials = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (estimateId: number) => {
+      const { data, error } = await supabase.rpc('reserve_materials_from_estimate', {
+        p_estimate_id: estimateId
+      });
+
+      if (error) {
+        console.error('Reserve materials error:', error);
+        throw error;
+      }
+
+      return data as { success: boolean; message: string; materials_reserved: number };
+    },
+    onSuccess: (data) => {
+      // Invalidate relevant queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['stock_levels'] });
+      queryClient.invalidateQueries({ queryKey: ['materials'] });
+      queryClient.invalidateQueries({ queryKey: ['material_reservations'] });
+      
+      toast.success(data?.message || 'Materials reserved successfully');
+    },
+    onError: (error: any) => {
+      console.error('Failed to reserve materials:', error);
+      toast.error(error.message || 'Failed to reserve materials');
+    },
+  });
+};
