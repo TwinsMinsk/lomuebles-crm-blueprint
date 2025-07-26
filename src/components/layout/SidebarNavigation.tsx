@@ -2,7 +2,7 @@
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import { LayoutDashboard, Users, Building, Package, ListChecks, Calendar, ShoppingCart, Truck, Settings, UserCog, DollarSign, BarChart3, Target, Briefcase, Clock, TrendingUp, Warehouse } from "lucide-react";
+import { LayoutDashboard, Users, Building, Package, ListChecks, Calendar, ShoppingCart, Truck, Settings, UserCog, DollarSign, BarChart3, Target, Briefcase, Clock, TrendingUp, Warehouse, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -116,6 +116,12 @@ const menuGroups: MenuGroup[] = [
         label: "Остатки",
         path: "/warehouse/stock-levels",
         icon: BarChart3,
+        requiredRole: ["Главный Администратор", "Администратор"],
+      },
+      {
+        label: "Локации",
+        path: "/warehouse/locations",
+        icon: MapPin,
         requiredRole: ["Главный Администратор", "Администратор"],
       },
     ],
