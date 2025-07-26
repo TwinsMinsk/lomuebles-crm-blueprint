@@ -498,6 +498,7 @@ export type Database = {
         Row: {
           created_at: string
           id: number
+          location: string | null
           material_id: number
           order_id: number
           quantity_reserved: number
@@ -506,6 +507,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: number
+          location?: string | null
           material_id: number
           order_id: number
           quantity_reserved: number
@@ -514,6 +516,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: number
+          location?: string | null
           material_id?: number
           order_id?: number
           quantity_reserved?: number
@@ -936,7 +939,7 @@ export type Database = {
           current_quantity: number
           id: number
           last_movement_date: string | null
-          location: string | null
+          location: string
           material_id: number
           notes: string | null
           reserved_quantity: number
@@ -949,7 +952,7 @@ export type Database = {
           current_quantity?: number
           id?: number
           last_movement_date?: string | null
-          location?: string | null
+          location?: string
           material_id: number
           notes?: string | null
           reserved_quantity?: number
@@ -962,7 +965,7 @@ export type Database = {
           current_quantity?: number
           id?: number
           last_movement_date?: string | null
-          location?: string | null
+          location?: string
           material_id?: number
           notes?: string | null
           reserved_quantity?: number
@@ -973,7 +976,7 @@ export type Database = {
           {
             foreignKeyName: "stock_levels_material_id_fkey"
             columns: ["material_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "materials"
             referencedColumns: ["id"]
           },
@@ -983,6 +986,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string
+          from_location: string | null
           id: number
           material_id: number
           movement_date: string
@@ -992,12 +996,14 @@ export type Database = {
           quantity: number
           reference_document: string | null
           supplier_id: number | null
+          to_location: string | null
           total_cost: number | null
           unit_cost: number | null
         }
         Insert: {
           created_at?: string
           created_by: string
+          from_location?: string | null
           id?: number
           material_id: number
           movement_date?: string
@@ -1007,12 +1013,14 @@ export type Database = {
           quantity: number
           reference_document?: string | null
           supplier_id?: number | null
+          to_location?: string | null
           total_cost?: number | null
           unit_cost?: number | null
         }
         Update: {
           created_at?: string
           created_by?: string
+          from_location?: string | null
           id?: number
           material_id?: number
           movement_date?: string
@@ -1022,6 +1030,7 @@ export type Database = {
           quantity?: number
           reference_document?: string | null
           supplier_id?: number | null
+          to_location?: string | null
           total_cost?: number | null
           unit_cost?: number | null
         }
@@ -1437,6 +1446,7 @@ export type Database = {
         Returns: {
           created_at: string
           created_by: string
+          from_location: string | null
           id: number
           material_id: number
           movement_date: string
@@ -1446,6 +1456,7 @@ export type Database = {
           quantity: number
           reference_document: string | null
           supplier_id: number | null
+          to_location: string | null
           total_cost: number | null
           unit_cost: number | null
         }
@@ -1532,6 +1543,10 @@ export type Database = {
       }
       recalculate_one_material_stock: {
         Args: { p_material_id: number }
+        Returns: undefined
+      }
+      recalculate_stock_for_location: {
+        Args: { p_material_id: number; p_location: string }
         Returns: undefined
       }
       recalculate_stock_levels: {
