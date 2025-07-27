@@ -124,18 +124,6 @@ const menuGroups: MenuGroup[] = [
         icon: MapPin,
         requiredRole: ["Главный Администратор", "Администратор"],
       },
-      {
-        label: "Отчеты",
-        path: "/warehouse/reports",
-        icon: BarChart3,
-        requiredRole: ["Главный Администратор", "Администратор"],
-      },
-      {
-        label: "Поставки",
-        path: "/warehouse/deliveries",
-        icon: Truck,
-        requiredRole: ["Главный Администратор", "Администратор"],
-      },
     ],
   },
   {
