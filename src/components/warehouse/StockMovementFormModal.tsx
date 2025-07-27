@@ -52,6 +52,22 @@ const stockMovementFormSchema = z.object({
       });
     }
   }
+  
+  if (data.movement_type === "Поступление" && !data.to_location) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Локация назначения обязательна для поступления",
+      path: ["to_location"],
+    });
+  }
+  
+  if (data.movement_type === "Расход" && !data.from_location) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Локация списания обязательна для расхода",
+      path: ["from_location"],
+    });
+  }
 });
 
 interface StockMovementFormModalProps {
@@ -339,58 +355,66 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
               />
             </div>
 
-            {/* Location fields - only show for transfers */}
-            {movementType === "Перемещение" && (
+            {/* Location fields */}
+            {(movementType === "Перемещение" || movementType === "Поступление" || movementType === "Расход") && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="from_location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Откуда *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Выберите локацию" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {locations?.map((location) => (
-                            <SelectItem key={location.id} value={location.name}>
-                              {location.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {(movementType === "Перемещение" || movementType === "Расход") && (
+                  <FormField
+                    control={form.control}
+                    name="from_location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {movementType === "Перемещение" ? "Откуда *" : "Локация списания *"}
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Выберите локацию" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {locations?.map((location) => (
+                              <SelectItem key={location.id} value={location.name}>
+                                {location.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
-                <FormField
-                  control={form.control}
-                  name="to_location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Куда *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Выберите локацию" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {locations?.map((location) => (
-                            <SelectItem key={location.id} value={location.name}>
-                              {location.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {(movementType === "Перемещение" || movementType === "Поступление") && (
+                  <FormField
+                    control={form.control}
+                    name="to_location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {movementType === "Перемещение" ? "Куда *" : "Локация поступления *"}
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Выберите локацию" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {locations?.map((location) => (
+                              <SelectItem key={location.id} value={location.name}>
+                                {location.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
               </div>
             )}
 

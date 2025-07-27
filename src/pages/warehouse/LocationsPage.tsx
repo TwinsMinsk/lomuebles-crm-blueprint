@@ -37,7 +37,7 @@ const LocationsPage = () => {
         }
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="space-y-6">
         <ModernCard>
           <div className="p-6 space-y-6">
             <LocationFilters 
@@ -57,7 +57,7 @@ const LocationsPage = () => {
           <ModernCard>
             <div className="p-6 space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">{selectedLocation.name}</h2>
+                <h2 className="text-xl font-semibold">Материалы в локации: {selectedLocation.name}</h2>
                 <Button
                   variant="outline"
                   size="sm"
