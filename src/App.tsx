@@ -40,6 +40,8 @@ import MaterialsPage from "./pages/warehouse/MaterialsPage";
 import StockMovementsPage from "./pages/warehouse/StockMovementsPage";
 import StockLevelsPage from "./pages/warehouse/StockLevelsPage";
 import LocationsPage from "./pages/warehouse/LocationsPage";
+import WarehouseReportsPage from "./pages/warehouse/WarehouseReportsPage";
+import MaterialDeliveriesPage from "./pages/warehouse/MaterialDeliveriesPage";
 
 // Component for role-based task detail routing
 const TaskDetailRouter = () => {
@@ -119,6 +121,22 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
                 <LocationsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="warehouse/reports" 
+            element={
+              <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
+                <WarehouseReportsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="warehouse/deliveries" 
+            element={
+              <ProtectedRoute allowedRoles={["Главный Администратор", "Администратор"]}>
+                <MaterialDeliveriesPage />
               </ProtectedRoute>
             } 
           />
