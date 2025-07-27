@@ -141,6 +141,8 @@ export const useCreateStockMovement = () => {
         movement_date: movementData.movement_date || new Date().toISOString(),
         notes: movementData.notes || null,
         reference_document: movementData.reference_document || null,
+        from_location: movementData.from_location || null,
+        to_location: movementData.to_location || null,
       };
       
       console.log('useCreateStockMovement: Calling RPC with data:', rpcData);
@@ -165,6 +167,7 @@ export const useCreateStockMovement = () => {
       console.log('useCreateStockMovement: onSuccess called with:', data);
       queryClient.invalidateQueries({ queryKey: ['stock_movements'] });
       queryClient.invalidateQueries({ queryKey: ['stock_levels'] });
+      queryClient.invalidateQueries({ queryKey: ['stock-levels'] }); // Invalidate location-specific queries
       queryClient.invalidateQueries({ queryKey: ['materials'] });
       toast({
         title: 'Движение запасов создано',
