@@ -1,5 +1,5 @@
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { useMaterials } from "@/hooks/warehouse/useMaterials";
+import { useLocations } from "@/hooks/warehouse/useLocations";
 import { useCreateStockMovement, useUpdateStockMovement } from "@/hooks/warehouse/useStockMovements";
 import { STOCK_MOVEMENT_TYPES } from "@/types/warehouse";
 import type { StockMovementFormData } from "@/types/warehouse";
@@ -25,6 +26,32 @@ const stockMovementFormSchema = z.object({
   supplier_id: z.number().optional(),
   order_id: z.number().optional(),
   movement_date: z.string().optional(),
+  from_location: z.string().optional(),
+  to_location: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.movement_type === "Перемещение") {
+    if (!data.from_location) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Откуда обязательно для перемещения",
+        path: ["from_location"],
+      });
+    }
+    if (!data.to_location) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Куда обязательно для перемещения",
+        path: ["to_location"],
+      });
+    }
+    if (data.from_location === data.to_location) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Локации откуда и куда должны отличаться",
+        path: ["to_location"],
+      });
+    }
+  }
 });
 
 interface StockMovementFormModalProps {
@@ -43,6 +70,7 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
   });
   const suppliers = suppliersData?.suppliers || [];
   const { data: materials } = useMaterials();
+  const { data: locations } = useLocations();
   const createMovement = useCreateStockMovement();
   const updateMovement = useUpdateStockMovement();
 
@@ -55,7 +83,14 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
       reference_document: "",
       notes: "",
       movement_date: new Date().toISOString().split('T')[0],
+      from_location: "",
+      to_location: "",
     },
+  });
+
+  const movementType = useWatch({
+    control: form.control,
+    name: "movement_type",
   });
 
   // Pre-fill form when editing
@@ -73,6 +108,8 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
         supplier_id: movement.supplier_id,
         order_id: movement.order_id,
         movement_date: movement.movement_date ? new Date(movement.movement_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        from_location: movement.from_location || "",
+        to_location: movement.to_location || "",
       });
     } else if (mode === "create") {
       console.log('Resetting form for create mode');
@@ -83,6 +120,8 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
         reference_document: "",
         notes: "",
         movement_date: new Date().toISOString().split('T')[0],
+        from_location: "",
+        to_location: "",
       });
     }
   }, [mode, movement, form]);
@@ -299,6 +338,61 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
                 )}
               />
             </div>
+
+            {/* Location fields - only show for transfers */}
+            {movementType === "Перемещение" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="from_location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Откуда *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Выберите локацию" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {locations?.map((location) => (
+                            <SelectItem key={location.id} value={location.name}>
+                              {location.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="to_location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Куда *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Выберите локацию" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {locations?.map((location) => (
+                            <SelectItem key={location.id} value={location.name}>
+                              {location.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
 
             <FormField
               control={form.control}

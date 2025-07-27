@@ -144,6 +144,8 @@ export interface StockMovementFormData {
   supplier_id?: number;
   order_id?: number;
   movement_date?: string;
+  from_location?: string;
+  to_location?: string;
 }
 
 // Filter types
