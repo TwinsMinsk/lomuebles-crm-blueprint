@@ -11,9 +11,10 @@ import type { Location } from "@/hooks/warehouse/useLocations";
 interface LocationsTableProps {
   locations: Location[];
   isLoading: boolean;
+  onLocationSelect?: (location: Location) => void;
 }
 
-export const LocationsTable = ({ locations, isLoading }: LocationsTableProps) => {
+export const LocationsTable = ({ locations, isLoading, onLocationSelect }: LocationsTableProps) => {
   const [editingLocation, setEditingLocation] = useState<Location | null>(null);
   const [deletingLocation, setDeletingLocation] = useState<Location | null>(null);
 
@@ -70,6 +71,15 @@ export const LocationsTable = ({ locations, isLoading }: LocationsTableProps) =>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
+                    {onLocationSelect && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => onLocationSelect(location)}
+                      >
+                        Материалы
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
