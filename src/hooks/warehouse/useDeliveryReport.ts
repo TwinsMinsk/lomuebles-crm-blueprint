@@ -54,7 +54,7 @@ export const useDeliveryReport = (filters: DeliveryReportFilters) => {
         throw new Error(`Failed to fetch delivery report: ${error.message}`);
       }
 
-      return (data || []) as MaterialDeliveryWithDetails[];
+      return (data || []) as unknown as MaterialDeliveryWithDetails[];
     },
   });
 };

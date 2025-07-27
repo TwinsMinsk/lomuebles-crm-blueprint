@@ -1,4 +1,4 @@
-import { ResponsiveTable } from "@/components/ui/responsive-table";
+import { ResponsiveTable, ResponsiveRow, ResponsiveRowItem } from "@/components/ui/responsive-table";
 import { formatQuantity } from "@/utils/warehouse";
 import type { ReservationReport } from "@/types/warehouse";
 
@@ -8,29 +8,39 @@ interface ReservationReportTableProps {
 }
 
 export const ReservationReportTable = ({ data, isLoading }: ReservationReportTableProps) => {
-  const columns = [
-    { key: "material_name", label: "Материал" },
-    { key: "category", label: "Категория" },
-    { key: "total_reserved", label: "Зарезервировано" },
-    { key: "available_quantity", label: "Доступно" },
-    { key: "reservations_count", label: "Резервов" },
-  ];
+  if (isLoading) {
+    return <div className="text-center py-8">Загрузка...</div>;
+  }
 
-  const formatRow = (item: ReservationReport) => ({
-    material_name: item.material_name,
-    category: item.category,
-    total_reserved: formatQuantity(item.total_reserved, item.unit),
-    available_quantity: formatQuantity(item.available_quantity, item.unit),
-    reservations_count: item.reservations.length,
-  });
+  if (!data.length) {
+    return <div className="text-center py-8 text-muted-foreground">Нет резервов для отображения</div>;
+  }
 
   return (
-    <ResponsiveTable
-      columns={columns}
-      data={data}
-      formatRow={formatRow}
-      isLoading={isLoading}
-      emptyMessage="Нет резервов для отображения"
-    />
+    <ResponsiveTable>
+      {/* Desktop Header */}
+      <thead className="hidden lg:table-header-group">
+        <tr className="border-b">
+          <th className="p-4 text-left font-medium">Материал</th>
+          <th className="p-4 text-left font-medium">Категория</th>
+          <th className="p-4 text-left font-medium">Зарезервировано</th>
+          <th className="p-4 text-left font-medium">Доступно</th>
+          <th className="p-4 text-left font-medium">Резервов</th>
+        </tr>
+      </thead>
+      
+      {/* Table Body */}
+      <tbody>
+        {data.map((reservation) => (
+          <ResponsiveRow key={reservation.material_id}>
+            <ResponsiveRowItem label="Материал" value={reservation.material_name} />
+            <ResponsiveRowItem label="Категория" value={reservation.category} />
+            <ResponsiveRowItem label="Зарезервировано" value={formatQuantity(reservation.total_reserved, reservation.unit)} />
+            <ResponsiveRowItem label="Доступно" value={formatQuantity(reservation.available_quantity, reservation.unit)} />
+            <ResponsiveRowItem label="Резервов" value={reservation.reservations.length} />
+          </ResponsiveRow>
+        ))}
+      </tbody>
+    </ResponsiveTable>
   );
 };

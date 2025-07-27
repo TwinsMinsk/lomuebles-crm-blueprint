@@ -1,4 +1,4 @@
-import { ResponsiveTable } from "@/components/ui/responsive-table";
+import { ResponsiveTable, ResponsiveRow, ResponsiveRowItem } from "@/components/ui/responsive-table";
 import { formatQuantity, formatCurrency } from "@/utils/warehouse";
 import type { StockMovementWithDetails } from "@/types/warehouse";
 
@@ -8,31 +8,59 @@ interface MovementReportTableProps {
 }
 
 export const MovementReportTable = ({ data, isLoading }: MovementReportTableProps) => {
-  const columns = [
-    { key: "movement_date", label: "Дата" },
-    { key: "material_name", label: "Материал" },
-    { key: "movement_type", label: "Тип" },
-    { key: "quantity", label: "Количество" },
-    { key: "supplier_name", label: "Поставщик" },
-    { key: "total_cost", label: "Стоимость" },
-  ];
+  if (isLoading) {
+    return <div className="text-center py-8">Загрузка...</div>;
+  }
 
-  const formatRow = (item: StockMovementWithDetails) => ({
-    movement_date: new Date(item.movement_date).toLocaleDateString('ru-RU'),
-    material_name: item.material_name || '-',
-    movement_type: item.movement_type,
-    quantity: formatQuantity(item.quantity, item.material_unit || 'шт'),
-    supplier_name: item.supplier_name || '-',
-    total_cost: formatCurrency(item.total_cost),
-  });
+  if (!data.length) {
+    return <div className="text-center py-8 text-muted-foreground">Нет движений для отображения</div>;
+  }
 
   return (
-    <ResponsiveTable
-      columns={columns}
-      data={data}
-      formatRow={formatRow}
-      isLoading={isLoading}
-      emptyMessage="Нет движений для отображения"
-    />
+    <ResponsiveTable>
+      {/* Desktop Header */}
+      <thead className="hidden lg:table-header-group">
+        <tr className="border-b">
+          <th className="p-4 text-left font-medium">Дата</th>
+          <th className="p-4 text-left font-medium">Материал</th>
+          <th className="p-4 text-left font-medium">Тип</th>
+          <th className="p-4 text-left font-medium">Количество</th>
+          <th className="p-4 text-left font-medium">Поставщик</th>
+          <th className="p-4 text-left font-medium">Стоимость</th>
+        </tr>
+      </thead>
+      
+      {/* Table Body */}
+      <tbody>
+        {data.map((movement) => (
+          <ResponsiveRow key={movement.id}>
+            <ResponsiveRowItem 
+              label="Дата" 
+              value={new Date(movement.movement_date).toLocaleDateString('ru-RU')} 
+            />
+            <ResponsiveRowItem 
+              label="Материал" 
+              value={movement.material_name || '-'} 
+            />
+            <ResponsiveRowItem 
+              label="Тип" 
+              value={movement.movement_type} 
+            />
+            <ResponsiveRowItem 
+              label="Количество" 
+              value={formatQuantity(movement.quantity, movement.material_unit || 'шт')} 
+            />
+            <ResponsiveRowItem 
+              label="Поставщик" 
+              value={movement.supplier_name || '-'} 
+            />
+            <ResponsiveRowItem 
+              label="Стоимость" 
+              value={formatCurrency(movement.total_cost)} 
+            />
+          </ResponsiveRow>
+        ))}
+      </tbody>
+    </ResponsiveTable>
   );
 };

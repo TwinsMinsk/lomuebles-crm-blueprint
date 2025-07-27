@@ -1,9 +1,9 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DELIVERY_STATUSES, type MaterialDeliveryFilters, type DeliveryStatus } from "@/types/warehouse";
+import { DELIVERY_STATUSES, type MaterialDeliveryFilters as MaterialDeliveryFiltersType, type DeliveryStatus } from "@/types/warehouse";
 
 interface MaterialDeliveryFiltersProps {
-  filters: MaterialDeliveryFilters;
-  onFiltersChange: (filters: MaterialDeliveryFilters) => void;
+  filters: MaterialDeliveryFiltersType;
+  onFiltersChange: (filters: MaterialDeliveryFiltersType) => void;
 }
 
 export const MaterialDeliveryFilters = ({ filters, onFiltersChange }: MaterialDeliveryFiltersProps) => {

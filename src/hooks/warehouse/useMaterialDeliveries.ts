@@ -56,7 +56,7 @@ export const useMaterialDeliveries = (filters?: MaterialDeliveryFilters) => {
         throw new Error(`Failed to fetch deliveries: ${error.message}`);
       }
 
-      return (data || []) as MaterialDeliveryWithDetails[];
+      return (data || []) as unknown as MaterialDeliveryWithDetails[];
     },
   });
 };
@@ -82,7 +82,7 @@ export const useMaterialDelivery = (id: number) => {
         throw new Error(`Failed to fetch delivery: ${error.message}`);
       }
 
-      return data as MaterialDeliveryWithDetails | null;
+      return data as unknown as MaterialDeliveryWithDetails | null;
     },
     enabled: !!id,
   });
