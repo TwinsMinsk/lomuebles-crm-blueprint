@@ -1584,7 +1584,7 @@ export type Database = {
       }
       recalculate_all_stock_levels: {
         Args: Record<PropertyKey, never>
-        Returns: string
+        Returns: undefined
       }
       recalculate_one_material_stock: {
         Args: { p_material_id: number }

@@ -228,6 +228,7 @@ export const useUpdateStockMovement = () => {
       queryClient.invalidateQueries({ queryKey: ['stock_movements'] });
       queryClient.invalidateQueries({ queryKey: ['stock_movement', data.id] });
       queryClient.invalidateQueries({ queryKey: ['stock_levels'] });
+      queryClient.invalidateQueries({ queryKey: ['stock-levels'] }); // Invalidate location-specific queries
       queryClient.invalidateQueries({ queryKey: ['materials'] });
       toast({
         title: 'Движение запасов обновлено',
@@ -310,6 +311,7 @@ export const useDeleteStockMovement = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stock_movements'] });
       queryClient.invalidateQueries({ queryKey: ['stock_levels'] });
+      queryClient.invalidateQueries({ queryKey: ['stock-levels'] }); // Invalidate location-specific queries
       queryClient.invalidateQueries({ queryKey: ['materials'] });
     },
     onError: (error) => {

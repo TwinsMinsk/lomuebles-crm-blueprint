@@ -6,6 +6,8 @@ export const useStockLevelsByLocation = (location: string) => {
   return useQuery({
     queryKey: ['stock-levels', 'by-location', location],
     queryFn: async (): Promise<StockLevelWithMaterial[]> => {
+      console.log('Fetching stock levels for location:', location);
+      
       const { data, error } = await supabase
         .from('stock_levels')
         .select(`
@@ -31,6 +33,7 @@ export const useStockLevelsByLocation = (location: string) => {
         throw error;
       }
 
+      console.log('Stock levels data for location', location, ':', data);
       return data || [];
     },
     enabled: !!location
