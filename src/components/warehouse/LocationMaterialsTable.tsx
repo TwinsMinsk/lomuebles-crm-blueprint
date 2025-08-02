@@ -117,62 +117,14 @@ export const LocationMaterialsTable = ({ locationName, isLoading = false }: Loca
           </tr>
         </thead>
         
-        {/* Table Body */}
-        <tbody className="hidden lg:table-row-group">
-        {sortedStockLevels.map((stockLevel) => {
-            const material = stockLevel.material;
-            const available = (stockLevel.current_quantity || 0) - (stockLevel.reserved_quantity || 0);
-            const statusInfo = getStockStatusInfo(stockLevel.status || 'В наличии');
-            
-            return (
-              <tr key={`${stockLevel.material_id}-${stockLevel.location}`} className="border-b transition-colors hover:bg-muted/50">
-                <td className="p-4 align-middle">
-                  <div className="flex items-center gap-3">
-                    <div>
-                      <div className="font-medium">{material?.name}</div>
-                      {material?.sku && (
-                        <div className="text-sm text-muted-foreground">SKU: {material.sku}</div>
-                      )}
-                    </div>
-                  </div>
-                </td>
-                <td className="p-4 align-middle">
-                  {material?.category && (
-                    <Badge variant="outline" className="text-xs">
-                      {material.category}
-                    </Badge>
-                  )}
-                </td>
-                <td className="p-4 align-middle text-right">
-                  <div className="font-medium">
-                    {formatQuantity(stockLevel.current_quantity || 0, material?.unit || 'шт')}
-                  </div>
-                  {(stockLevel.reserved_quantity || 0) > 0 && (
-                    <div className="text-xs text-muted-foreground">
-                      Доступно: {formatQuantity(available, material?.unit || 'шт')}
-                    </div>
-                  )}
-                </td>
-                <td className="p-4 align-middle">
-                  <ModernStatusBadge
-                    status={statusInfo.label}
-                    variant={stockLevel.status === 'В наличии' ? 'success' : 
-                           stockLevel.status === 'Заканчивается' ? 'warning' : 'danger'}
-                  />
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-        
-        {/* Mobile Cards */}
+        {/* Responsive Rows - handles both desktop and mobile */}
         {sortedStockLevels.map((stockLevel) => {
           const material = stockLevel.material;
           const available = (stockLevel.current_quantity || 0) - (stockLevel.reserved_quantity || 0);
           const statusInfo = getStockStatusInfo(stockLevel.status || 'В наличии');
           
           return (
-            <ResponsiveRow key={`mobile-${stockLevel.material_id}-${stockLevel.location}`}>
+            <ResponsiveRow key={`${stockLevel.material_id}-${stockLevel.location}`}>
               <ResponsiveRowItem
                 label="Материал"
                 value={
