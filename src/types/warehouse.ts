@@ -84,6 +84,8 @@ export interface StockMovement {
   supplier_id?: number;
   order_id?: number;
   movement_date: string;
+  from_location?: string;
+  to_location?: string;
   created_by: string;
   created_at: string;
 }
@@ -113,6 +115,8 @@ export interface StockMovementWithDetails extends StockMovement {
   supplier_name?: string;
   order_number?: string;
   created_by_name?: string;
+  from_location?: string;
+  to_location?: string;
 }
 
 export interface StockLevelWithMaterial extends StockLevel {

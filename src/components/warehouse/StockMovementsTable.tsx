@@ -123,6 +123,7 @@ export const StockMovementsTable = ({ movements, isLoading }: StockMovementsTabl
             <th className="text-left p-4 font-medium">Материал</th>
             <th className="text-left p-4 font-medium">Тип движения</th>
             <th className="text-left p-4 font-medium">Количество</th>
+            <th className="text-left p-4 font-medium">Локации</th>
             <th className="text-left p-4 font-medium">Стоимость за единицу</th>
             <th className="text-left p-4 font-medium">Общая стоимость</th>
             <th className="text-left p-4 font-medium">Поставщик</th>
@@ -174,6 +175,33 @@ export const StockMovementsTable = ({ movements, isLoading }: StockMovementsTabl
                   <span className="font-medium">
                     {formatQuantity(movement.quantity, movement.material_unit || 'шт')}
                   </span>
+                }
+              />
+              
+              <ResponsiveRowItem
+                label="Локации"
+                value={
+                  <div className="text-sm">
+                    {movement.movement_type === 'Перемещение' ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">Из:</span>
+                        <span className="font-medium">{movement.from_location || '—'}</span>
+                        <span className="text-muted-foreground">→</span>
+                        <span className="text-muted-foreground">В:</span>
+                        <span className="font-medium">{movement.to_location || '—'}</span>
+                      </div>
+                    ) : movement.movement_type === 'Поступление' || movement.movement_type === 'Возврат' ? (
+                      <div>
+                        <span className="text-muted-foreground">→ </span>
+                        <span className="font-medium">{movement.to_location || '—'}</span>
+                      </div>
+                    ) : (
+                      <div>
+                        <span className="font-medium">{movement.from_location || '—'}</span>
+                        <span className="text-muted-foreground"> →</span>
+                      </div>
+                    )}
+                  </div>
                 }
               />
               
@@ -258,6 +286,8 @@ export const StockMovementsTable = ({ movements, isLoading }: StockMovementsTabl
             supplier_id: editingMovement.supplier_id,
             order_id: editingMovement.order_id,
             movement_date: editingMovement.movement_date,
+            from_location: editingMovement.from_location,
+            to_location: editingMovement.to_location,
           }}
         />
       )}
