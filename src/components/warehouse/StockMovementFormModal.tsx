@@ -13,6 +13,7 @@ import { useSuppliers } from "@/hooks/useSuppliers";
 import { useMaterials } from "@/hooks/warehouse/useMaterials";
 import { useLocations } from "@/hooks/warehouse/useLocations";
 import { useCreateStockMovement, useUpdateStockMovement } from "@/hooks/warehouse/useStockMovements";
+import { useOrders } from "@/hooks/orders/useOrders";
 import { STOCK_MOVEMENT_TYPES } from "@/types/warehouse";
 import type { StockMovementFormData } from "@/types/warehouse";
 import { useEffect } from "react";
@@ -88,8 +89,14 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
   const suppliers = suppliersData?.suppliers || [];
   const { data: materials } = useMaterials();
   const { data: locations } = useLocations();
+  const { data: orders } = useOrders();
   const createMovement = useCreateStockMovement();
   const updateMovement = useUpdateStockMovement();
+
+  // Filter active orders for selection
+  const activeOrders = orders?.filter(order => 
+    order.status && !['Завершен', 'Отменен'].includes(order.status)
+  ) || [];
 
   const form = useForm<StockMovementFormData>({
     resolver: zodResolver(stockMovementFormSchema),
@@ -354,6 +361,42 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
                         {suppliers.map((supplier) => (
                           <SelectItem key={supplier.supplier_id} value={supplier.supplier_id.toString()}>
                             {supplier.supplier_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="order_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Связанный заказ</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(value === "__none__" ? undefined : (value ? Number(value) : undefined))} 
+                      value={field.value?.toString() || "__none__"}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Выберите заказ" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="__none__">Без заказа</SelectItem>
+                        {activeOrders.map((order) => (
+                          <SelectItem key={order.id} value={order.id.toString()}>
+                            <div className="flex flex-col">
+                              <span className="font-medium">
+                                {order.order_name || `Заказ ${order.order_number}`}
+                              </span>
+                              <span className="text-sm text-muted-foreground">
+                                {order.contact?.full_name} • {order.status}
+                              </span>
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
