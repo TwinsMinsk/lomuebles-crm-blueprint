@@ -358,7 +358,7 @@ export const useReserveMaterials = () => {
 
   return useMutation({
     mutationFn: async (estimateId: number) => {
-      const { data, error } = await supabase.rpc('reserve_materials_from_estimate', {
+      const { data, error } = await supabase.rpc('reserve_materials_from_estimate_improved', {
         p_estimate_id: estimateId
       });
 
@@ -367,7 +367,18 @@ export const useReserveMaterials = () => {
         throw error;
       }
 
-      return data as { success: boolean; message: string; materials_reserved: number };
+      return data as { 
+        success: boolean; 
+        message?: string; 
+        materials_reserved?: number;
+        error?: string;
+        insufficient_stock?: Array<{
+          material_id: number;
+          material_name: string;
+          needed: number;
+          available: number;
+        }>;
+      };
     },
     onSuccess: (data) => {
       // Invalidate relevant queries to refresh data
@@ -375,11 +386,20 @@ export const useReserveMaterials = () => {
       queryClient.invalidateQueries({ queryKey: ['materials'] });
       queryClient.invalidateQueries({ queryKey: ['material_reservations'] });
       
-      toast.success(data?.message || 'Materials reserved successfully');
+      if (data?.success) {
+        toast.success(data.message || 'Материалы успешно зарезервированы');
+      } else if (data?.error && data?.insufficient_stock) {
+        const insufficientItems = data.insufficient_stock;
+        let errorMessage = 'Недостаточно материалов на складе:\n';
+        insufficientItems.forEach((item) => {
+          errorMessage += `• ${item.material_name}: нужно ${item.needed}, доступно ${item.available}\n`;
+        });
+        toast.error(errorMessage);
+      }
     },
     onError: (error: any) => {
       console.error('Failed to reserve materials:', error);
-      toast.error(error.message || 'Failed to reserve materials');
+      toast.error(error.message || 'Ошибка резервирования материалов');
     },
   });
 };

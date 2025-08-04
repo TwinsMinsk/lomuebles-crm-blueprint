@@ -17,6 +17,7 @@ import { useOrders } from "@/hooks/orders/useOrders";
 import { STOCK_MOVEMENT_TYPES } from "@/types/warehouse";
 import type { StockMovementFormData } from "@/types/warehouse";
 import { useEffect } from "react";
+import { ReservationDisplayWidget } from "./ReservationDisplayWidget";
 
 const stockMovementFormSchema = z.object({
   material_id: z.number().min(1, "Материал обязателен"),
@@ -30,6 +31,8 @@ const stockMovementFormSchema = z.object({
   movement_date: z.string().optional(),
   from_location: z.string().optional(),
   to_location: z.string().optional(),
+  source_type: z.enum(['manual', 'estimate_reservation', 'auto_completion']).optional(),
+  related_estimate_id: z.number().optional(),
 }).superRefine((data, ctx) => {
   if (data.movement_type === "Перемещение") {
     if (!data.from_location) {
@@ -109,12 +112,29 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
       movement_date: toMadridTime(new Date()).toISOString().split('T')[0],
       from_location: "",
       to_location: "",
+      source_type: "manual",
+      related_estimate_id: undefined,
     },
   });
 
   const movementType = useWatch({
     control: form.control,
     name: "movement_type",
+  });
+
+  const selectedOrderId = useWatch({
+    control: form.control,
+    name: "order_id",
+  });
+
+  const selectedMaterialId = useWatch({
+    control: form.control,
+    name: "material_id",
+  });
+
+  const quantity = useWatch({
+    control: form.control,
+    name: "quantity",
   });
 
   // Pre-fill form when editing
@@ -406,6 +426,16 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
                 )}
               />
             </div>
+
+            {/* Reservation Display Widget */}
+            {selectedOrderId && selectedMaterialId && selectedMaterialId > 0 && (
+              <ReservationDisplayWidget
+                orderId={selectedOrderId}
+                materialId={selectedMaterialId}
+                plannedQuantity={quantity || 0}
+                movementType={movementType}
+              />
+            )}
 
             {/* Location fields */}
             {(movementType === "Перемещение" || movementType === "Поступление" || movementType === "Расход") && (

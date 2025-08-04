@@ -146,6 +146,8 @@ export interface StockMovementFormData {
   movement_date?: string;
   from_location?: string;
   to_location?: string;
+  source_type?: 'manual' | 'estimate_reservation' | 'auto_completion';
+  related_estimate_id?: number;
 }
 
 // Filter types
