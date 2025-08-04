@@ -544,6 +544,7 @@ export type Database = {
           order_id: number
           quantity_reserved: number
           updated_at: string
+          used_quantity: number | null
         }
         Insert: {
           created_at?: string
@@ -553,6 +554,7 @@ export type Database = {
           order_id: number
           quantity_reserved: number
           updated_at?: string
+          used_quantity?: number | null
         }
         Update: {
           created_at?: string
@@ -562,6 +564,7 @@ export type Database = {
           order_id?: number
           quantity_reserved?: number
           updated_at?: string
+          used_quantity?: number | null
         }
         Relationships: [
           {
@@ -1036,6 +1039,8 @@ export type Database = {
           order_id: number | null
           quantity: number
           reference_document: string | null
+          related_estimate_id: number | null
+          source_type: string | null
           supplier_id: number | null
           to_location: string | null
           total_cost: number | null
@@ -1053,6 +1058,8 @@ export type Database = {
           order_id?: number | null
           quantity: number
           reference_document?: string | null
+          related_estimate_id?: number | null
+          source_type?: string | null
           supplier_id?: number | null
           to_location?: string | null
           total_cost?: number | null
@@ -1070,6 +1077,8 @@ export type Database = {
           order_id?: number | null
           quantity?: number
           reference_document?: string | null
+          related_estimate_id?: number | null
+          source_type?: string | null
           supplier_id?: number | null
           to_location?: string | null
           total_cost?: number | null
@@ -1088,6 +1097,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_related_estimate_id_fkey"
+            columns: ["related_estimate_id"]
+            isOneToOne: false
+            referencedRelation: "estimates"
             referencedColumns: ["id"]
           },
           {
@@ -1496,6 +1512,8 @@ export type Database = {
           order_id: number | null
           quantity: number
           reference_document: string | null
+          related_estimate_id: number | null
+          source_type: string | null
           supplier_id: number | null
           to_location: string | null
           total_cost: number | null
@@ -1574,6 +1592,15 @@ export type Database = {
         Args: { user_id: string }
         Returns: string
       }
+      handle_manual_movement_with_reservations: {
+        Args: {
+          p_material_id: number
+          p_order_id: number
+          p_quantity: number
+          p_movement_type: string
+        }
+        Returns: undefined
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -1599,6 +1626,10 @@ export type Database = {
         Returns: undefined
       }
       reserve_materials_from_estimate: {
+        Args: { p_estimate_id: number }
+        Returns: Json
+      }
+      reserve_materials_from_estimate_improved: {
         Args: { p_estimate_id: number }
         Returns: Json
       }
