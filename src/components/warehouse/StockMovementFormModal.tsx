@@ -137,6 +137,18 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
     name: "quantity",
   });
 
+  // Debug logging for useWatch values
+  console.log('🔍 useWatch values:', {
+    selectedOrderId,
+    selectedMaterialId,
+    quantity,
+    movementType,
+    selectedOrderIdType: typeof selectedOrderId,
+    selectedMaterialIdType: typeof selectedMaterialId,
+    selectedOrderIdIsNumber: typeof selectedOrderId === 'number',
+    selectedMaterialIdIsNumber: typeof selectedMaterialId === 'number'
+  });
+
   // Pre-fill form when editing
   useEffect(() => {
     console.log('StockMovementFormModal: useEffect triggered', { mode, movement });
@@ -239,8 +251,15 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
                     <FormLabel>Материал *</FormLabel>
                     <Select 
                       onValueChange={(value) => {
-                        console.log('Material selected:', value);
-                        field.onChange(Number(value));
+                        console.log('🔍 Material select onValueChange called:', {
+                          rawValue: value,
+                          valueType: typeof value,
+                          parsedValue: Number(value),
+                          currentFieldValue: field.value
+                        });
+                        const newValue = Number(value);
+                        console.log('🔍 Setting material_id to:', newValue);
+                        field.onChange(newValue);
                       }} 
                       value={field.value > 0 ? field.value.toString() : ""}
                     >
@@ -397,7 +416,18 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
                   <FormItem>
                     <FormLabel>Связанный заказ</FormLabel>
                     <Select 
-                      onValueChange={(value) => field.onChange(value === "__none__" ? undefined : (value ? Number(value) : undefined))} 
+                      onValueChange={(value) => {
+                        console.log('🔍 Order select onValueChange called:', {
+                          rawValue: value,
+                          valueType: typeof value,
+                          isNoneValue: value === "__none__",
+                          parsedValue: value === "__none__" ? undefined : (value ? Number(value) : undefined),
+                          currentFieldValue: field.value
+                        });
+                        const newValue = value === "__none__" ? undefined : (value ? Number(value) : undefined);
+                        console.log('🔍 Setting order_id to:', newValue);
+                        field.onChange(newValue);
+                      }} 
                       value={field.value?.toString() || "__none__"}
                     >
                       <FormControl>
