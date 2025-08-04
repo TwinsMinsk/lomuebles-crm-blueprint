@@ -1,13 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { StockLevel, StockLevelWithMaterial } from '@/types/warehouse';
+import { StockLevel, StockLevelWithMaterial, MaterialFilters } from '@/types/warehouse';
 import { useToast } from '@/hooks/use-toast';
 
-export const useStockLevels = () => {
+export const useStockLevels = (filters?: MaterialFilters) => {
   return useQuery({
-    queryKey: ['stock_levels'],
+    queryKey: ['stock_levels', filters],
     queryFn: async (): Promise<StockLevelWithMaterial[]> => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('stock_levels')
         .select(`
           *,
@@ -15,15 +15,48 @@ export const useStockLevels = () => {
         `)
         .order('status', { ascending: false }); // Show problematic stock first
 
+      const { data, error } = await query;
+
       if (error) {
         console.error('Error fetching stock levels:', error);
         throw error;
       }
 
-      return (data || []).map((item: any) => ({
+      let processedData = (data || []).map((item: any) => ({
         ...item,
         material: item.material || null
       }));
+
+      // Apply client-side filters since we're joining with materials
+      if (filters) {
+        if (filters.search) {
+          const searchTerm = filters.search.toLowerCase();
+          processedData = processedData.filter((item) => 
+            item.material?.name?.toLowerCase().includes(searchTerm) ||
+            item.material?.sku?.toLowerCase().includes(searchTerm)
+          );
+        }
+
+        if (filters.category) {
+          processedData = processedData.filter((item) => 
+            item.material?.category === filters.category
+          );
+        }
+
+        if (filters.supplier_id) {
+          processedData = processedData.filter((item) => 
+            item.material?.supplier_id === filters.supplier_id
+          );
+        }
+
+        if (filters.low_stock_only) {
+          processedData = processedData.filter((item) => 
+            item.status === 'Заканчивается' || item.status === 'Нет в наличии'
+          );
+        }
+      }
+
+      return processedData;
     }
   });
 };

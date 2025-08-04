@@ -9,7 +9,7 @@ import type { MaterialFilters } from "@/types/warehouse";
 const StockLevelsPage = () => {
   const [filters, setFilters] = useState<MaterialFilters>({});
   
-  const { data: stockLevels, isLoading } = useStockLevels();
+  const { data: stockLevels, isLoading } = useStockLevels(filters);
 
   return (
     <div className="space-y-6">
