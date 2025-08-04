@@ -31,6 +31,12 @@ export const ReservationDisplayWidget = ({
   plannedQuantity = 0,
   movementType 
 }: ReservationDisplayWidgetProps) => {
+  console.log('🎯 ReservationDisplayWidget rendered with props:', {
+    orderId,
+    materialId,
+    plannedQuantity,
+    movementType
+  });
   const { data: reservations, isLoading } = useQuery({
     queryKey: ['material-reservations', orderId, materialId],
     queryFn: async () => {
@@ -51,12 +57,41 @@ export const ReservationDisplayWidget = ({
     enabled: !!(orderId && materialId),
   });
 
+  console.log('🎯 ReservationDisplayWidget query status:', {
+    isLoading,
+    orderId,
+    materialId,
+    enabled: !!(orderId && materialId),
+    reservations,
+    reservationsLength: reservations?.length
+  });
+
   if (isLoading || !orderId || !materialId) {
+    console.log('🎯 ReservationDisplayWidget returning null - loading or missing IDs');
     return null;
   }
 
   if (!reservations || reservations.length === 0) {
-    return null;
+    console.log('🎯 ReservationDisplayWidget returning null - no reservations found');
+    // Показываем виджет даже если нет резервов, для отладки
+    return (
+      <Card className="bg-gray-50 border border-gray-200">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <Info className="h-4 w-4 text-blue-600" />
+            Информация о резерве
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              Для данной комбинации материала и заказа резервы не найдены.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
   }
 
   const totalReserved = reservations.reduce((sum, res) => sum + res.quantity_reserved, 0);
