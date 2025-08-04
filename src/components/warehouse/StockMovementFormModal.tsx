@@ -230,7 +230,7 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {mode === "edit" ? "Редактировать движение материала" : "Добавить движение материала"}
