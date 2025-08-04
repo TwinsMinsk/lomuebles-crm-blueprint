@@ -428,7 +428,14 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
             </div>
 
             {/* Reservation Display Widget */}
-            {selectedOrderId && selectedMaterialId && selectedMaterialId > 0 && (
+            {(() => {
+              console.log('Reservation widget condition check:', {
+                selectedOrderId,
+                selectedMaterialId,
+                condition: selectedOrderId && selectedMaterialId && selectedMaterialId > 0
+              });
+              return selectedOrderId && selectedMaterialId && selectedMaterialId > 0;
+            })() && (
               <ReservationDisplayWidget
                 orderId={selectedOrderId}
                 materialId={selectedMaterialId}
