@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { StockMovementWithDetails } from "@/types/warehouse";
 import { formatQuantity, formatCurrency, getMovementTypeColor } from "@/utils/warehouse";
+import { formatDateInMadrid } from "@/utils/timezone";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { ModernEmptyState } from "@/components/ui/modern-empty-state";
 import { ResponsiveTable, ResponsiveRow, ResponsiveRowItem } from "@/components/ui/responsive-table";
@@ -137,7 +138,7 @@ export const StockMovementsTable = ({ movements, isLoading }: StockMovementsTabl
               {/* Desktop cells */}
               <ResponsiveRowItem
                 label="Дата"
-                value={new Date(movement.movement_date).toLocaleDateString('ru-RU')}
+                value={formatDateInMadrid(movement.movement_date)}
               />
               
               <ResponsiveRowItem

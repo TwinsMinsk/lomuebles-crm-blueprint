@@ -2,6 +2,7 @@
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { fromMadridTimeToUTC, toMadridTime } from "@/utils/timezone";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -98,7 +99,7 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
       quantity: 0, // Это значение не пройдет валидацию - будет показана ошибка
       reference_document: "",
       notes: "",
-      movement_date: new Date().toISOString().split('T')[0],
+      movement_date: toMadridTime(new Date()).toISOString().split('T')[0],
       from_location: "",
       to_location: "",
     },
@@ -123,7 +124,7 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
         notes: movement.notes || "",
         supplier_id: movement.supplier_id,
         order_id: movement.order_id,
-        movement_date: movement.movement_date ? new Date(movement.movement_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        movement_date: movement.movement_date ? toMadridTime(movement.movement_date).toISOString().split('T')[0] : toMadridTime(new Date()).toISOString().split('T')[0],
         from_location: movement.from_location || "",
         to_location: movement.to_location || "",
       });
@@ -135,7 +136,7 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
         quantity: 0,
         reference_document: "",
         notes: "",
-        movement_date: new Date().toISOString().split('T')[0],
+        movement_date: toMadridTime(new Date()).toISOString().split('T')[0],
         from_location: "",
         to_location: "",
       });
@@ -148,14 +149,22 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
     console.log('Form errors:', form.formState.errors);
     
     try {
-      console.log('Calling createMovement.mutateAsync with:', data);
+      // Convert the date string to UTC before submitting
+      const processedData = {
+        ...data,
+        movement_date: data.movement_date ? 
+          fromMadridTimeToUTC(new Date(`${data.movement_date}T12:00:00`)).toISOString() :
+          undefined
+      };
+      
+      console.log('Calling movement mutation with processed data:', processedData);
       
       if (mode === "edit" && movement) {
         console.log('Editing movement with id:', movement.id);
-        await updateMovement.mutateAsync({ ...data, id: movement.id });
+        await updateMovement.mutateAsync({ ...processedData, id: movement.id });
       } else {
         console.log('Creating new movement');
-        await createMovement.mutateAsync(data);
+        await createMovement.mutateAsync(processedData);
       }
       
       console.log('Movement operation successful, closing modal');
