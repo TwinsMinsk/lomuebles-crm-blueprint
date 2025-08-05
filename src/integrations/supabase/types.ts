@@ -1540,6 +1540,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_available_locations_for_material: {
+        Args: { p_material_id: number }
+        Returns: {
+          location_name: string
+          available_quantity: number
+          reserved_quantity: number
+          current_quantity: number
+        }[]
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -1631,6 +1640,15 @@ export type Database = {
       }
       reserve_materials_from_estimate_improved: {
         Args: { p_estimate_id: number }
+        Returns: Json
+      }
+      validate_stock_movement_availability: {
+        Args: {
+          p_material_id: number
+          p_from_location: string
+          p_quantity: number
+          p_movement_type: Database["public"]["Enums"]["stock_movement_type"]
+        }
         Returns: Json
       }
     }

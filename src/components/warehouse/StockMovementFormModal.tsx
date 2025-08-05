@@ -1,4 +1,3 @@
-
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,11 +12,14 @@ import { useSuppliers } from "@/hooks/useSuppliers";
 import { useMaterials } from "@/hooks/warehouse/useMaterials";
 import { useLocations } from "@/hooks/warehouse/useLocations";
 import { useCreateStockMovement, useUpdateStockMovement } from "@/hooks/warehouse/useStockMovements";
+import { useAvailableLocationsForMaterial } from "@/hooks/warehouse/useAvailableLocationsForMaterial";
+import { useStockMovementValidation } from "@/hooks/warehouse/useStockMovementValidation";
 import { useOrders } from "@/hooks/orders/useOrders";
 import { STOCK_MOVEMENT_TYPES } from "@/types/warehouse";
-import type { StockMovementFormData } from "@/types/warehouse";
+import type { StockMovementFormData, StockMovementType } from "@/types/warehouse";
 import { useEffect } from "react";
 import { ReservationDisplayWidget } from "./ReservationDisplayWidget";
+import { toast } from "sonner";
 
 const stockMovementFormSchema = z.object({
   material_id: z.number().min(1, "Материал обязателен"),
@@ -117,36 +119,22 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
     },
   });
 
-  const movementType = useWatch({
-    control: form.control,
-    name: "movement_type",
-  });
+  // Watch form values for validation and UI updates
+  const materialId = useWatch({ control: form.control, name: "material_id" });
+  const movementType = useWatch({ control: form.control, name: "movement_type" }) as StockMovementType;
+  const selectedOrderId = useWatch({ control: form.control, name: "order_id" });
+  const quantity = useWatch({ control: form.control, name: "quantity" });
+  const fromLocationValue = useWatch({ control: form.control, name: "from_location" });
 
-  const selectedOrderId = useWatch({
-    control: form.control,
-    name: "order_id",
-  });
-
-  const selectedMaterialId = useWatch({
-    control: form.control,
-    name: "material_id",
-  });
-
-  const quantity = useWatch({
-    control: form.control,
-    name: "quantity",
-  });
-
-  // Debug logging for useWatch values
-  console.log('🔍 useWatch values:', {
-    selectedOrderId,
-    selectedMaterialId,
-    quantity,
-    movementType,
-    selectedOrderIdType: typeof selectedOrderId,
-    selectedMaterialIdType: typeof selectedMaterialId,
-    selectedOrderIdIsNumber: typeof selectedOrderId === 'number',
-    selectedMaterialIdIsNumber: typeof selectedMaterialId === 'number'
+  // Get available locations for selected material
+  const { data: availableLocations } = useAvailableLocationsForMaterial(materialId);
+  
+  // Validate stock movement
+  const { data: validationResult } = useStockMovementValidation({
+    materialId,
+    fromLocation: fromLocationValue,
+    quantity: quantity,
+    movementType: movementType
   });
 
   // Pre-fill form when editing
@@ -184,10 +172,16 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
 
   const onSubmit = async (data: StockMovementFormData) => {
     console.log('Form submitted with data:', data);
-    console.log('Form validation state:', form.formState);
-    console.log('Form errors:', form.formState.errors);
     
     try {
+      // Validate before submission for movements that reduce stock
+      if (data.movement_type && ['Расход', 'Списание', 'Перемещение'].includes(data.movement_type)) {
+        if (!validationResult?.valid) {
+          toast.error(validationResult?.message || 'Недостаточно материала для выполнения операции');
+          return;
+        }
+      }
+      
       // Convert the date string to UTC before submitting
       const processedData = {
         ...data,
@@ -211,12 +205,6 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
       form.reset();
     } catch (error) {
       console.error('Error in onSubmit:', error);
-      // Дополнительная информация об ошибке
-      if (error instanceof Error) {
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
-      }
-      console.error('Full error object:', JSON.stringify(error, null, 2));
     }
   };
 
@@ -251,14 +239,7 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
                     <FormLabel>Материал *</FormLabel>
                     <Select 
                       onValueChange={(value) => {
-                        console.log('🔍 Material select onValueChange called:', {
-                          rawValue: value,
-                          valueType: typeof value,
-                          parsedValue: Number(value),
-                          currentFieldValue: field.value
-                        });
                         const newValue = Number(value);
-                        console.log('🔍 Setting material_id to:', newValue);
                         field.onChange(newValue);
                       }} 
                       value={field.value > 0 ? field.value.toString() : ""}
@@ -320,12 +301,21 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
                         value={field.value || ""}
                         onChange={(e) => {
                           const value = e.target.value ? Number(e.target.value) : 0;
-                          console.log('Quantity changed:', value);
                           field.onChange(value);
                         }}
                         placeholder="0"
                       />
                     </FormControl>
+                    {validationResult && !validationResult.valid && quantity && fromLocationValue && (
+                      <p className="text-sm text-destructive">
+                        {validationResult.message}
+                      </p>
+                    )}
+                    {validationResult && validationResult.valid && validationResult.available_quantity !== undefined && (
+                      <p className="text-sm text-muted-foreground">
+                        Доступно: {validationResult.available_quantity}
+                      </p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -417,15 +407,7 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
                     <FormLabel>Связанный заказ</FormLabel>
                     <Select 
                       onValueChange={(value) => {
-                        console.log('🔍 Order select onValueChange called:', {
-                          rawValue: value,
-                          valueType: typeof value,
-                          isNoneValue: value === "__none__",
-                          parsedValue: value === "__none__" ? undefined : (value ? Number(value) : undefined),
-                          currentFieldValue: field.value
-                        });
                         const newValue = value === "__none__" ? undefined : (value ? Number(value) : undefined);
-                        console.log('🔍 Setting order_id to:', newValue);
                         field.onChange(newValue);
                       }} 
                       value={field.value?.toString() || "__none__"}
@@ -458,17 +440,10 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
             </div>
 
             {/* Reservation Display Widget */}
-            {(() => {
-              console.log('Reservation widget condition check:', {
-                selectedOrderId,
-                selectedMaterialId,
-                condition: selectedOrderId && selectedMaterialId && selectedMaterialId > 0
-              });
-              return selectedOrderId && selectedMaterialId && selectedMaterialId > 0;
-            })() && (
+            {selectedOrderId && materialId && materialId > 0 && (
               <ReservationDisplayWidget
                 orderId={selectedOrderId}
-                materialId={selectedMaterialId}
+                materialId={materialId}
                 plannedQuantity={quantity || 0}
                 movementType={movementType}
               />
@@ -493,13 +468,30 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {locations?.map((location) => (
-                              <SelectItem key={location.id} value={location.name}>
-                                {location.name}
-                              </SelectItem>
-                            ))}
+                            {materialId && availableLocations && availableLocations.length > 0 
+                              ? availableLocations.map((location) => (
+                                  <SelectItem key={location.location_name} value={location.location_name}>
+                                    <div className="flex justify-between items-center w-full">
+                                      <span>{location.location_name}</span>
+                                      <span className="text-xs text-muted-foreground ml-2">
+                                        Доступно: {location.available_quantity}
+                                      </span>
+                                    </div>
+                                  </SelectItem>
+                                ))
+                              : locations?.map((location) => (
+                                  <SelectItem key={location.id} value={location.name}>
+                                    {location.name}
+                                  </SelectItem>
+                                ))
+                            }
                           </SelectContent>
                         </Select>
+                        {materialId && availableLocations?.length === 0 && (
+                          <p className="text-sm text-destructive">
+                            Материал отсутствует во всех локациях
+                          </p>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -557,7 +549,7 @@ export const StockMovementFormModal = ({ isOpen, onClose, mode, movement }: Stoc
               </Button>
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || (validationResult && !validationResult.valid)}
               >
                 {isLoading ? "Сохранение..." : (mode === "edit" ? "Обновить" : "Создать")}
               </Button>
