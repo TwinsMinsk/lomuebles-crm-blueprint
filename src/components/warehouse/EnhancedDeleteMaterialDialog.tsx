@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { AlertTriangle, FileText, Package, Activity, Trash2, ArrowRight } from "lucide-react";
 import { useMaterialDependencies } from "@/hooks/warehouse/useMaterialDependencies";
 import { useEnhancedMaterialDelete } from "@/hooks/warehouse/useEnhancedMaterialDelete";
+import { useDeleteMaterial } from "@/hooks/warehouse/useMaterials";
 import type { Material } from "@/types/warehouse";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 
@@ -22,27 +23,40 @@ export const EnhancedDeleteMaterialDialog = ({ material, isOpen, onClose }: Enha
   const [showCascadeOptions, setShowCascadeOptions] = useState(false);
   
   const { data: dependencies, isLoading } = useMaterialDependencies(material.id);
-  const deleteMaterial = useEnhancedMaterialDelete();
+  const enhancedDeleteMaterial = useEnhancedMaterialDelete();
+  const simpleDeleteMaterial = useDeleteMaterial();
 
-  const handleDeleteClick = () => {
+  const handleDeleteClick = async () => {
+    console.log('Delete clicked. Has blocking dependencies:', dependencies?.hasBlockingDependencies);
+    
     if (!dependencies?.hasBlockingDependencies) {
-      handleConfirmDelete();
+      // Use simple deletion for materials without dependencies
+      try {
+        console.log('Using simple delete for material:', material.id);
+        await simpleDeleteMaterial.mutateAsync(material.id);
+        onClose();
+      } catch (error) {
+        console.error("Error with simple delete:", error);
+      }
     } else {
+      console.log('Showing cascade options for material with dependencies');
       setShowCascadeOptions(true);
     }
   };
 
   const handleConfirmDelete = async () => {
     try {
+      console.log('Confirming enhanced delete with cascade options:', selectedCascadeOptions);
+      
       const cascadeOptions = {
         cancelEstimates: selectedCascadeOptions.includes('cancel-estimates'),
         clearReservations: selectedCascadeOptions.includes('clear-reservations'),
         archiveData: selectedCascadeOptions.includes('archive-data')
       };
       
-      await deleteMaterial.mutateAsync({ 
+      await enhancedDeleteMaterial.mutateAsync({ 
         materialId: material.id, 
-        cascadeOptions: dependencies?.hasBlockingDependencies ? cascadeOptions : undefined 
+        cascadeOptions 
       });
       onClose();
     } catch (error) {
@@ -242,9 +256,9 @@ export const EnhancedDeleteMaterialDialog = ({ material, isOpen, onClose }: Enha
             <Button 
               variant="destructive" 
               onClick={handleDeleteClick}
-              disabled={deleteMaterial.isPending}
+              disabled={simpleDeleteMaterial.isPending}
             >
-              {deleteMaterial.isPending ? "Удаление..." : "Удалить материал"}
+              {simpleDeleteMaterial.isPending ? "Удаление..." : "Удалить материал"}
             </Button>
           ) : !showCascadeOptions ? (
             <Button 
@@ -258,9 +272,9 @@ export const EnhancedDeleteMaterialDialog = ({ material, isOpen, onClose }: Enha
             <Button 
               variant="destructive" 
               onClick={handleConfirmDelete}
-              disabled={deleteMaterial.isPending || selectedCascadeOptions.length === 0}
+              disabled={enhancedDeleteMaterial.isPending || selectedCascadeOptions.length === 0}
             >
-              {deleteMaterial.isPending ? "Выполнение..." : "Выполнить действия и удалить"}
+              {enhancedDeleteMaterial.isPending ? "Выполнение..." : "Выполнить действия и удалить"}
             </Button>
           )}
         </AlertDialogFooter>
