@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { Edit, Trash2, Package } from "lucide-react";
 import { MaterialFormModal } from "./MaterialFormModal";
-import { DeleteMaterialDialog } from "./DeleteMaterialDialog";
+import { EnhancedDeleteMaterialDialog } from "./EnhancedDeleteMaterialDialog";
 import { formatCurrency, getStockStatusInfo } from "@/utils/warehouse";
 import type { MaterialWithStock } from "@/types/warehouse";
 
@@ -133,7 +133,7 @@ export const MaterialsTable = ({ materials, isLoading }: MaterialsTableProps) =>
       )}
 
       {deletingMaterial && (
-        <DeleteMaterialDialog
+        <EnhancedDeleteMaterialDialog
           material={deletingMaterial}
           isOpen={true}
           onClose={() => setDeletingMaterial(null)}
