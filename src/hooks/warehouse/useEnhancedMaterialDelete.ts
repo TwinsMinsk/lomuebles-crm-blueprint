@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface CascadeDeleteOptions {
   cancelEstimates?: boolean;
+  removeEstimates?: boolean;
   clearReservations?: boolean;
   archiveData?: boolean;
 }
@@ -22,21 +23,43 @@ export const useEnhancedMaterialDelete = () => {
       // Start a transaction-like approach by handling cascades first
       if (cascadeOptions?.cancelEstimates) {
         // Cancel approved estimates that use this material by updating their status
-        const { error: estimateError } = await supabase
-          .from('estimates')
-          .update({ status: 'отменена' })
-          .in('id', 
-            // Get estimate IDs that use this material
+        const { data: estimateItems } = await supabase
+          .from('estimate_items')
+          .select('estimate_id')
+          .eq('material_id', materialId);
+        
+        if (estimateItems && estimateItems.length > 0) {
+          const estimateIds = estimateItems.map(item => item.estimate_id);
+          const { error: estimateError } = await supabase
+            .from('estimates')
+            .update({ status: 'отменена' })
+            .in('id', estimateIds)
+            .eq('status', 'утверждена'); // Only cancel approved estimates
+          
+          if (estimateError) {
+            console.error('Error canceling estimates:', estimateError);
+            // Continue anyway - this is a best effort operation
+          }
+        }
+      }
+
+      if (cascadeOptions?.removeEstimates) {
+        // Remove estimate items that use this material (except for approved estimates)
+        const { error: removeError } = await supabase
+          .from('estimate_items')
+          .delete()
+          .eq('material_id', materialId)
+          .not('estimate_id', 'in', 
+            // Get IDs of approved estimates to exclude them
             await supabase
-              .from('estimate_items')
-              .select('estimate_id')
-              .eq('material_id', materialId)
-              .then(({ data }) => data?.map(item => item.estimate_id) || [])
+              .from('estimates')
+              .select('id')
+              .eq('status', 'утверждена')
+              .then(({ data }) => data?.map(e => e.id) || [])
           );
         
-        if (estimateError) {
-          console.error('Error canceling estimates:', estimateError);
-          // Continue anyway - this is a best effort operation
+        if (removeError) {
+          console.error('Error removing estimate items:', removeError);
         }
       }
 

@@ -106,11 +106,13 @@ export const useMaterialDependencies = (materialId: number) => {
       }));
 
       // Check for blocking dependencies
+      // ANY estimates block deletion due to foreign key constraints, not just approved ones
       const approvedEstimates = processedEstimates.filter(e => e.status === 'утверждена');
       const activeReservations = processedReservations.filter(r => r.quantity_reserved > 0);
       
-      const hasBlockingDependencies = approvedEstimates.length > 0 || activeReservations.length > 0;
-      const canDelete = !hasBlockingDependencies || processedMovements.length === 0;
+      // Material has blocking dependencies if it has ANY estimates/reservations or stock movements
+      const hasBlockingDependencies = processedEstimates.length > 0 || activeReservations.length > 0;
+      const canDelete = !hasBlockingDependencies;
 
       return {
         estimates: processedEstimates,

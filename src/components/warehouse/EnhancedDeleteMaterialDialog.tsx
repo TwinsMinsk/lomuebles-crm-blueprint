@@ -50,6 +50,7 @@ export const EnhancedDeleteMaterialDialog = ({ material, isOpen, onClose }: Enha
       
       const cascadeOptions = {
         cancelEstimates: selectedCascadeOptions.includes('cancel-estimates'),
+        removeEstimates: selectedCascadeOptions.includes('remove-estimates'),
         clearReservations: selectedCascadeOptions.includes('clear-reservations'),
         archiveData: selectedCascadeOptions.includes('archive-data')
       };
@@ -214,6 +215,19 @@ export const EnhancedDeleteMaterialDialog = ({ material, isOpen, onClose }: Enha
                       />
                       <label htmlFor="cancel-estimates" className="text-sm">
                         Отменить все утвержденные сметы
+                      </label>
+                    </div>
+                  )}
+                  
+                  {estimates?.some(e => e.status !== 'утверждена') && (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="remove-estimates"
+                        checked={selectedCascadeOptions.includes('remove-estimates')}
+                        onCheckedChange={(checked) => handleCascadeOptionChange('remove-estimates', checked as boolean)}
+                      />
+                      <label htmlFor="remove-estimates" className="text-sm">
+                        Удалить все связанные сметы (кроме утвержденных)
                       </label>
                     </div>
                   )}
