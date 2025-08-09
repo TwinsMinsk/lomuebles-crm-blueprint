@@ -69,12 +69,9 @@ export const useStockLevel = (materialId: number) => {
         .from('stock_levels')
         .select('*')
         .eq('material_id', materialId)
-        .single();
+        .maybeSingle();
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          return null; // Not found
-        }
         throw error;
       }
 
@@ -117,20 +114,17 @@ export const useUpdateStockLevel = () => {
   return useMutation({
     mutationFn: async ({ 
       material_id, 
-      reserved_quantity, 
-      location, 
       notes 
     }: { 
       material_id: number; 
-      reserved_quantity?: number; 
-      location?: string; 
       notes?: string; 
     }): Promise<StockLevel> => {
       const updateData: any = {};
       
-      if (reserved_quantity !== undefined) updateData.reserved_quantity = reserved_quantity;
-      if (location !== undefined) updateData.location = location;
       if (notes !== undefined) updateData.notes = notes;
+      if (Object.keys(updateData).length === 0) {
+        throw new Error('Нет изменений для сохранения');
+      }
 
       const { data, error } = await supabase
         .from('stock_levels')
