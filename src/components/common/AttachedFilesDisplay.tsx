@@ -3,7 +3,6 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { FileText, ExternalLink, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
 
 interface AttachedFile {
   name: string;
@@ -36,29 +35,9 @@ const AttachedFilesDisplay: React.FC<AttachedFilesDisplayProps> = ({
   const displayFiles = files.slice(0, maxDisplayCount);
   const remainingCount = files.length - maxDisplayCount;
 
-  const resolveSignedUrl = async (url: string): Promise<string> => {
+  const openFile = (url: string, name: string) => {
     try {
-      const marker = '/storage/v1/object/public/';
-      const idx = url.indexOf(marker);
-      if (idx === -1) return url;
-      const after = url.substring(idx + marker.length);
-      const firstSlash = after.indexOf('/');
-      if (firstSlash === -1) return url;
-      const bucket = after.substring(0, firstSlash);
-      const path = after.substring(firstSlash + 1);
-      const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 5);
-      if (error || !data?.signedUrl) return url;
-      return data.signedUrl;
-    } catch (e) {
-      console.error('Failed to create signed URL', e);
-      return url;
-    }
-  };
-
-  const openFile = async (url: string) => {
-    try {
-      const signed = await resolveSignedUrl(url);
-      window.open(signed, '_blank', 'noopener,noreferrer');
+      window.open(url, '_blank', 'noopener,noreferrer');
     } catch (error) {
       console.error('Error opening file:', error);
     }
@@ -93,7 +72,7 @@ const AttachedFilesDisplay: React.FC<AttachedFilesDisplayProps> = ({
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              openFile(file.url);
+              openFile(file.url, file.name);
             }}
             className="h-auto p-1 justify-start text-xs hover:bg-blue-50"
           >
@@ -124,7 +103,7 @@ const AttachedFilesDisplay: React.FC<AttachedFilesDisplayProps> = ({
           size="sm"
           onClick={(e) => {
             e.stopPropagation();
-            openFile(file.url);
+            openFile(file.url, file.name);
           }}
           className="h-auto p-2 justify-start text-sm hover:bg-blue-50 w-full"
         >

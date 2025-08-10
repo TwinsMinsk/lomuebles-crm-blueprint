@@ -11,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, FileText, ExternalLink } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface OrderViewPopupProps {
   orderId: number | null;
@@ -119,35 +118,17 @@ const OrderViewPopup: React.FC<OrderViewPopupProps> = ({ orderId }) => {
             <p className="text-sm font-medium mb-2">Прикрепленные файлы</p>
             <div className="space-y-2">
               {order.attached_files_order_docs.map((file: any, index: number) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      const marker = '/storage/v1/object/public/';
-                      let targetUrl = file.url as string;
-                      const idx = targetUrl.indexOf(marker);
-                      if (idx !== -1) {
-                        const after = targetUrl.substring(idx + marker.length);
-                        const firstSlash = after.indexOf('/');
-                        if (firstSlash > -1) {
-                          const bucket = after.substring(0, firstSlash);
-                          const path = after.substring(firstSlash + 1);
-                          const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 5);
-                          if (data?.signedUrl) targetUrl = data.signedUrl;
-                        }
-                      }
-                      window.open(targetUrl, '_blank', 'noopener,noreferrer');
-                    } catch (e) {
-                      console.error('Failed to open file', e);
-                    }
-                  }}
-                  className="flex items-center gap-2 p-2 text-sm hover:bg-muted rounded-md transition-colors w-full text-left"
+                <a 
+                  key={index} 
+                  href={file.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 p-2 text-sm hover:bg-muted rounded-md transition-colors"
                 >
                   <FileText className="h-4 w-4" />
                   <span className="flex-grow truncate">{file.name}</span>
                   <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                </button>
+                </a>
               ))}
             </div>
           </div>

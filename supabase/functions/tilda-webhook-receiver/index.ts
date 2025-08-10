@@ -9,10 +9,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// API key and admin user for webhook authentication (set via Supabase secrets)
-const API_KEY = Deno.env.get('TILDA_WEBHOOK_API_KEY') || '';
-const ADMIN_USER_ID = Deno.env.get('WEBHOOK_ADMIN_USER_ID') || '';
+// API key for webhook authentication
+const API_KEY = 'tilda_webhook_74b91d28e5f94a3c8b7e6d2c9a1f5e3d'
 
+// Admin user ID to use as creator_user_id
+const ADMIN_USER_ID = '99b2a5aa-5efa-4912-8e3b-623bb5f33cdd'
 
 // Create Supabase client
 const supabaseClient = createClient(
@@ -47,21 +48,14 @@ serve(async (req) => {
   try {
     // Get request body
     const requestData = await req.json()
-    // Minimal structured logging without PII
-    const safePreview = (val: string | null | undefined) => (val ? `${val.substring(0,3)}***` : 'null')
-    console.log('Webhook received', {
-      method: req.method,
-      formType: requestData?.formType,
-      formIdTilda: requestData?.formIdTilda,
-      phone_masked: safePreview(requestData?.phone)
-    })
+    console.log('Received webhook data:', JSON.stringify(requestData, null, 2))
 
     // Extract and validate required fields
     const { formType, name, phone, source, language = 'RU', initial_comment, formIdTilda } = requestData
 
     // 1. General validation for required fields
     if (!formType || !name || !phone) {
-      console.error('Bad request: Missing required fields');
+      console.error('Bad request: Missing formType, name, or phone. Received data:', JSON.stringify(requestData, null, 2))
       return new Response(JSON.stringify({ status: 'error', message: 'Invalid data: Missing formType, name, or phone' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400
@@ -70,7 +64,7 @@ serve(async (req) => {
 
     // 2. Validate formType is one of the expected types
     if (formType !== 'callback' && formType !== 'product_order_lead_simple') {
-      console.error('Bad request: Unknown formType:', formType)
+      console.error('Bad request: Unknown formType. Received formType:', formType, 'Full data:', JSON.stringify(requestData, null, 2))
       return new Response(JSON.stringify({ status: 'error', message: `Invalid data: Unknown formType: ${formType}` }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400
@@ -89,7 +83,7 @@ serve(async (req) => {
       // assigned_user_id remains null by default
     }
 
-    console.log('Creating lead (sanitized log):', { hasInitialComment: Boolean(initial_comment), source: leadData.lead_source });
+    console.log('Creating lead with data:', JSON.stringify(leadData))
     
     const { data: newLead, error } = await supabaseClient
       .from('leads')

@@ -1594,7 +1594,7 @@ export type Database = {
         }[]
       }
       get_task_related_details: {
-        Args: { p_task_id: number } | { p_task_id: number; p_user_id: string }
+        Args: { p_task_id: number; p_user_id: string }
         Returns: Json
       }
       get_user_role: {

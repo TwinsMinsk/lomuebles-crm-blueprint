@@ -18,7 +18,6 @@ import { usePartners } from "@/hooks/usePartners";
 import { useEntityFileUpload } from "@/hooks/useEntityFileUpload";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2, Paperclip, X, FileText } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 // Define order status constants
 const READY_MADE_STATUSES = ["Новый", "Ожидает подтверждения", "Ожидает оплаты", "Оплачен", "Передан на сборку", "Готов к отгрузке", "В доставке", "Выполнен", "Отменен"];
@@ -574,32 +573,14 @@ const OrderEditForm: React.FC<OrderEditFormProps> = ({ order, onSuccess }) => {
                 >
                   <div className="flex items-center gap-2">
                     <FileText className="h-4 w-4 text-gray-500" />
-                    <button 
-                      type="button"
-                      onClick={async () => {
-                        try {
-                          const marker = '/storage/v1/object/public/';
-                          let targetUrl = file.url as string;
-                          const idx = targetUrl.indexOf(marker);
-                          if (idx !== -1) {
-                            const after = targetUrl.substring(idx + marker.length);
-                            const firstSlash = after.indexOf('/');
-                            if (firstSlash > -1) {
-                              const bucket = after.substring(0, firstSlash);
-                              const path = after.substring(firstSlash + 1);
-                              const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 5);
-                              if (data?.signedUrl) targetUrl = data.signedUrl;
-                            }
-                          }
-                          window.open(targetUrl, '_blank', 'noopener,noreferrer');
-                        } catch (e) {
-                          console.error('Failed to open file', e);
-                        }
-                      }}
-                      className="text-blue-600 hover:underline text-sm text-left"
+                    <a 
+                      href={file.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline text-sm"
                     >
                       {file.name}
-                    </button>
+                    </a>
                     {file.size && (
                       <span className="text-xs text-gray-500">
                         ({(file.size / 1024).toFixed(0)} KB)
