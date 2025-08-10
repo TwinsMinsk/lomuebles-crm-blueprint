@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Paperclip, FileText, Loader2, ExternalLink, X } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FileUploadSectionProps {
   entityType: string;
@@ -111,16 +112,34 @@ export const FileUploadSection = ({
           <ul className="divide-y">
             {files.map((file, index) => (
               <li key={index} className="flex items-center justify-between p-2 hover:bg-accent/50">
-                <a
-                  href={file.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 flex-1 text-sm hover:underline text-primary"
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const marker = '/storage/v1/object/public/';
+                      let targetUrl = file.url as string;
+                      const idx = targetUrl.indexOf(marker);
+                      if (idx !== -1) {
+                        const after = targetUrl.substring(idx + marker.length);
+                        const firstSlash = after.indexOf('/');
+                        if (firstSlash > -1) {
+                          const bucket = after.substring(0, firstSlash);
+                          const path = after.substring(firstSlash + 1);
+                          const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 5);
+                          if (data?.signedUrl) targetUrl = data.signedUrl;
+                        }
+                      }
+                      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                    } catch (e) {
+                      console.error('Failed to open file', e);
+                    }
+                  }}
+                  className="flex items-center gap-2 flex-1 text-sm hover:underline text-primary text-left"
                 >
                   <FileText className="h-4 w-4 flex-shrink-0" />
                   <span className="truncate">{file.name}</span>
                   <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                </a>
+                </button>
                 <Button
                   type="button"
                   variant="ghost"

@@ -17,8 +17,7 @@ export const useTaskRelatedDetails = (taskId: number | null | undefined) => {
       console.log("Fetching task related details for task:", taskId);
 
       const { data, error } = await supabase.rpc('get_task_related_details', {
-        p_task_id: taskId,
-        p_user_id: user.id
+        p_task_id: taskId
       });
 
       if (error) {
