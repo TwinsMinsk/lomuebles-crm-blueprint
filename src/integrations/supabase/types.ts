@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -1488,13 +1488,13 @@ export type Database = {
       }
       create_notification: {
         Args: {
-          p_user_id: string
-          p_title: string
-          p_message: string
-          p_type?: string
-          p_related_entity_type?: string
-          p_related_entity_id?: number
           p_action_url?: string
+          p_message: string
+          p_related_entity_id?: number
+          p_related_entity_type?: string
+          p_title: string
+          p_type?: string
+          p_user_id: string
         }
         Returns: string
       }
@@ -1519,42 +1519,30 @@ export type Database = {
           total_cost: number | null
           unit_cost: number | null
         }
+        SetofOptions: {
+          from: "*"
+          to: "stock_movements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
-      debug_auth_state: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
-      delete_old_read_notifications: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      delete_stock_movement: {
-        Args: { p_movement_id: number }
-        Returns: Json
-      }
-      generate_new_order_number: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      generate_order_number: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      debug_auth_state: { Args: never; Returns: Json }
+      delete_old_read_notifications: { Args: never; Returns: number }
+      delete_stock_movement: { Args: { p_movement_id: number }; Returns: Json }
+      generate_new_order_number: { Args: never; Returns: string }
+      generate_order_number: { Args: never; Returns: string }
       get_available_locations_for_material: {
         Args: { p_material_id: number }
         Returns: {
-          location_name: string
           available_quantity: number
-          reserved_quantity: number
           current_quantity: number
+          location_name: string
+          reserved_quantity: number
         }[]
       }
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_current_user_role: { Args: never; Returns: string }
       get_distinct_values: {
-        Args: { table_name: string; column_name: string }
+        Args: { column_name: string; table_name: string }
         Returns: {
           value: string
         }[]
@@ -1570,70 +1558,54 @@ export type Database = {
         Returns: number
       }
       get_sorted_tasks: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
+          assigned_task_user_id: string
+          assigned_user_name: string
+          completion_date: string
+          creation_date: string
+          creator_user_id: string
+          creator_user_name: string
+          description: string
+          due_date: string
+          google_calendar_event_id: string
+          priority: string
+          related_contact_id: number
+          related_custom_request_id: number
+          related_lead_id: number
+          related_order_id: number
+          related_partner_manufacturer_id: number
           task_id: number
           task_name: string
-          description: string
-          task_type: string
           task_status: string
-          priority: string
-          creation_date: string
-          due_date: string
-          completion_date: string
-          creator_user_id: string
-          assigned_task_user_id: string
-          google_calendar_event_id: string
-          related_lead_id: number
-          related_contact_id: number
-          related_order_id: number
-          related_custom_request_id: number
-          related_partner_manufacturer_id: number
-          assigned_user_name: string
-          creator_user_name: string
+          task_type: string
         }[]
       }
-      get_task_related_details: {
-        Args: { p_task_id: number; p_user_id: string }
-        Returns: Json
-      }
-      get_user_role: {
-        Args: { user_id: string }
-        Returns: string
-      }
+      get_task_related_details:
+        | { Args: { p_task_id: number }; Returns: Json }
+        | { Args: { p_task_id: number; p_user_id: string }; Returns: Json }
+      get_user_role: { Args: { user_id: string }; Returns: string }
       handle_manual_movement_with_reservations: {
         Args: {
           p_material_id: number
+          p_movement_type: string
           p_order_id: number
           p_quantity: number
-          p_movement_type: string
         }
         Returns: undefined
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_admin_user: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      recalculate_all_stock_levels: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      is_admin: { Args: never; Returns: boolean }
+      is_admin_user: { Args: never; Returns: boolean }
+      recalculate_all_stock_levels: { Args: never; Returns: undefined }
       recalculate_one_material_stock: {
         Args: { p_material_id: number }
         Returns: undefined
       }
       recalculate_stock_for_location: {
-        Args: { p_material_id: number; p_location: string }
+        Args: { p_location: string; p_material_id: number }
         Returns: undefined
       }
-      recalculate_stock_levels: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      recalculate_stock_levels: { Args: never; Returns: undefined }
       reserve_materials_from_estimate: {
         Args: { p_estimate_id: number }
         Returns: Json
@@ -1644,10 +1616,10 @@ export type Database = {
       }
       validate_stock_movement_availability: {
         Args: {
-          p_material_id: number
           p_from_location: string
-          p_quantity: number
+          p_material_id: number
           p_movement_type: Database["public"]["Enums"]["stock_movement_type"]
+          p_quantity: number
         }
         Returns: Json
       }
